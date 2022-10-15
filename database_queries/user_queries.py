@@ -101,7 +101,7 @@ def restore_user(user_id: int):
 
 def authenticate_user(username: str, password: str):
     """Authenticates the user's credentials by checking if the username and password exists in the database
-        and if the user's account is not flagged as deleted."""
+    and if the user's account is not flagged as deleted."""
     is_user: User = User.query.filter_by(username=username).first()
     if is_user is None:
         return False
@@ -144,7 +144,7 @@ def remove_session():
 
 def password_reset_link(email: str):
     """Sends the password reset link to the user's email and stores the token in the database that expires in
-     24 hours."""
+    24 hours."""
     if not check_email_exists(email):
         return False
     first_name: User = User.query.filter_by(email=email).first().first_name
