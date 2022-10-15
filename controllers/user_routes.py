@@ -1,5 +1,4 @@
 
-from config.configurations import app
 from database_queries.user_queries import (authenticate_user,
                                            authenticated_user,
                                            check_email_exists,
