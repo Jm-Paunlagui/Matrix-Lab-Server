@@ -5,13 +5,12 @@ from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
 from werkzeug.utils import cached_property
 
-"""This class is a wrapper around the UserAgent class from Werkzeug.
-It parses the user agent string and provides access to the browser
-and operating system properties. It also provides a method to
-return a dictionary of the parsed user agent string."""
-
 
 class ParsedUserAgent(UserAgent):
+    """This class is a wrapper around the UserAgent class from Werkzeug.
+    It parses the user agent string and provides access to the browser
+    and operating system properties. It also provides a method to
+    return a dictionary of the parsed user agent string."""
 
     # desc: Parser for the User's browser and OS
     @cached_property
