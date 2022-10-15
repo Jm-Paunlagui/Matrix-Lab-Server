@@ -35,5 +35,3 @@ class User(db.Model):
         return f"User('{self.user_id}', '{self.email}', '{self.first_name}', '{self.last_name}', '{self.username}', " \
                f"'{self.password}', '{self.role}', '{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', " \
                f"'{self.password_reset_token}') "
-
-
