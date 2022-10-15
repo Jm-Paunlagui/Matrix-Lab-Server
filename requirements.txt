@@ -1,0 +1,17 @@
+flask
+flask-bcrypt
+flask-cors
+flask-session
+flask-mail
+mysql-connector-python
+redis
+tensorflow
+pyjwt
+itsdangerous
+pytz
+python-dateutil
+ua-parser
+python-dotenv
+werkzeug
+Flask-SQLAlchemy
+SQLAlchemy-Utils
