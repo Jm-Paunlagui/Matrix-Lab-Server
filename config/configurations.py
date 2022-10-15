@@ -80,7 +80,6 @@ def run():
 
     It is recommended to use 127.0.0.1 or local host during development phase. This prevents others from targeting your
     application and executing SQL injections against your project. - DeepSource"""
-
     # @desc: Recommended to use
     # Create a UDP socket object
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
