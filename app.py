@@ -1,5 +1,4 @@
 from config.configurations import app, db
-import controllers.user_routes
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

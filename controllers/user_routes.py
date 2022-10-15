@@ -1,4 +1,3 @@
-from datetime import datetime
 
 from config.configurations import app
 from database_queries.user_queries import (authenticate_user,
@@ -13,7 +12,6 @@ from flask import jsonify, request
 from modules.input_validation import (validate_email, validate_empty_fields,
                                       validate_password, validate_text,
                                       validate_username)
-from modules.user_agent import get_os_browser_versions
 
 
 # @desc: User registration route

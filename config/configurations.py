@@ -1,6 +1,4 @@
 import os
-
-import mysql.connector
 import redis
 from flask import Flask
 from flask_cors import CORS
