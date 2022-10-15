@@ -26,8 +26,10 @@ class User(db.Model):
     username = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
     role = db.Column(db.String(255), nullable=False, default='user')
-    created_at = db.Column(db.DateTime, nullable=False, default=timezone_current_time)
-    updated_at = db.Column(db.DateTime, nullable=False, default=timezone_current_time)
+    created_at = db.Column(db.DateTime, nullable=False,
+                           default=timezone_current_time)
+    updated_at = db.Column(db.DateTime, nullable=False,
+                           default=timezone_current_time)
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token = db.Column(db.Text, nullable=True)
 
