@@ -17,7 +17,6 @@ server_session = Session(app)
 
 def check_email_exists(email: str):
     """Check if users email exists in the database."""
-
     is_email: User = User.query.filter_by(email=email).first()
     if is_email:
         return True
@@ -26,7 +25,6 @@ def check_email_exists(email: str):
 
 def check_password_reset_token_exists(email: str):
     """Check if reset password token exists in the database."""
-
     is_token: User = User.query.filter_by(email=email).first()
     if is_token.password_reset_token:
         return True
@@ -36,7 +34,6 @@ def check_password_reset_token_exists(email: str):
 # @desc: Checks if the user id exists
 def check_user_id_exists(user_id: int):
     """Check if the user id exists in the database."""
-
     is_user_id: User = User.query.filter_by(user_id=user_id).first()
     if is_user_id.user_id:
         return True
@@ -45,7 +42,6 @@ def check_user_id_exists(user_id: int):
 
 def check_email_exists_by_username(username: str):
     """Check if the user's email exists in the database."""
-
     is_email: User = User.query.filter_by(username=username).first()
     if is_email is None:
         return False
@@ -56,7 +52,6 @@ def check_email_exists_by_username(username: str):
 
 def create_user(email: str, first_name: str, last_name: str, username: str, password: str, role: str):
     """Creates a new user in the database."""
-
     if check_email_exists(email):
         return False
     hashed_password = password_hasher(password)
@@ -69,7 +64,6 @@ def create_user(email: str, first_name: str, last_name: str, username: str, pass
 
 def delete_user(user_id: int):
     """Deletes the user's account by flagging the user's account as deleted."""
-
     if check_user_id_exists(user_id):
         flag_delete_user: User = User.query.filter_by(user_id=user_id).first()
         flag_delete_user.flag_deleted = True
@@ -80,7 +74,6 @@ def delete_user(user_id: int):
 
 def delete_user_permanently(user_id: int):
     """Deletes the user's account permanently."""
-
     if check_user_id_exists(user_id):
         permanently_delete_user: User = User.query.filter_by(
             user_id=user_id).first()
@@ -98,7 +91,6 @@ def list_flag_deleted_users():
 
 def restore_user(user_id: int):
     """Restores the user's account by unflagging the user's account as deleted."""
-
     if check_user_id_exists(user_id):
         restore_user_id: User = User.query.filter_by(user_id=user_id).first()
         restore_user_id.flag_deleted = False
@@ -110,7 +102,6 @@ def restore_user(user_id: int):
 def authenticate_user(username: str, password: str):
     """Authenticates the user's credentials by checking if the username and password exists in the database
         and if the user's account is not flagged as deleted."""
-
     is_user: User = User.query.filter_by(username=username).first()
     if is_user is None:
         return False
@@ -122,7 +113,6 @@ def authenticate_user(username: str, password: str):
 
 def authenticated_user():
     """Checks if the user is authenticated and if the user's account is not flagged as deleted."""
-
     user_id: int = session.get('user_id')
     if user_id is None:
         return False
@@ -132,7 +122,6 @@ def authenticated_user():
 
 def redirect_to():
     """Redirects the user to the page based on the user's role."""
-
     user_id = session.get('user_id')
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
@@ -145,7 +134,6 @@ def redirect_to():
 
 def remove_session():
     """Removes the user's session if the user logs out."""
-
     user_id = session.get('user_id')
     if user_id is not None:
         session.pop('user_id', None)
@@ -157,7 +145,6 @@ def remove_session():
 def password_reset_link(email: str):
     """Sends the password reset link to the user's email and stores the token in the database that expires in
      24 hours."""
-
     if not check_email_exists(email):
         return False
     first_name: User = User.query.filter_by(email=email).first().first_name
@@ -218,7 +205,6 @@ def password_reset_link(email: str):
 def password_reset(password_reset_token: str, password: str):
     """Resets the password of the user with the given password reset token. Returns True if successful, False
     otherwise."""
-
     try:
         email: dict = jwt.decode(password_reset_token, public_key, algorithms=[
                                  "RS256"], verify=True)
