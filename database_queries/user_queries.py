@@ -50,6 +50,7 @@ def check_email_exists_by_username(username: str):
     if is_email.username == username:
         # Hide some text in the email address and hide the domain name of the email address
         return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):]
+    return False
 
 
 # @desc: Creates a new user account
@@ -309,7 +310,7 @@ def password_reset(password_reset_token: str, password: str):
 
             mail.send(msg)
             return True
-
+        return False
     except jwt.exceptions.InvalidTokenError:
         # @desc: If the password reset link has expired, tampers with the link, or the link is invalid, return False
         return False
