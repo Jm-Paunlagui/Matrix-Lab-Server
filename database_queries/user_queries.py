@@ -100,8 +100,10 @@ def restore_user(user_id: int):
 
 
 def authenticate_user(username: str, password: str):
-    """Authenticates the user's credentials by checking if the username and password exists in the database
-    and if the user's account is not flagged as deleted."""
+    """
+    Authenticates the user's credentials by checking if the username and password exists in the database
+    and if the user's account is not flagged as deleted.
+    """
     is_user: User = User.query.filter_by(username=username).first()
     if is_user is None:
         return False
@@ -143,8 +145,10 @@ def remove_session():
 
 
 def password_reset_link(email: str):
-    """Sends the password reset link to the user's email and stores the token in the database that expires in
-    24 hours."""
+    """
+    Sends the password reset link to the user's email and stores the token in the database that expires in
+    24 hours.
+    """
     if not check_email_exists(email):
         return False
     first_name: User = User.query.filter_by(email=email).first().first_name
@@ -203,8 +207,10 @@ def password_reset_link(email: str):
 
 
 def password_reset(password_reset_token: str, password: str):
-    """Resets the password of the user with the given password reset token. Returns True if successful, False
-    otherwise."""
+    """
+    Resets the password of the user with the given password reset token. Returns True if successful, False
+    otherwise.
+    """
     try:
         email: dict = jwt.decode(password_reset_token, public_key, algorithms=[
                                  "RS256"], verify=True)
