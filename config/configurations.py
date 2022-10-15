@@ -14,7 +14,6 @@ app = Flask(__name__)
 # @desc: This method pushes the application context to the top of the stack.
 app.app_context().push()
 
-
 # @desc: Email configuration for the Flask app
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config["MAIL_USE_SSL"] = True
@@ -24,10 +23,8 @@ app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
 app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
 
 # @desc: Secret key of the application
-
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-
 
 # @desc: Cross-Origin Resource Sharing configuration for the Flask app to allow requests from the client
 CORS(app, supports_credentials=True,
@@ -51,7 +48,6 @@ SESSION_USE_SIGNER = True
 SESSION_REDIS = redis.from_url("redis://127.0.0.1:6379")
 
 # @desc: The flask sqlalchemy instance
-# engine = create_engine('mysql+mysqlconnector://root:@localhost:3306/matrix_lab')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost:3306/matrix_lab' \
                                         '?charset=utf8mb4&collation=utf8mb4_unicode_ci'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -62,7 +58,6 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
     print("Database created")
 
 db = SQLAlchemy(app)
-
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
 app.config.from_object(__name__)
