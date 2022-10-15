@@ -27,20 +27,17 @@ def password_generator():
     # @desc: Check if the password is valid
     if validate_password(passwords):
         return passwords
-    else:
-        return password_generator()
+    return password_generator()
 
 
 # @desc: Password hasher checker function
 def password_hash_check(hashed_password: str, password: str):
     if not bcrypt.check_password_hash(hashed_password, password):
         return False
-    else:
-        return True
+    return True
 
 
 # @desc: Password hasher function
 def password_hasher(password: str):
     hashed_password = bcrypt.generate_password_hash(password)
     return hashed_password
-
