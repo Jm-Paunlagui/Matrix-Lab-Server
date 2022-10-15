@@ -1,6 +1,4 @@
 import os
-
-import mysql.connector
 import redis
 from flask import Flask
 from flask_cors import CORS
@@ -79,5 +77,3 @@ app.config.from_object(__name__)
 # @desc: This is the main method of the Flask app that runs the application.
 def run():
     app.run(host='0.0.0.0', debug=True, port=os.environ.get('PORT', 8080))
-
-
