@@ -32,6 +32,8 @@ class User(db.Model):
     password_reset_token = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
-        return f"User('{self.user_id}', '{self.email}', '{self.first_name}', '{self.last_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}') "
+        return f"User('{self.user_id}', '{self.email}', '{self.first_name}', '{self.last_name}', '{self.username}', " \
+               f"'{self.password}', '{self.role}', '{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', " \
+               f"'{self.password_reset_token}') "
 
 
