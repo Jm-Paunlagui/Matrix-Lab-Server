@@ -32,4 +32,3 @@ def validate_text(text: str):
 # desc: Validation for text
 def validate_number(number: int):
     return bool(re.compile(r"^[0-9]{1,}$").match(str(number)))
-
