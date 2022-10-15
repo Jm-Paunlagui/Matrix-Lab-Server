@@ -43,4 +43,3 @@ def password_hash_check(hashed_password: str, password: str):
 def password_hasher(password: str):
     hashed_password = bcrypt.generate_password_hash(password)
     return hashed_password
-
