@@ -31,7 +31,7 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
 # @desc: Cross-Origin Resource Sharing configuration for the Flask app to allow requests from the client
 CORS(app, supports_credentials=True,
-     methods="GET,POST,PUT,DELETE,OPTIONS", origins=os.environ.get("DEV_URL"))
+     methods="GET,POST,PUT,DELETE,OPTIONS")
 
 # @desc: The flask mail instance
 mail = Mail(app)
