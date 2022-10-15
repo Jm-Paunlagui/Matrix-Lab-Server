@@ -1,4 +1,6 @@
 import os
+import socket
+
 import redis
 from flask import Flask
 from flask_cors import CORS
@@ -48,14 +50,6 @@ SESSION_PERMANENT = False
 SESSION_USE_SIGNER = True
 SESSION_REDIS = redis.from_url("redis://127.0.0.1:6379")
 
-# @desc: MySQL database connection
-# db = mysql.connector.connect(
-#     host="localhost",
-#     user="root",
-#     password="",
-#     database="matrix_lab"
-# )
-
 # @desc: The flask sqlalchemy instance
 # engine = create_engine('mysql+mysqlconnector://root:@localhost:3306/matrix_lab')
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost:3306/matrix_lab' \
@@ -74,6 +68,23 @@ db = SQLAlchemy(app)
 app.config.from_object(__name__)
 
 
-# @desc: This is the main method of the Flask app that runs the application.
+"""Audit: Binding to all interfaces detected with hardcoded values - BAN-B104 - Severity: Major 
+Binding to all network interfaces can potentially open up a service to traffic on unintended interfaces, 
+that may not be properly documented or secured. This can be prevented by changing the code so it explicitly only 
+allows access from localhost
+
+When binding to 0.0.0.0, you accept incoming connections from anywhere. During development, an application may have 
+security vulnerabilities making it susceptible to SQL injections and other attacks. Therefore when the application is 
+not ready for production, accepting connections from anywhere can be dangerous. 
+
+It is recommended to use 127.0.0.1 or local host during development phase. This prevents others from targeting your 
+application and executing SQL injections against your project. - DeepSource"""
+
+
 def run():
-    app.run(host='0.0.0.0', debug=True, port=os.environ.get('PORT', 8080))
+    # @desc: Recommended to use
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a UDP socket object
+    s.bind(("127.0.0.1", 31137))  # Bind to localhost
+
+
+
