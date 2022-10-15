@@ -83,8 +83,6 @@ application and executing SQL injections against your project. - DeepSource"""
 
 def run():
     # @desc: Recommended to use
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Create a UDP socket object
+    # Create a UDP socket object
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind(("127.0.0.1", 31137))  # Bind to localhost
-
-
-
