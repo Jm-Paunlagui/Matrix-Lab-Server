@@ -12,33 +12,38 @@ class ParsedUserAgent(UserAgent):
     and operating system properties. It also provides a method to
     return a dictionary of the parsed user agent string."""
 
-    # desc: Parser for the User's browser and OS
     @cached_property
     def _details(self):
+        """Parse the user agent string and return a dictionary of the
+        parsed user agent string."""
+
         return user_agent_parser.Parse(self.string)
 
-    # desc: Get the User's OS
     @property
     def platform(self):
+        """Return the operating system name."""
+
         return self._details['os']['family']
 
-    # desc: Get the User's browser
     @property
     def browser(self):
+        """Return the browser name."""
         return self._details['user_agent']['family']
 
-    # desc: Get the User's browser version
     @property
     def version(self):
+        """Return the browser version."""
+
         return '.'.join(
             part
             for key in ('major', 'minor', 'patch')
             if (part := self._details['user_agent'][key]) is not None
         )
 
-    # desc: Get the User's OS version
     @property
     def os_version(self):
+        """Return the operating system version."""
+
         return '.'.join(
             part
             for key in ('major', 'minor', 'patch')
@@ -46,7 +51,8 @@ class ParsedUserAgent(UserAgent):
         )
 
 
-# desc: Get the User's browser and OS
 def get_os_browser_versions():
+    """Get the User's browser and OS from the request header."""
+
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, datetime.now()

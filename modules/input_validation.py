@@ -1,31 +1,37 @@
 import re
 
 
-# desc: Validation for empty fields
 def validate_empty_fields(*args: str):
+    """Checks if any of the fields are empty."""
+
     return all(not arg == "" or arg is None or arg == " " for arg in args)
 
 
-# desc: Validation for email
 def validate_email(email: str):
+    """Checks if the email is valid."""
+
     return bool(re.compile(r"[^@]+@[^@]+\.[^@]+").match(email))
 
 
-# desc: Validation for password
 def validate_password(password: str):
+    """Checks if the password is valid."""
+
     return bool(re.compile(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$").match(password))
 
 
-# desc: Validation for username
 def validate_username(username: str):
+    """Checks if the username is valid."""
+
     return bool(re.compile(r"^[a-zA-Z0-9_-]{5,20}$").match(username))
 
 
-# desc: Validation for text
 def validate_text(text: str):
+    """Checks if the text is valid."""
+
     return bool(re.compile(r"^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$").match(text))
 
 
-# desc: Validation for text
 def validate_number(number: int):
+    """Checks if the number is valid."""
+
     return bool(re.compile(r"^[0-9]{1,}$").match(str(number)))

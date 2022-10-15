@@ -69,7 +69,8 @@ app.config.from_object(__name__)
 
 
 def run():
-    """Audit: Binding to all interfaces detected with hardcoded values - BAN-B104 - Severity: Major
+    """
+    Audit: Binding to all interfaces detected with hardcoded values - BAN-B104 - Severity: Major
     Binding to all network interfaces can potentially open up a service to traffic on unintended interfaces,
     that may not be properly documented or secured. This can be prevented by changing the code so it explicitly only
     allows access from localhost
@@ -79,7 +80,9 @@ def run():
     not ready for production, accepting connections from anywhere can be dangerous.
 
     It is recommended to use 127.0.0.1 or local host during development phase. This prevents others from targeting your
-    application and executing SQL injections against your project. - DeepSource"""
+    application and executing SQL injections against your project. - DeepSource
+    """
+
     # @desc: Recommended to use
     # Create a UDP socket object
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
