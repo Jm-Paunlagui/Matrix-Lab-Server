@@ -15,7 +15,7 @@ from modules.input_validation import (validate_email, validate_empty_fields,
 
 
 # @desc: User registration route
-@app.route('/signup', methods=['POST'])
+# @app.route('/signup', methods=['POST'])
 def signup():
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
@@ -50,7 +50,7 @@ def signup():
 
 
 # @desc User authentication
-@app.route("/authenticate", methods=["POST"])
+# @app.route("/authenticate", methods=["POST"])
 def authenticate():
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
@@ -72,7 +72,7 @@ def authenticate():
 
 
 # @desc: Gets the authenticated user by id
-@app.route("/get_user", methods=["GET"])
+# @app.route("/get_user", methods=["GET"])
 def get_authenticated_user():
     user = authenticated_user()
     if not user:
@@ -85,7 +85,7 @@ def get_authenticated_user():
 
 
 # @desc: Signs out the authenticated user by id and deletes the session
-@app.route("/sign-out", methods=["GET"])
+# @app.route("/sign-out", methods=["GET"])
 def signout():
     if not remove_session():
         return jsonify({"status": "error", "message": "Session not found"}), 404
@@ -94,7 +94,7 @@ def signout():
 
 
 # @desc: Check email by username
-@app.route("/check-email", methods=["POST"])
+# @app.route("/check-email", methods=["POST"])
 def check_email():
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
@@ -115,7 +115,7 @@ def check_email():
 
 
 # @desc: Sends a password reset link to the user's email address
-@app.route("/forgot-password", methods=["POST"])
+# @app.route("/forgot-password", methods=["POST"])
 def forgot_password():
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
@@ -141,7 +141,7 @@ def forgot_password():
 
 
 # @desc: Resets the password of the user based on the token sent to the user's email address
-@app.route("/reset-password/<token>", methods=["POST"])
+# @app.route("/reset-password/<token>", methods=["POST"])
 def reset_password(token: str):
 
     if not request.is_json:

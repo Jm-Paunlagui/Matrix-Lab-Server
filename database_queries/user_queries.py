@@ -126,7 +126,6 @@ def authenticate_user(username: str, password: str):
 
     # desc: Generate a session token
     session['user_id'] = is_user.user_id
-    print(session['user_id'])
     return True
 
 
