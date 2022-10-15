@@ -45,10 +45,11 @@ def check_user_id_exists(user_id: int):
 def check_email_exists_by_username(username: str):
     # desc: Check if email exists by username
     is_email: User = User.query.filter_by(username=username).first()
+    if is_email is None:
+        return False
     if is_email.username == username:
         # Hide some text in the email address and hide the domain name of the email address
         return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):]
-    return False
 
 
 # @desc: Creates a new user account
