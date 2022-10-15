@@ -47,4 +47,3 @@ def validate_number(number: int):
         return True
     else:
         return False
-
