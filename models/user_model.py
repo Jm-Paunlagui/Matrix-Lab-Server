@@ -4,6 +4,7 @@ from modules.datetime_tz import timezone_current_time
 
 # desc: User model class
 class User(db.Model):
+
     """
     @desc: User model class
     user_id: User id number (primary key) (auto increment) bigint
