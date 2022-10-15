@@ -86,7 +86,8 @@ def delete_user_permanently(user_id: int):
     # @desc: Check if the user's id exists
     if check_user_id_exists(user_id):
         # @desc: Delete the user's account
-        permanently_delete_user: User = User.query.filter_by(user_id=user_id).first()
+        permanently_delete_user: User = User.query.filter_by(
+            user_id=user_id).first()
         db.session.delete(permanently_delete_user)
         db.session.commit()
         return True
@@ -198,7 +199,8 @@ def password_reset_link(email: str):
     source = get_os_browser_versions()
 
     # @desc: Update the password reset token in the database
-    User.query.filter_by(email=email).update({"password_reset_token": password_reset_token})
+    User.query.filter_by(email=email).update(
+        {"password_reset_token": password_reset_token})
     db.session.commit()
 
     # @desc: Send the password reset link to the user's email address
@@ -252,7 +254,8 @@ def password_reset_link(email: str):
 def password_reset(password_reset_token: str, password: str):
     try:
         # @desc: Get the user's email address from the password reset link
-        email: dict = jwt.decode(password_reset_token, public_key, algorithms=["RS256"], verify=True)
+        email: dict = jwt.decode(password_reset_token, public_key, algorithms=[
+                                 "RS256"], verify=True)
 
         # @desc: Hash the user's password
         hashed_password: str = password_hasher(password)
@@ -262,7 +265,8 @@ def password_reset(password_reset_token: str, password: str):
         email_name = intoken.first_name
         if intoken.password_reset_token == password_reset_token:
             # @desc: Update the user's password and set the password reset token to NULL
-            new_password: User = User.query.filter_by(email=email["sub"]).first()
+            new_password: User = User.query.filter_by(
+                email=email["sub"]).first()
             new_password.password = hashed_password
             new_password.password_reset_token = ""
             db.session.commit()
