@@ -3,10 +3,7 @@ import re
 
 # desc: Validation for empty fields
 def validate_empty_fields(*args: str):
-    for arg in args:
-        if arg == "" or arg is None or arg == " ":
-            return False
-    return True
+    return all(not arg == "" or arg is None or arg == " " for arg in args)
 
 
 # desc: Validation for email
