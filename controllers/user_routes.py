@@ -68,7 +68,7 @@ def get_authenticated_user():
     return jsonify({"status": "success", "message": "User retrieved successfully",
                     "user": {
                         "id": user.user_id, "email": user.email, "first_name": user.first_name,
-                        "last_name": user.last_name, "username": user.username, "role": user.role
+                        "last_name": user.last_name, "username": user.username, "role": user.role, "path": redirect_to()
                     }}), 200
 
 
