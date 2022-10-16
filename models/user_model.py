@@ -22,6 +22,7 @@ class User(db.Model):
     __tablename__ = 'users'
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email = db.Column(db.String(255), unique=True, nullable=False)
+    recovery_email = db.Column(db.String(255), unique=True, nullable=False)
     first_name = db.Column(db.String(255), nullable=False)
     last_name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(255), unique=True, nullable=False)
@@ -36,6 +37,6 @@ class User(db.Model):
 
     def __repr__(self):
         """User model class representation."""
-        return f"User('{self.user_id}', '{self.email}', '{self.first_name}', '{self.last_name}', '{self.username}', " \
-               f"'{self.password}', '{self.role}', '{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', " \
-               f"'{self.password_reset_token}') "
+        return f"User('{self.user_id}', '{self.email}', '{self.recovery_email}', '{self.first_name}', " \
+               f"'{self.last_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', " \
+               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
