@@ -71,12 +71,12 @@ def run():
     """
     Audit: Binding to all interfaces detected with hardcoded values - BAN-B104 - Severity: Major
     Binding to all network interfaces can potentially open up a service to traffic on unintended interfaces,
-    that may not be properly documented or secured. This can be prevented by changing the code so it explicitly only
+    that may not be properly documented or secured. This can be prevented by changing the code, so it explicitly only
     allows access from localhost
 
     When binding to 0.0.0.0, you accept incoming connections from anywhere. During development, an application may have
-    security vulnerabilities making it susceptible to SQL injections and other attacks. Therefore when the application is
-    not ready for production, accepting connections from anywhere can be dangerous.
+    security vulnerabilities making it susceptible to SQL injections and other attacks. Therefore, when the application
+    is not ready for production, accepting connections from anywhere can be dangerous.
 
     It is recommended to use 127.0.0.1 or local host during development phase. This prevents others from targeting your
     application and executing SQL injections against your project. - DeepSource
