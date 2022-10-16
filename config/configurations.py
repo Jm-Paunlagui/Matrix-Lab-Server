@@ -36,10 +36,10 @@ mail = Mail(app)
 # @desc: RSA keys for JWT
 private_key = b"-----BEGIN PRIVATE KEY-----\n" + \
               os.environ.get("MATRIX_RSA_PRIVATE_KEY").encode() + \
-    b"\n-----END PRIVATE KEY-----"
+              b"\n-----END PRIVATE KEY-----"
 public_key = b"-----BEGIN PUBLIC KEY-----\n" + \
              os.environ.get("MATRIX_RSA_PUBLIC_KEY").encode() + \
-    b"\n-----END PUBLIC KEY-----"
+             b"\n-----END PUBLIC KEY-----"
 
 # @desc: The redis configuration for the Flask app
 SESSION_TYPE = "redis"
@@ -48,8 +48,7 @@ SESSION_USE_SIGNER = True
 SESSION_REDIS = redis.from_url("redis://127.0.0.1:6379")
 
 # @desc: The flask sqlalchemy instance
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:@localhost:3306/matrix_lab' \
-                                        '?charset=utf8mb4&collation=utf8mb4_unicode_ci'
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
@@ -58,6 +57,10 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
     print("Database created")
 
 db = SQLAlchemy(app)
+# noinspection PyUnresolvedReferences
+import models.user_model
+
+db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
 app.config.from_object(__name__)
