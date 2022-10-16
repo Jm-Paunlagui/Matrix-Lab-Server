@@ -122,28 +122,6 @@ def authenticated_user():
     return user_data
 
 
-def redirect_to():
-    """Redirects the user to the page based on the user's role."""
-    user_id = session.get('user_id')
-    user_role: User = User.query.filter_by(user_id=user_id).first()
-    match user_role.role:
-        case 'admin':
-            return '/admin/dashboard'
-        case 'user':
-            return '/user/dashboard'
-    return "/"
-
-
-def remove_session():
-    """Removes the user's session if the user logs out."""
-    user_id = session.get('user_id')
-    if user_id is not None:
-        session.pop('user_id', None)
-        session.clear()
-        return True
-    return False
-
-
 def password_reset_link(email: str):
     """
     Sends the password reset link to the user's email and stores the token in the database that expires in
@@ -260,3 +238,25 @@ def password_reset(password_reset_token: str, password: str):
         return False
     except jwt.exceptions.InvalidTokenError:
         return False
+
+
+def redirect_to():
+    """Redirects the user to the page based on the user's role."""
+    user_id = session.get('user_id')
+    user_role: User = User.query.filter_by(user_id=user_id).first()
+    match user_role.role:
+        case 'admin':
+            return '/admin/dashboard'
+        case 'user':
+            return '/user/dashboard'
+    return "/"
+
+
+def remove_session():
+    """Removes the user's session if the user logs out."""
+    user_id = session.get('user_id')
+    if user_id is not None:
+        session.pop('user_id', None)
+        session.clear()
+        return True
+    return False
