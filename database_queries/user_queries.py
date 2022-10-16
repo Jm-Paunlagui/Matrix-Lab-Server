@@ -246,9 +246,15 @@ def redirect_to():
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
-            return '/admin/dashboard'
+            id1: str = user_role.email
+            id2: str = user_role.recovery_email
+            path: str = "/admin/dashboard"
+            return id1, id2, path
         case 'user':
-            return '/user/dashboard'
+            id1: str = user_role.email
+            id2: str = user_role.recovery_email
+            path: str = "/user/dashboard"
+            return id1, id2, path
     return "/"
 
 

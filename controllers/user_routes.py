@@ -44,12 +44,14 @@ def signup():
 
 
 def authenticate():
-    """User authentication route handler function."""
+    """User authentication route handler function and return email for identity confirmation"""
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     username = request.json["username"]
     password = request.json["password"]
+
+    identity: dict = redirect_to()
 
     if not validate_empty_fields(username, password):
         return jsonify({"status": "error", "message": "Username and password are required!"}), 400
@@ -57,7 +59,8 @@ def authenticate():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    return jsonify({"status": "success", "message": "User authenticated successfully.", "path": redirect_to()}), 200
+    return jsonify({"status": "success", "message": "User authenticated successfully.", "identity_one": identity[0],
+                    "identity_two": identity[1], "path": identity[2]}), 200
 
 
 def get_authenticated_user():
