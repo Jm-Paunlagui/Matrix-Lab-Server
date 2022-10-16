@@ -1,3 +1,4 @@
+import models.user_model
 import os
 import socket
 
@@ -48,7 +49,8 @@ SESSION_USE_SIGNER = True
 SESSION_REDIS = redis.from_url("redis://127.0.0.1:6379")
 
 # @desc: The flask sqlalchemy instance
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
+    "SQLALCHEMY_DATABASE_URI")
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
@@ -58,7 +60,6 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
-import models.user_model
 
 db.create_all()
 
