@@ -34,9 +34,10 @@ class User(db.Model):
                            default=timezone_current_time)
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token = db.Column(db.Text, nullable=True)
+    security_code = db.Column(db.String(8), nullable=True)
 
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.recovery_email}', '{self.first_name}', " \
                f"'{self.last_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', " \
-               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
+               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}', '{self.security_code}')"
