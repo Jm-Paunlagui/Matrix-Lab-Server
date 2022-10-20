@@ -77,6 +77,7 @@ def send_security_code():
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
     return jsonify({"status": "success", "message": "Email sent successfully."}), 200
 
+
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
     user = authenticated_user()

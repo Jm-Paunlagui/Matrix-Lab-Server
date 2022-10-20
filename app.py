@@ -11,7 +11,8 @@ from controllers.user_routes import (signup,
 # @desc: User routes for authentication
 app.add_url_rule("/signup", view_func=signup, methods=["POST"])
 app.add_url_rule("/authenticate", view_func=authenticate, methods=["POST"])
-app.add_url_rule("/checkpoint-2fa", view_func=send_security_code, methods=["POST"])
+app.add_url_rule("/checkpoint-2fa",
+                 view_func=send_security_code, methods=["POST"])
 app.add_url_rule(
     "/get_user", view_func=get_authenticated_user, methods=["GET"])
 app.add_url_rule("/sign-out", view_func=signout, methods=["POST"])

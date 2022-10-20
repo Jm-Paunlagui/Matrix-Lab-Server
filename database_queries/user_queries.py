@@ -139,7 +139,8 @@ def security_code(email: str):
     is_email.security_code = security_code
     db.session.commit()
     # Send the security code to the email
-    msg = Message('Security Code - Matrix Lab', sender="service.matrix.ai@gmail.com", recipients=[email])
+    msg = Message('Security Code - Matrix Lab',
+                  sender="service.matrix.ai@gmail.com", recipients=[email])
 
     msg.body = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
     http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; 
