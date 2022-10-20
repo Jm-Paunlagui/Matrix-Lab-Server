@@ -5,7 +5,7 @@ from database_queries.user_queries import (authenticate_user,
                                            check_password_reset_token_exists,
                                            create_user, password_reset,
                                            password_reset_link, redirect_to,
-                                           remove_session)
+                                           remove_session, security_code)
 from flask import jsonify, request
 from modules.input_validation import (validate_email, validate_empty_fields,
                                       validate_password, validate_text,
@@ -51,17 +51,31 @@ def authenticate():
     username = request.json["username"]
     password = request.json["password"]
 
-    identity: dict = redirect_to()
-
     if not validate_empty_fields(username, password):
         return jsonify({"status": "error", "message": "Username and password are required!"}), 400
     if not validate_username(username) or not validate_password(password):
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
+    identity: dict = redirect_to()
     return jsonify({"status": "success", "message": "User authenticated successfully.", "identity_one": identity[0],
                     "identity_two": identity[1], "path": identity[2]}), 200
 
+
+def send_security_code():
+    """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    email = request.json["email"]
+
+    if not validate_empty_fields(email):
+        return jsonify({"status": "error", "message": "Email is required!"}), 400
+    if not validate_email(email):
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if not security_code(email):
+        return jsonify({"status": "error", "message": "Security code not sent!"}), 500
+    return jsonify({"status": "success", "message": "Email sent successfully."}), 200
 
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""

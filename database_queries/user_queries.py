@@ -18,7 +18,7 @@ server_session = Session(app)
 def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.filter_by(email=email).first()
-    if is_email:
+    if is_email.email == email or is_email.recovery_email == email:
         return True
     return False
 
@@ -110,6 +110,66 @@ def authenticate_user(username: str, password: str):
     if not password_hash_check(is_user.password, password) or is_user.flag_deleted:
         return False
     session['user_id'] = is_user.user_id
+    return True
+
+
+def security_code(email: str):
+    """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
+
+    # Check if the email is primary or recovery
+    is_email: User = User.query.filter_by(email=email).first()
+
+    if not is_email.email == email or is_email.recovery_email == email:
+        return False
+    # Generate a link for removing the user's email if not recognized by the user using jwt
+    payload = {
+        "iss": "http://127.0.0.1:5000",
+        "sub": email,
+        "iat": datetime.timestamp(timezone_current_time),
+        "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
+        "jti": str(uuid.uuid4())
+    }
+    link = jwt.encode(payload, private_key, algorithm="RS256")
+
+    username = is_email.username
+    source = get_os_browser_versions()
+    # Generate a random security code
+    security_code = str(uuid.uuid4())[:6]
+    # Update the security code in the database
+    is_email.security_code = security_code
+    db.session.commit()
+    # Send the security code to the email
+    msg = Message('Security Code - Matrix Lab', sender="service.matrix.ai@gmail.com", recipients=[email])
+
+    msg.body = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
+    http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; 
+    background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" width="100%" 
+    bgcolor="#f2f3f8" style="@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400
+    ;500;600;700;800;900&display=swap');font-family: 'Montserrat', sans-serif;"> <tr> <td> <table 
+    style="background-color: #f2f3f8; max-width:670px; margin:0 auto; padding: auto;" width="100%" border="0" 
+    align="center" cellpadding="0" cellspacing="0"> <tr> <td style="height:30px;">&nbsp;</td></tr><tr> <td 
+    style="text-align:center;"> <a href="https://rakeshmandal.com" title="logo" target="_blank"> <img width="60" 
+    src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" alt="logo"> </a> 
+    </td></tr><tr> <td style="height:20px;">&nbsp;</td></tr><tr> <td> <table width="87%" border="0" align="center" 
+    cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff; border-radius:3px; 
+    text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,
+    .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1 
+    style="color:#5d6068;font-weight:700;text-align:left">Security code</h1> <p style="color:#878a92;margin:.4em 0 
+    2.1875em;font-size:16px;line-height:1.625; text-align: justify;">Please use the security code for the Matrix 
+    account{username}.</p><p style="color:#5d6068;font-weight:600;text-align:left">Security code: <span 
+    style="color:#878a92;font-weight:400;">{security_code}</span></p><p style="color:#878a92;margin: 2.1875em 0 
+    .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
+    {source[0]}{source[1]}</b> device using <b>{source[2]}{source[3]}</b> on <b>{source[4]}</b>.</p><p 
+    style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
+    not recognize this email to your{username}'s email address, you can <a href="{"http://localhost:3000/reme/" + link}" 
+    style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from that 
+    account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
+    left;">Thanks, <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td 
+    style="height:20px;">&nbsp;</td></tr><tr> <td style="text-align:center;"> <p style="font-size:14px; color:rgba(
+    124, 144, 163, 0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 
+    Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
+    </td></tr></table></body></html> """
+    mail.send(msg)
     return True
 
 

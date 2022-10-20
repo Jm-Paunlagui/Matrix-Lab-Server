@@ -17,6 +17,7 @@ class User(db.Model):
     updated_at: User updated date timestamp
     flag_deleted: User deleted flag (default: 0) tinyint
     password_reset_token: User password reset token text
+    security_code: User security code varchar(255)
     """
 
     __tablename__ = 'users'
@@ -34,7 +35,7 @@ class User(db.Model):
                            default=timezone_current_time)
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token = db.Column(db.Text, nullable=True)
-    security_code = db.Column(db.String(8), nullable=True)
+    security_code = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         """User model class representation."""
