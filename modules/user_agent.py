@@ -1,7 +1,5 @@
 from datetime import datetime
 
-from modules.datetime_tz import timezone_current_time
-
 from flask import request
 from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
