@@ -34,8 +34,6 @@ class User(db.Model):
     updated_at = db.Column(db.DateTime, nullable=False,
                            default=timezone_current_time)
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
-    password_reset_token = db.Column(db.Text, nullable=True)
-    security_code = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         """User model class representation."""
