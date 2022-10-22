@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from modules.datetime_tz import timezone_current_time
+
 from flask import request
 from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
@@ -54,4 +56,5 @@ class ParsedUserAgent(UserAgent):
 def get_os_browser_versions():
     """Get the User's browser and OS from the request header."""
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
-    return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, datetime.now()
+    return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
+        datetime.now().strftime("%A, %I:%M:%S %p")
