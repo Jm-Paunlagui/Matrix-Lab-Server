@@ -141,7 +141,7 @@ def security_code(email: str):
     # Send the security code to the email
     msg = Message('Security Code - Matrix Lab', sender="service.matrix.ai@gmail.com", recipients=[email])
 
-    msg.body = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
+    msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
     http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; 
     background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" width="100%" 
     bgcolor="#f2f3f8" style="@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400
@@ -159,9 +159,9 @@ def security_code(email: str):
     account{username}.</p><p style="color:#5d6068;font-weight:600;text-align:left">Security code: <span 
     style="color:#878a92;font-weight:400;">{security_code}</span></p><p style="color:#878a92;margin: 2.1875em 0 
     .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
-    {source[0]}{source[1]}</b> device using <b>{source[2]}{source[3]}</b> on <b>{source[4]}</b>.</p><p 
-    style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
-    not recognize this email to your{username}'s email address, you can <a href="{"http://localhost:3000/reme/" + link}" 
+    {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
+    style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not 
+    recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" + link}" 
     style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from that 
     account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
     left;">Thanks, <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td 
@@ -297,6 +297,9 @@ def password_reset(password_reset_token: str, password: str):
             return True
         return False
     except jwt.exceptions.InvalidTokenError:
+        token: User = User.query.filter_by(password_reset_token=password_reset_token).first()
+        token.password_reset_token = ""
+        db.session.commit()
         return False
 
 
