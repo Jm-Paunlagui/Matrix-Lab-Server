@@ -21,18 +21,18 @@ class User(db.Model):
     """
 
     __tablename__ = 'users'
-    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    recovery_email = db.Column(db.String(255), unique=True, nullable=True)
-    first_name = db.Column(db.String(255), nullable=False)
-    last_name = db.Column(db.String(255), nullable=False)
-    username = db.Column(db.String(255), unique=True, nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    role = db.Column(db.String(255), nullable=False, default='user')
-    created_at = db.Column(db.DateTime, nullable=False,
-                           default=timezone_current_time)
-    updated_at = db.Column(db.DateTime, nullable=False,
-                           default=timezone_current_time)
+    user_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    email: str = db.Column(db.String(255), unique=True, nullable=False)
+    recovery_email: str = db.Column(db.String(255), unique=True, nullable=True)
+    first_name: str = db.Column(db.String(255), nullable=False)
+    last_name: str = db.Column(db.String(255), nullable=False)
+    username: str = db.Column(db.String(255), unique=True, nullable=False)
+    password: str = db.Column(db.String(255), nullable=False)
+    role: str = db.Column(db.String(255), nullable=False, default='user')
+    created_at: str = db.Column(db.DateTime, nullable=False,
+                                default=timezone_current_time)
+    updated_at: str = db.Column(db.DateTime, nullable=False,
+                                default=timezone_current_time)
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token = db.Column(db.Text, nullable=True)
 
