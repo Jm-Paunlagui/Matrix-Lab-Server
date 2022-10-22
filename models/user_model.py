@@ -39,4 +39,4 @@ class User(db.Model):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.recovery_email}', '{self.first_name}', " \
                f"'{self.last_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', " \
-               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}', '{self.security_code}')"
+               f"'{self.updated_at}', '{self.flag_deleted}')"
