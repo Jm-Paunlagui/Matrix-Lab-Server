@@ -1,6 +1,4 @@
-import os
 import uuid
-import pyotp
 from datetime import datetime, timedelta
 
 import jwt
