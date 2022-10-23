@@ -161,10 +161,11 @@ def send_tfa(email: str):
         style="color:#878a92;font-weight:400;">{totp}</span></p><p style="color:#878a92;margin: 2.1875em 0 
         .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
         {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
-        style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not 
-        recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" + link}" 
-        style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from that 
-        account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
+        style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
+        not recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" + 
+                                                                                       link}" 
+        style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from 
+        that account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
         left;">Thanks, <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td 
         style="height:20px;">&nbsp;</td></tr><tr> <td style="text-align:center;"> <p style="font-size:14px; color:rgba(
         124, 144, 163, 0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 
