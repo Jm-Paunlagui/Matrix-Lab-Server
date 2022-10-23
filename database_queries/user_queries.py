@@ -21,7 +21,7 @@ server_session = Session(app)
 def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.filter_by(email=email).first()
-    if is_email.email == email or is_email.recovery_email == email:
+    if email in (is_email.email, is_email.recovery_email):
         return True
     return False
 
