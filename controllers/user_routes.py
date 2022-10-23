@@ -5,11 +5,11 @@ from database_queries.user_queries import (authenticate_user,
                                            check_password_reset_token_exists,
                                            create_user, password_reset,
                                            password_reset_link, redirect_to,
-                                           remove_session, security_code)
+                                           remove_session, send_tfa, verify_tfa)
 from flask import jsonify, request
 from modules.input_validation import (validate_email, validate_empty_fields,
                                       validate_password, validate_text,
-                                      validate_username)
+                                      validate_username, validate_number)
 
 
 def signup():
@@ -70,12 +70,29 @@ def send_security_code():
     email = request.json["email"]
 
     if not validate_empty_fields(email):
-        return jsonify({"status": "error", "message": "Email is required!"}), 400
+        return jsonify({"status": "error", "message": "Choose an email!"}), 400
     if not validate_email(email):
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not security_code(email):
+    if not send_tfa(email):
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
     return jsonify({"status": "success", "message": "Email sent successfully."}), 200
+
+
+def verify_security_code():
+    """Verifies the security code that was sent to the user's email address."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    code = request.json["code"]
+
+    if not validate_empty_fields(code):
+        return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
+    if not validate_number(code):
+        return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
+    if not verify_tfa(code):
+        return jsonify({"status": "error", "message": "Invalid security code!"}), 401
+    return jsonify({"status": "success", "message": "Security code verified successfully."}), 200
+
 
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
