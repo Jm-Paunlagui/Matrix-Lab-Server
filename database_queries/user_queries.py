@@ -117,7 +117,6 @@ def authenticate_user(username: str, password: str):
 
 def send_tfa(email: str):
     """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
-
     # Check if the email is primary or recovery
     is_email: User = User.query.with_entities(User.email, User.recovery_email, User.username).filter(
         (User.email == email) | (User.recovery_email == email)).first()
@@ -178,7 +177,6 @@ def send_tfa(email: str):
 
 def verify_tfa(code: str):
     """Verifies the security code that is provided by the user"""
-
     topt = verify_code(code)
     if topt:
         return True
