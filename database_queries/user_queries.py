@@ -314,21 +314,31 @@ def password_reset(password_reset_token: str, password: str):
         return False
 
 
-def redirect_to():
-    """Redirects the user to the page based on the user's role."""
+def has_emails():
+    """Gets the email and recovery email of the user based on user session."""
     user_id = session.get('user_id')
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
             id1: str = user_role.email
             id2: str = user_role.recovery_email
-            path: str = "/admin/dashboard"
-            return id1, id2, path
+            return id1, id2
         case 'user':
             id1: str = user_role.email
             id2: str = user_role.recovery_email
-            path: str = "/user/dashboard"
-            return id1, id2, path
+            return id1, id2
+    return "/"
+
+
+def redirect_to():
+    """Redirects the user to the appropriate page based on the user role."""
+    user_id = session.get('user_id')
+    user_role: User = User.query.filter_by(user_id=user_id).first()
+    match user_role.role:
+        case 'admin':
+            return "/admin/dashboard"
+        case 'user':
+            return "/user/dashboard"
     return "/"
 
 

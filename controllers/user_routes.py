@@ -4,7 +4,7 @@ from database_queries.user_queries import (authenticate_user,
                                            check_email_exists_by_username,
                                            check_password_reset_token_exists,
                                            create_user, password_reset,
-                                           password_reset_link, redirect_to,
+                                           password_reset_link, has_emails, redirect_to,
                                            remove_session, send_tfa, verify_tfa)
 from flask import jsonify, request
 from modules.input_validation import (validate_email, validate_empty_fields,
@@ -57,9 +57,9 @@ def authenticate():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    identity: dict = redirect_to()
+    identity: dict = has_emails()
     return jsonify({"status": "success", "message": "User authenticated successfully.", "identity_one": identity[0],
-                    "identity_two": identity[1], "path": identity[2]}), 200
+                    "identity_two": identity[1]}), 200
 
 
 def send_security_code():
@@ -91,7 +91,7 @@ def verify_security_code():
         return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
     if not verify_tfa(code):
         return jsonify({"status": "error", "message": "Invalid security code!"}), 401
-    return jsonify({"status": "success", "message": "Security code verified successfully."}), 200
+    return jsonify({"status": "success", "message": "Security code verified successfully", "path": redirect_to()}), 200
 
 
 def get_authenticated_user():
