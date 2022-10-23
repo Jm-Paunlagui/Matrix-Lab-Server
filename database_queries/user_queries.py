@@ -140,7 +140,8 @@ def send_tfa(email: str):
         totp = topt_code()
 
         # Send the security code to the email
-        msg = Message('Security Code - Matrix Lab', sender="service.matrix.ai@gmail.com", recipients=[email])
+        msg = Message('Security Code - Matrix Lab',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
 
         msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
         http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; 
@@ -308,7 +309,8 @@ def password_reset(password_reset_token: str, password: str):
             return True
         return False
     except jwt.exceptions.InvalidTokenError:
-        token: User = User.query.filter_by(password_reset_token=password_reset_token).first()
+        token: User = User.query.filter_by(
+            password_reset_token=password_reset_token).first()
         token.password_reset_token = ""
         db.session.commit()
         return False
