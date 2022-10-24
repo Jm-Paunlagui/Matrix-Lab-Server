@@ -51,7 +51,8 @@ def check_email_exists_by_username(username: str):
         return False
     if is_email.username == username:
         return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):], \
-               is_email.recovery_email[:2] + '*****' + is_email.recovery_email[is_email.recovery_email.find('@'):]
+            is_email.recovery_email[:2] + '*****' + \
+            is_email.recovery_email[is_email.recovery_email.find('@'):]
     return False
 
 
