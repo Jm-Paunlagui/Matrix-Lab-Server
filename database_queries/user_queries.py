@@ -20,14 +20,16 @@ def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.with_entities(User.email, User.recovery_email).filter(
         (User.email == email) | (User.recovery_email == email)).first()
-    if email in (is_email.email, is_email.recovery_email):
-        return True
+    if is_email is not None:
+        if email in (is_email.email, is_email.recovery_email):
+            return True
     return False
 
 
 def check_password_reset_token_exists(email: str):
     """Check if reset password token exists in the database."""
-    is_token: User = User.query.filter_by(email=email).first()
+    is_token: User = User.query.with_entities(User.email, User.recovery_email, User.password_reset_token).filter(
+        (User.email == email) | (User.recovery_email == email)).first()
     if is_token.password_reset_token:
         return True
     return False
@@ -48,7 +50,8 @@ def check_email_exists_by_username(username: str):
     if is_email is None:
         return False
     if is_email.username == username:
-        return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):]
+        return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):], \
+               is_email.recovery_email[:2] + '*****' + is_email.recovery_email[is_email.recovery_email.find('@'):]
     return False
 
 
