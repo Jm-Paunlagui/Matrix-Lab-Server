@@ -130,6 +130,7 @@ def send_tfa(email: str):
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": email,
+            "username": is_email[2],
             "iat": datetime.timestamp(timezone_current_time),
             "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
