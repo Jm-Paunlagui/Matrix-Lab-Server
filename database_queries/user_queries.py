@@ -46,12 +46,13 @@ def check_user_id_exists(user_id: int):
 
 def check_email_exists_by_username(username: str):
     """Check if the user's email exists in the database."""
-    is_email: User = User.query.filter_by(username=username).first()
+    is_email: User = User.query.with_entities(User.email, User.recovery_email, User.username).filter(
+        (User.username == username)).first()
     if is_email is None:
         return False
-    if is_email.username == username:
-        return is_email.email[:2] + '*****' + is_email.email[is_email.email.find('@'):], \
-               is_email.recovery_email[:2] + '*****' + is_email.recovery_email[is_email.recovery_email.find('@'):]
+    if is_email is not None:
+        if username in is_email.username:
+            return is_email.email, is_email.recovery_email
     return False
 
 
@@ -159,12 +160,12 @@ def send_tfa(email: str):
         .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1 
         style="color:#5d6068;font-weight:700;text-align:left">Security code</h1> <p style="color:#878a92;margin:.4em 0 
         2.1875em;font-size:16px;line-height:1.625; text-align: justify;">Please use the security code for the Matrix 
-        account{username}.</p><p style="color:#5d6068;font-weight:600;text-align:left">Security code: <span 
-        style="color:#878a92;font-weight:400;">{totp}</span></p><p style="color:#878a92;margin: 2.1875em 0 
+        account {username}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Security code: <span 
+        style="color:#878a92;font-weight:400;">{totp}</span></h2><p style="color:#878a92;margin: 2.1875em 0 
         .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
         {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
         style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
-        not recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" + 
+        not recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" +
                                                                                        link}" 
         style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from 
         that account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
@@ -202,7 +203,8 @@ def password_reset_link(email: str):
     """
     if not check_email_exists(email):
         return False
-    first_name: User = User.query.filter_by(email=email).first().first_name
+    first_name: User = User.query.with_entities(User.first_name).filter(
+        (User.email == email) | (User.recovery_email == email)).first().first_name
     payload = {
         "iss": "http://127.0.0.1:5000",
         "sub": email,
@@ -214,44 +216,46 @@ def password_reset_link(email: str):
     source = get_os_browser_versions()
     User.query.filter_by(email=email).update(
         {"password_reset_token": password_reset_token})
+    User.query.filter((User.email == email) | (User.recovery_email == email)).update(
+        {"password_reset_token": password_reset_token})
     db.session.commit()
     msg = Message('Password Reset Link - Matrix Lab',
                   sender="service.matrix.ai@gmail.com", recipients=[email])
-    msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
-    http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px; 
-    background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" width="100%" 
+    msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8"
+    http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 0px;
+    background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" width="100%"
     bgcolor="#f2f3f8" style="@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400
-    ;500;600;700;800;900&display=swap');font-family: 'Montserrat', sans-serif;"> <tr> <td> <table 
-    style="background-color: #f2f3f8; max-width:670px; margin:0 auto; padding: auto;" width="100%" border="0" 
-    align="center" cellpadding="0" cellspacing="0"> <tr> <td style="height:30px;">&nbsp;</td></tr><tr> <td 
-    style="text-align:center;"> <a href="" title="logo" target="_blank"> <img width="60" 
-    src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" alt="logo"> </a> 
-    </td></tr><tr> <td style="height:20px;">&nbsp;</td></tr><tr> <td> <table width="87%" border="0" align="center" 
-    cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff; border-radius:3px; 
+    ;500;600;700;800;900&display=swap');font-family: 'Montserrat', sans-serif;"> <tr> <td> <table
+    style="background-color: #f2f3f8; max-width:670px; margin:0 auto; padding: auto;" width="100%" border="0"
+    align="center" cellpadding="0" cellspacing="0"> <tr> <td style="height:30px;">&nbsp;</td></tr><tr> <td
+    style="text-align:center;"> <a href="" title="logo" target="_blank"> <img width="60"
+    src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" alt="logo"> </a>
+    </td></tr><tr> <td style="height:20px;">&nbsp;</td></tr><tr> <td> <table width="87%" border="0" align="center"
+    cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff; border-radius:3px;
     text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,
-    .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1 
-    style="color:#5d6068;font-weight:700;text-align:left">Hi {first_name},</h1> <p style="color:#878a92;margin:.4em 0 
-    2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password 
-    for your Matrix account. Use the button below to reset it. <strong>This password reset is only valid for the next 
-    24 hours.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}" 
-    style="background:#22bc66;text-decoration:none !important; font-weight:500; color:#fff;text-transform:uppercase; 
-    font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,.16);">Reset 
-    Password</a> <p style="color:#878a92;margin: 2.1875em 0 .4em;font-size:16px;line-height:1.625; text-align: 
+    .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1
+    style="color:#5d6068;font-weight:700;text-align:left">Hi {first_name},</h1> <p style="color:#878a92;margin:.4em 0
+    2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password
+    for your Matrix account. Use the button below to reset it. <strong>This password reset is only valid for the next
+    24 hours.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
+    style="background:#22bc66;text-decoration:none !important; font-weight:500; color:#fff;text-transform:uppercase;
+    font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,.16);">Reset
+    Password</a> <p style="color:#878a92;margin: 2.1875em 0 .4em;font-size:16px;line-height:1.625; text-align:
     justify;">For security, this request was received from a <b>{source[0]} {source[1]}</b> device using <b>
-    {source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p style="color:#878a92;margin: .4em 0 
-    2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not request a password reset, 
-    please ignore this email or contact technical support by email: <b> <a 
-    style="text-decoration:none;color:#878a92;" 
-    href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p style="color:#878a92;margin:1.1875em 
-    0 .4em;font-size:16px;line-height:1.625;text-align: left;">Thanks, <br>The Matrix Lab team </p><hr 
-    style="margin-top: 12px; margin-bottom: 12px;"> <p style="color:#878a92;margin:.4em 0 
-    1.1875em;font-size:13px;line-height:1.625; text-align: left;">If you&#39;re having trouble with the button above, 
-    copy and paste the URL below into your web browser.</p><p style="color:#878a92;margin:.4em 0 
+    {source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p style="color:#878a92;margin: .4em 0
+    2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not request a password reset,
+    please ignore this email or contact technical support by email: <b> <a
+    style="text-decoration:none;color:#878a92;"
+    href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p style="color:#878a92;margin:1.1875em
+    0 .4em;font-size:16px;line-height:1.625;text-align: left;">Thanks, <br>The Matrix Lab team </p><hr
+    style="margin-top: 12px; margin-bottom: 12px;"> <p style="color:#878a92;margin:.4em 0
+    1.1875em;font-size:13px;line-height:1.625; text-align: left;">If you&#39;re having trouble with the button above,
+    copy and paste the URL below into your web browser.</p><p style="color:#878a92;margin:.4em 0
     1.1875em;font-size:13px;line-height:1.625; text-align: left;">
-    {"http://localhost:3000/reset-password/" + password_reset_token}</p></td></tr></table> </td><tr> <td 
+    {"http://localhost:3000/reset-password/" + password_reset_token}</p></td></tr></table> </td><tr> <td
     style="height:20px;">&nbsp;</td></tr><tr> <td style="text-align:center;"> <p style="font-size:14px; color:rgba(
-    124, 144, 163, 0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 
-    Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
+    124, 144, 163, 0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3
+    Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table>
     </td></tr></table></body></html> """
     mail.send(msg)
     return True
@@ -264,7 +268,7 @@ def password_reset(password_reset_token: str, password: str):
     """
     try:
         email: dict = jwt.decode(password_reset_token, public_key, algorithms=[
-                                 "RS256"], verify=True)
+            "RS256"], verify=True)
         hashed_password: str = password_hasher(password)
         intoken: User = User.query.filter_by(email=email["sub"]).first()
         email_name = intoken.first_name

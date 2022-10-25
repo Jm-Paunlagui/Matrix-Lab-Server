@@ -58,8 +58,7 @@ def authenticate():
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
     identity: dict = has_emails()
-    return jsonify({"status": "success", "message": "User authenticated successfully.", "identity_one": identity[0],
-                    "identity_two": identity[1]}), 200
+    return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
 def send_security_code():
@@ -87,7 +86,7 @@ def verify_security_code():
 
     if not validate_empty_fields(code):
         return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
-    if not validate_number(code):
+    if not validate_number(code) and len(code) != 7:
         return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
     if not verify_tfa(code):
         return jsonify({"status": "error", "message": "Invalid security code!"}), 401
@@ -136,11 +135,14 @@ def forgot_password():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     email = request.json["email"]
+    confirm_email = request.json["confirm_email"]
 
     if not validate_empty_fields(email):
         return jsonify({"status": "error", "message": "Email address is required!"}), 400
     if not validate_email(email):
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if email != confirm_email:
+        return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
     if not check_email_exists(email):
         return jsonify({"status": "error", "message": "Email address does not exist!"}), 404
     if check_password_reset_token_exists(email):
