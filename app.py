@@ -17,7 +17,8 @@ app.add_url_rule("/user/checkpoint-2fa",
                  view_func=send_security_code, methods=["POST"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
-app.add_url_rule("/user/remove-email-from-account", view_func=remove_email_from_account, methods=["POST"])
+app.add_url_rule("/user/remove-email-from-account",
+                 view_func=remove_email_from_account, methods=["POST"])
 app.add_url_rule(
     "/user/get_user", view_func=get_authenticated_user, methods=["GET"])
 app.add_url_rule("/user/sign-out", view_func=signout, methods=["POST"])
