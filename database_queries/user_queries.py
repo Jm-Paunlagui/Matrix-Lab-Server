@@ -18,18 +18,28 @@ server_session = Session(app)
 
 def check_email_exists(email: str):
     """Check if users email exists in the database."""
-    is_email: User = User.query.with_entities(User.email, User.recovery_email).filter(
-        (User.email == email) | (User.recovery_email == email)).first()
+    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email).filter(
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
     if is_email is not None:
-        if email in (is_email.email, is_email.recovery_email):
+        if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
+            return True
+    return False
+
+
+def check_username_exists(username: str):
+    """Checks if the username exists in the database."""
+    is_username: User = User.query.filter_by(username=username).first()
+    if is_username is not None:
+        if username == is_username.username:
             return True
     return False
 
 
 def check_password_reset_token_exists(email: str):
     """Check if reset password token exists in the database."""
-    is_token: User = User.query.with_entities(User.email, User.recovery_email, User.password_reset_token).filter(
-        (User.email == email) | (User.recovery_email == email)).first()
+    is_token: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+                                              User.password_reset_token).filter(
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
     if is_token.password_reset_token:
         return True
     return False
@@ -46,13 +56,14 @@ def check_user_id_exists(user_id: int):
 
 def check_email_exists_by_username(username: str):
     """Check if the user's email exists in the database."""
-    is_email: User = User.query.with_entities(User.email, User.recovery_email, User.username).filter(
+    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+                                              User.username).filter(
         (User.username == username)).first()
     if is_email is None:
         return False
     if is_email is not None:
-        if username in is_email.username:
-            return is_email.email, is_email.recovery_email
+        if username == is_email.username:
+            return is_email.email, is_email.secondary_email, is_email.recovery_email
     return False
 
 
@@ -122,22 +133,23 @@ def authenticate_user(username: str, password: str):
 def send_tfa(email: str):
     """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
     # Check if the email is primary or recovery
-    is_email: User = User.query.with_entities(User.email, User.recovery_email, User.username).filter(
-        (User.email == email) | (User.recovery_email == email)).first()
+    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+                                              User.username).filter(
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
 
-    if email in (is_email.email, is_email.recovery_email):
+    if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
         # Generate a link for removing the user's email if not recognized by the user using jwt
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": email,
-            "username": is_email[2],
+            "username": is_email[3],
             "iat": datetime.timestamp(timezone_current_time),
             "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
         }
         link = jwt.encode(payload, private_key, algorithm="RS256")
 
-        username = is_email[2]
+        username = is_email[3]
         source = get_os_browser_versions()
 
         totp = topt_code()
@@ -166,8 +178,8 @@ def send_tfa(email: str):
         .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
         {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
         style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
-        not recognize this email to your {username}'s email address, you can <a href="{"http://localhost:3000/reme/" +
-                                                                                       link}" 
+        not recognize this email to your {username}'s email address, you can 
+        <a href="{"http://localhost:3000/remove-email-from-account/" +link}" 
         style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from 
         that account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
         left;">Thanks, <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td 
@@ -205,7 +217,7 @@ def password_reset_link(email: str):
     if not check_email_exists(email):
         return False
     first_name: User = User.query.with_entities(User.first_name).filter(
-        (User.email == email) | (User.recovery_email == email)).first().first_name
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first().first_name
     payload = {
         "iss": "http://127.0.0.1:5000",
         "sub": email,
@@ -215,9 +227,9 @@ def password_reset_link(email: str):
     }
     password_reset_token = jwt.encode(payload, private_key, algorithm="RS256")
     source = get_os_browser_versions()
-    User.query.filter_by(email=email).update(
-        {"password_reset_token": password_reset_token})
-    User.query.filter((User.email == email) | (User.recovery_email == email)).update(
+    # User.query.filter_by(email=email).update(
+    #     {"password_reset_token": password_reset_token})
+    User.query.filter((User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).update(
         {"password_reset_token": password_reset_token})
     db.session.commit()
     msg = Message('Password Reset Link - Matrix Lab',
@@ -329,12 +341,14 @@ def has_emails():
     match user_role.role:
         case 'admin':
             id1: str = user_role.email
-            id2: str = user_role.recovery_email
-            return id1, id2
+            id2: str = user_role.secondary_email
+            id3: str = user_role.recovery_email
+            return id1, id2, id3
         case 'user':
             id1: str = user_role.email
-            id2: str = user_role.recovery_email
-            return id1, id2
+            id2: str = user_role.secondary_email
+            id3: str = user_role.recovery_email
+            return id1, id2, id3
     return "/"
 
 
@@ -357,4 +371,56 @@ def remove_session():
         session.pop('user_id', None)
         session.clear()
         return True
+    return False
+
+
+def remove_email(option: str, email: str, username: str):
+    """Removes the email address if the user does not recognize the email address"""
+    remove: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+                                            User.username).filter(
+        User.username == username).first()
+    if option == "no" and remove is not None:
+        if remove.email == email:
+            return False
+        if email in (remove.secondary_email, remove.recovery_email) and username == remove.username:
+            type_of_email = "secondary_email" if remove.secondary_email == email else "recovery_email"
+            User.query.filter_by(username=username).update({type_of_email: None})
+            source = get_os_browser_versions()
+            msg = Message(subject="Email Removed", sender="service.matrix.ai@gmail.com", recipients=[remove.email])
+            msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+                http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+                style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
+                cellpadding="0" width="100%" bgcolor="#f2f3f8" style="@import url(
+                'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display
+                =swap');font-family:Montserrat,sans-serif"><tr><td><table 
+                style="background-color:#f2f3f8;max-width:670px;margin:0 auto;padding:auto" width="100%" border="0" 
+                align="center" cellpadding="0" cellspacing="0"><tr><td style="height:30px">&nbsp;</td></tr><tr><td 
+                style="text-align:center"><a href="https://rakeshmandal.com" title="logo" target="_blank"><img 
+                width="60" src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+                alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" 
+                border="0" align="center" cellpadding="0" cellspacing="0" 
+                style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 
+                18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,
+                0,.06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Email 
+                removed from {username}</h1><p style="color:#878a92;margin:.4em 0 
+                2.1875em;font-size:16px;line-height:1.625;text-align:justify">The email address <b><a 
+                style="text-decoration:none;color:#878a92">{email}</a></b> has been removed from your Matrix account 
+                {username}.</p><p style="color:#878a92;margin:2.1875em 0 
+                .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this request was received 
+                from a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>
+                {source[4]}</b>.</p><p style="color:#878a92;margin:.4em 0 
+                2.1875em;font-size:16px;line-height:1.625;text-align:justify">If this was not you, please contact 
+                technical support by email:<b><a style="text-decoration:none;color:#878a92" 
+                href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+                style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+                <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td 
+                style="height:20px">&nbsp;</td></tr><tr><td style="text-align:center"><p 
+                style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 0">Group 14 - Matrix 
+                Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 Philippines</p></td></tr><tr><td 
+                style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> """
+            mail.send(msg)
+            db.session.commit()
+            return True
+        return False
+
     return False

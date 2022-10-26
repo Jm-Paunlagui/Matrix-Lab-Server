@@ -1,12 +1,14 @@
+from flask import jsonify, request
+
 from database_queries.user_queries import (authenticate_user,
                                            authenticated_user,
                                            check_email_exists,
                                            check_email_exists_by_username,
                                            check_password_reset_token_exists,
+                                           check_username_exists,
                                            create_user, password_reset,
-                                           password_reset_link, has_emails, redirect_to,
-                                           remove_session, send_tfa, verify_tfa)
-from flask import jsonify, request
+                                           password_reset_link, has_emails, redirect_to, remove_session, send_tfa,
+                                           verify_tfa, remove_email)
 from modules.input_validation import (validate_email, validate_empty_fields,
                                       validate_password, validate_text,
                                       validate_username, validate_number)
@@ -166,3 +168,30 @@ def reset_password(token: str):
     if not password_reset(token, password):
         return jsonify({"status": "error", "message": "Link session expired!"}), 404
     return jsonify({"status": "success", "message": "Your password has been reset successfully."}), 200
+
+
+def remove_email_from_account():
+    """Removes the email address from the user's account."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    option = request.json["option"]
+    email = request.json["email"]
+    username = request.json["username"]
+
+    if not validate_empty_fields(option) or not validate_empty_fields(email) or not validate_empty_fields(username):
+        return jsonify({"status": "error", "message": "Field required!"}), 400
+    if not validate_email(email):
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if not validate_username(username):
+        return jsonify({"status": "error", "message": "Invalid username!"}), 400
+    if not check_email_exists(email):
+        return jsonify({"status": "error", "message": "Email address does not exist!"}), 404
+    if not check_username_exists(username):
+        return jsonify({"status": "error", "message": "Username does not exist!"}), 404
+    if option == "yes":
+        return jsonify({"status": "success", "message": "No changes made to your account."}), 200
+    if not remove_email(option, email, username):
+        return jsonify({"status": "error", "message": "You can't remove the email address that is associated with "
+                                                      "your account."}), 409
+    return jsonify({"status": "success", "message": "Email address removed successfully."}), 200
