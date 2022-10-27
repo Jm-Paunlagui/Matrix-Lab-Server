@@ -230,8 +230,6 @@ def password_reset_link(email: str):
     }
     password_reset_token = jwt.encode(payload, private_key, algorithm="RS256")
     source = get_os_browser_versions()
-    # User.query.filter_by(email=email).update(
-    #     {"password_reset_token": password_reset_token})
     User.query.filter((User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).update(
         {"password_reset_token": password_reset_token})
     db.session.commit()
