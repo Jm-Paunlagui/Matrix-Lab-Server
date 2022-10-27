@@ -149,8 +149,7 @@ def forgot_password():
     if check_password_reset_token_exists(email):
         return jsonify({"status": "error", "message": "Password reset link already sent!"}), 409
     password_reset_link(email)
-    return jsonify({"status": "success", "message": "Password reset link sent successfully, "
-                                                    "Please check your email."}), 200
+    return jsonify({"status": "success", "message": "Password reset link sent successfully."}), 200
 
 
 def reset_password(token: str):
