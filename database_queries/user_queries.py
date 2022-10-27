@@ -377,7 +377,8 @@ def remove_session():
 def verify_remove_token(token: str):
     """Verifies the token for the user to remove their account."""
     try:
-        user_info: dict = jwt.decode(token, public_key, algorithms=["RS256"], verify=True)
+        user_info: dict = jwt.decode(
+            token, public_key, algorithms=["RS256"], verify=True)
         return user_info
     except jwt.exceptions.InvalidTokenError:
         return False
@@ -393,9 +394,11 @@ def remove_email(option: str, email: str, username: str):
             return False
         if email in (remove.secondary_email, remove.recovery_email) and username == remove.username:
             type_of_email = "secondary_email" if remove.secondary_email == email else "recovery_email"
-            User.query.filter_by(username=username).update({type_of_email: None})
+            User.query.filter_by(username=username).update(
+                {type_of_email: None})
             source = get_os_browser_versions()
-            msg = Message(subject="Email Removed", sender="service.matrix.ai@gmail.com", recipients=[remove.email])
+            msg = Message(subject="Email Removed",
+                          sender="service.matrix.ai@gmail.com", recipients=[remove.email])
             msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
                 http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
                 style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
