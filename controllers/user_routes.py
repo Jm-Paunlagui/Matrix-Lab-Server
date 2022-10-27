@@ -75,7 +75,7 @@ def send_security_code():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
     if not send_tfa(email):
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
-    return jsonify({"status": "success", "message": "Email sent successfully."}), 200
+    return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
 
 
 def verify_security_code():
