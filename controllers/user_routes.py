@@ -59,7 +59,6 @@ def authenticate():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    identity: dict = has_emails()
     return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
