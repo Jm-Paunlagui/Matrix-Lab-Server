@@ -25,7 +25,8 @@ class User(db.Model):
     __tablename__ = 'users'
     user_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email: str = db.Column(db.String(255), unique=True, nullable=True)
-    secondary_email: str = db.Column(db.String(255), unique=True, nullable=True)
+    secondary_email: str = db.Column(
+        db.String(255), unique=True, nullable=True)
     recovery_email: str = db.Column(db.String(255), unique=True, nullable=True)
     first_name: str = db.Column(db.String(255), nullable=False)
     last_name: str = db.Column(db.String(255), nullable=False)
