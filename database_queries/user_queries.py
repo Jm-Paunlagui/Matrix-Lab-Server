@@ -374,6 +374,15 @@ def remove_session():
     return False
 
 
+def verify_remove_token(token: str):
+    """Verifies the token for the user to remove their account."""
+    try:
+        user_info: dict = jwt.decode(token, public_key, algorithms=["RS256"], verify=True)
+        return user_info
+    except jwt.exceptions.InvalidTokenError:
+        return False
+
+
 def remove_email(option: str, email: str, username: str):
     """Removes the email address if the user does not recognize the email address"""
     remove: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,

@@ -1,4 +1,4 @@
-flask
+flask[async]
 flask-bcrypt
 flask-cors
 flask-session

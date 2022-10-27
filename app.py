@@ -7,7 +7,7 @@ from controllers.user_routes import (signup,
                                      signout,
                                      check_email,
                                      forgot_password,
-                                     reset_password, remove_email_from_account)
+                                     reset_password, verify_remove_account_token, remove_email_from_account)
 
 # @desc: User routes for authentication
 app.add_url_rule("/user/signup", view_func=signup, methods=["POST"])
@@ -17,6 +17,7 @@ app.add_url_rule("/user/checkpoint-2fa",
                  view_func=send_security_code, methods=["POST"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
+app.add_url_rule("/user/verify-remove-account-token/<token>", view_func=verify_remove_account_token, methods=["GET"])
 app.add_url_rule("/user/remove-email-from-account", view_func=remove_email_from_account, methods=["POST"])
 app.add_url_rule(
     "/user/get_user", view_func=get_authenticated_user, methods=["GET"])

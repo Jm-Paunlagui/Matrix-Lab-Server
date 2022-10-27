@@ -8,7 +8,7 @@ from database_queries.user_queries import (authenticate_user,
                                            check_username_exists,
                                            create_user, password_reset,
                                            password_reset_link, has_emails, redirect_to, remove_session, send_tfa,
-                                           verify_tfa, remove_email)
+                                           verify_tfa, verify_remove_token, remove_email)
 from modules.input_validation import (validate_email, validate_empty_fields,
                                       validate_password, validate_text,
                                       validate_username, validate_number)
@@ -168,6 +168,15 @@ def reset_password(token: str):
     if not password_reset(token, password):
         return jsonify({"status": "error", "message": "Link session expired!"}), 404
     return jsonify({"status": "success", "message": "Your password has been reset successfully."}), 200
+
+
+def verify_remove_account_token(token: str):
+    """Verifies the remove account token that was sent to the user's email address."""
+    user_data = verify_remove_token(token)
+    if not user_data:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 498
+    return jsonify({"status": "success", "message": "Token verified successfully",
+                    "user_data": {"email": user_data["sub"], "username": user_data["username"]}}), 200
 
 
 def remove_email_from_account():
