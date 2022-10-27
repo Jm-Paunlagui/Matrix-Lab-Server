@@ -9,8 +9,8 @@ from flask_session import Session
 from models.user_model import User
 from modules.datetime_tz import timezone_current_time
 from modules.password_bcrypt import password_hash_check, password_hasher
-from modules.user_agent import get_os_browser_versions
 from modules.topt_code import topt_code, verify_code
+from modules.user_agent import get_os_browser_versions
 
 # desc: Session configuration
 server_session = Session(app)
