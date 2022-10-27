@@ -20,18 +20,22 @@ def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email).filter(
         (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
-    if is_email is not None:
-        if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
-            return True
+    if (
+        is_email is not None
+        and email in (is_email.email, is_email.secondary_email, is_email.recovery_email)
+    ):
+        return True
     return False
 
 
 def check_username_exists(username: str):
     """Checks if the username exists in the database."""
     is_username: User = User.query.filter_by(username=username).first()
-    if is_username is not None:
-        if username == is_username.username:
-            return True
+    if (
+        is_username is not None
+        and username == is_username.username
+    ):
+        return True
     return False
 
 
@@ -61,9 +65,8 @@ def check_email_exists_by_username(username: str):
         (User.username == username)).first()
     if is_email is None:
         return False
-    if is_email is not None:
-        if username == is_email.username:
-            return is_email.email, is_email.secondary_email, is_email.recovery_email
+    if is_email is not None and username == is_email.username:
+        return is_email.email, is_email.secondary_email, is_email.recovery_email
     return False
 
 
