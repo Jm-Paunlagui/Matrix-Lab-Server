@@ -179,6 +179,7 @@ def signup():
         return jsonify({"status": "error", "message": "Email already exists!"}), 409
     return jsonify({"status": "success", "message": "User account created successfully."}), 201
 
+
 def verify_security_code():
     """Verifies the security code that was sent to the user's email address."""
     if not request.is_json:
