@@ -27,7 +27,8 @@ class User(db.Model):
     email: str = db.Column(db.String(255), unique=True, nullable=True)
     secondary_email: str = db.Column(
         db.String(255), unique=True, nullable=True, default="Secondary Email")
-    recovery_email: str = db.Column(db.String(255), unique=True, nullable=True, default="Recovery Email")
+    recovery_email: str = db.Column(
+        db.String(255), unique=True, nullable=True, default="Recovery Email")
     first_name: str = db.Column(db.String(255), nullable=False)
     last_name: str = db.Column(db.String(255), nullable=False)
     username: str = db.Column(db.String(255), unique=True, nullable=False)
