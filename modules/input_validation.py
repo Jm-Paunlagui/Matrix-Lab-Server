@@ -8,7 +8,8 @@ def validate_empty_fields(*args: str):
 
 def validate_email(email: str):
     """Checks if the email is valid."""
-    return bool(re.compile(r"[^@]+@[^@]+\.[^@]+").match(email))
+    return bool(re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@(["
+                           r"-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])").match(email))
 
 
 def validate_password(password: str):
