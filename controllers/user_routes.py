@@ -94,7 +94,9 @@ def get_authenticated_user():
         return jsonify({"status": "error", "message": "Unauthorized access", "path": "/"}), 401
     return jsonify({"status": "success", "message": "User retrieved successfully",
                     "user": {
-                        "id": user.user_id, "email": user.email, "first_name": user.first_name,
+                        "token": "true", "id": user.user_id,
+                        "email": user.email, "secondary_email": user.secondary_email,
+                        "recovery_email": user.recovery_email, "first_name": user.first_name,
                         "last_name": user.last_name, "username": user.username, "role": user.role, "path": redirect_to()
                     }}), 200
 
