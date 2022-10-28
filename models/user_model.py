@@ -8,8 +8,8 @@ class User(db.Model):
     User model class attributes
     user_id: User id number (primary key) (auto increment) bigint
     email: User email address (unique) varchar(255)
-    secondary_email: User secondary email address (unique) varchar(255)
-    recovery_email: User recovery email address (unique) varchar(255)
+    secondary_email: User secondary email address (unique) varchar(255) default "Secondary Email"
+    recovery_email: User recovery email address (unique) varchar(255) default "Recovery Email"
     first_name: User first name varchar(255)
     last_name: User last name varchar(255)
     username: User username (unique) varchar(255)
@@ -26,13 +26,13 @@ class User(db.Model):
     user_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     email: str = db.Column(db.String(255), unique=True, nullable=True)
     secondary_email: str = db.Column(
-        db.String(255), unique=True, nullable=True)
-    recovery_email: str = db.Column(db.String(255), unique=True, nullable=True)
+        db.String(255), unique=True, nullable=True, default="Secondary Email")
+    recovery_email: str = db.Column(db.String(255), unique=True, nullable=True, default="Recovery Email")
     first_name: str = db.Column(db.String(255), nullable=False)
     last_name: str = db.Column(db.String(255), nullable=False)
     username: str = db.Column(db.String(255), unique=True, nullable=False)
     password: str = db.Column(db.String(255), nullable=False)
-    role: str = db.Column(db.String(255), nullable=False, default='user')
+    role: str = db.Column(db.String(255), nullable=False, default="user")
     created_at: str = db.Column(db.DateTime, nullable=False,
                                 default=timezone_current_time)
     updated_at: str = db.Column(db.DateTime, nullable=False,
