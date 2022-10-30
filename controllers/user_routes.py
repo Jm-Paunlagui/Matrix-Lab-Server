@@ -46,7 +46,7 @@ def check_email():
     if not check_email_exists_by_username(username):
         return jsonify({"status": "error", "message": username + " does not exist!"}), 404
     return jsonify({"status": "success", "message": "Email retrieved successfully.",
-                    "email": check_email_exists_by_username(username)}), 200
+                    "emails": check_email_exists_by_username(username)}), 200
 
 
 def send_security_code():

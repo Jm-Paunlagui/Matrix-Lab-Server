@@ -66,7 +66,16 @@ def check_email_exists_by_username(username: str):
     if is_email is None:
         return False
     if is_email is not None and username == is_email.username:
-        return is_email.email, is_email.secondary_email, is_email.recovery_email
+        payload = {
+            "iss": "http://127.0.0.1:5000",
+            "sub": is_email.email,
+            "secondary_email": is_email.secondary_email,
+            "recovery_email": is_email.recovery_email,
+            "iat": datetime.timestamp(timezone_current_time),
+            "jti": str(uuid.uuid4())
+        }
+        emails = jwt.encode(payload, private_key, algorithm="RS256")
+        return emails
     return False
 
 
@@ -337,7 +346,7 @@ def password_reset(password_reset_token: str, password: str):
 
 def has_emails():
     """Gets the email and recovery email of the user based on user session."""
-    user_id = session.get('user_id')
+    user_id: int = session.get('user_id')
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
@@ -355,7 +364,7 @@ def has_emails():
 
 def redirect_to():
     """Redirects the user to the appropriate page based on the user role."""
-    user_id = session.get('user_id')
+    user_id: int = session.get('user_id')
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
@@ -367,7 +376,7 @@ def redirect_to():
 
 def remove_session():
     """Removes the user's session if the user logs out."""
-    user_id = session.get('user_id')
+    user_id: int = session.get('user_id')
     if user_id is not None:
         session.pop('user_id', None)
         session.clear()
