@@ -16,7 +16,8 @@ from controllers.user_routes import (
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])
-app.add_url_rule("/user/check-email", view_func=check_email, methods=["POST"])
+app.add_url_rule("/user/check-email",
+                 view_func=check_email, methods=["POST"])
 app.add_url_rule("/user/checkpoint-2fa",
                  view_func=send_security_code, methods=["POST"])
 app.add_url_rule("/user/forgot-password",
@@ -27,8 +28,10 @@ app.add_url_rule("/user/remove-email-from-account",
                  view_func=remove_email_from_account, methods=["POST"])
 app.add_url_rule("/user/reset-password/<token>",
                  view_func=reset_password, methods=["POST"])
-app.add_url_rule("/user/sign-out", view_func=signout, methods=["POST"])
-app.add_url_rule("/user/signup", view_func=signup, methods=["POST"])
+app.add_url_rule("/user/sign-out",
+                 view_func=signout, methods=["POST"])
+app.add_url_rule("/user/signup",
+                 view_func=signup, methods=["POST"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
 app.add_url_rule("/user/verify-remove-account-token/<token>",
