@@ -7,11 +7,19 @@ from flask import session
 from flask_mail import Message
 from flask_session import Session
 from models.user_model import User
-from modules.datetime_tz import timezone_current_time
-from modules.password_bcrypt import password_hash_check, password_hasher
-from modules.topt_code import topt_code, verify_code
-from modules.user_agent import get_os_browser_versions
-from modules.payload_signature import encode_payload, decode_payload
+# from modules.datetime_tz import timezone_current_time
+# from modules.password_bcrypt import password_hash_check, password_hasher
+# from modules.topt_code import topt_code, verify_code
+# from modules.user_agent import get_os_browser_versions
+# from modules.payload_signature import encode_payload, decode_payload
+from modules.module import (
+    Timezone,
+    InputTextValidation,
+    PasswordBcrypt,
+    PayloadSignature,
+    ToptCode,
+    get_os_browser_versions
+)
 
 # desc: Session configuration
 server_session = Session(app)
@@ -72,10 +80,10 @@ def check_email_exists_by_username(username: str):
             "sub": is_email.email,
             "secondary_email": is_email.secondary_email,
             "recovery_email": is_email.recovery_email,
-            "iat": datetime.timestamp(timezone_current_time),
+            "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "jti": str(uuid.uuid4())
         }
-        emails = encode_payload(payload)
+        emails = PayloadSignature(payload=payload).encode_payload()
         return emails
     return False
 
@@ -84,7 +92,7 @@ def create_user(email: str, first_name: str, last_name: str, username: str, pass
     """Creates a new user in the database."""
     if check_email_exists(email):
         return False
-    hashed_password = password_hasher(password)
+    hashed_password = PasswordBcrypt(password=password).password_hasher()
     new_user = User(email=email, first_name=first_name, last_name=last_name, username=username,
                     password=hashed_password, role=role)
     db.session.add(new_user)
@@ -137,7 +145,7 @@ def authenticate_user(username: str, password: str):
     is_user: User = User.query.filter_by(username=username).first()
     if is_user is None:
         return False
-    if not password_hash_check(is_user.password, password) or is_user.flag_deleted:
+    if not PasswordBcrypt(password=password).password_hash_check(is_user.password) or is_user.flag_deleted:
         return False
     session['user_id'] = is_user.user_id
     return True
@@ -156,16 +164,16 @@ def send_tfa(email: str):
             "iss": "http://127.0.0.1:5000",
             "sub": email,
             "username": is_email[3],
-            "iat": datetime.timestamp(timezone_current_time),
-            "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
+            "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+            "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
         }
-        link = encode_payload(payload)
+        link = PayloadSignature(payload=payload).encode_payload()
 
         username = is_email[3]
         source = get_os_browser_versions()
 
-        totp = topt_code()
+        totp = ToptCode.topt_code()
 
         # Send the security code to the email
         msg = Message('Security Code - Matrix Lab',
@@ -207,7 +215,7 @@ def send_tfa(email: str):
 
 def verify_tfa(code: str):
     """Verifies the security code that is provided by the user"""
-    topt = verify_code(code)
+    topt = ToptCode.verify_code(code=code)
     if topt:
         return True
     return False
@@ -234,11 +242,11 @@ def password_reset_link(email: str):
     payload = {
         "iss": "http://127.0.0.1:5000",
         "sub": email,
-        "iat": datetime.timestamp(timezone_current_time),
-        "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
+        "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
         "jti": str(uuid.uuid4())
     }
-    password_reset_token = encode_payload(payload)
+    password_reset_token = PayloadSignature(payload=payload).encode_payload()
     source = get_os_browser_versions()
     User.query.filter((User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).update(
         {"password_reset_token": password_reset_token})
@@ -291,8 +299,8 @@ def password_reset(password_reset_token: str, password: str):
     otherwise.
     """
     try:
-        email: dict = decode_payload(password_reset_token)
-        hashed_password: str = password_hasher(password)
+        email: dict = PayloadSignature(encoded=password_reset_token).decode_payload()
+        hashed_password: str = PasswordBcrypt(password=password).password_hasher()
         intoken: User = User.query.filter_by(email=email["sub"]).first()
         email_name = intoken.first_name
         if intoken.password_reset_token == password_reset_token:
@@ -388,7 +396,7 @@ def remove_session():
 def verify_remove_token(token: str):
     """Verifies the token for the user to remove their account."""
     try:
-        user_info: dict = decode_payload(token)
+        user_info: dict = PayloadSignature(encoded=token).decode_payload()
         return user_info
     except jwt.exceptions.InvalidTokenError:
         return False

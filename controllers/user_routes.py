@@ -10,9 +10,7 @@ from database_queries.user_queries import (authenticate_user,
                                            send_tfa, verify_remove_token,
                                            verify_tfa)
 from flask import jsonify, request
-from modules.input_validation import (validate_email, validate_empty_fields,
-                                      validate_number, validate_password,
-                                      validate_text, validate_username)
+from modules.module import InputTextValidation
 
 
 def authenticate():
@@ -20,12 +18,12 @@ def authenticate():
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
 
-    username = request.json["username"]
-    password = request.json["password"]
+    username: str = request.json["username"]
+    password: str = request.json["password"]
 
-    if not validate_empty_fields(username, password):
-        return jsonify({"status": "error", "message": "Username and password are required!"}), 400
-    if not validate_username(username) or not validate_password(password):
+    if not InputTextValidation().validate_empty_fields(username, password):
+        return jsonify({"status": "error", "message": "Username is required!"}), 400
+    if not InputTextValidation(username).validate_username() or not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
@@ -39,9 +37,9 @@ def check_email():
 
     username = request.json["username"]
 
-    if not validate_empty_fields(username):
+    if not InputTextValidation().validate_empty_fields(username):
         return jsonify({"status": "error", "message": "Username is required!"}), 400
-    if not validate_username(username):
+    if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
     if not check_email_exists_by_username(username):
         return jsonify({"status": "error", "message": username + " does not exist!"}), 404
@@ -56,9 +54,9 @@ def send_security_code():
 
     email = request.json["email"]
 
-    if not validate_empty_fields(email):
+    if not InputTextValidation().validate_empty_fields(email):
         return jsonify({"status": "error", "message": "Choose an email!"}), 400
-    if not validate_email(email):
+    if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
     if not send_tfa(email):
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
@@ -73,9 +71,9 @@ def forgot_password():
     email = request.json["email"]
     confirm_email = request.json["confirm_email"]
 
-    if not validate_empty_fields(email):
+    if not InputTextValidation().validate_empty_fields(email, confirm_email):
         return jsonify({"status": "error", "message": "Email address is required!"}), 400
-    if not validate_email(email):
+    if not InputTextValidation(email).validate_email() or not InputTextValidation(confirm_email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
     if email != confirm_email:
         return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
@@ -110,11 +108,11 @@ def remove_email_from_account():
     email = request.json["email"]
     username = request.json["username"]
 
-    if not validate_empty_fields(option) or not validate_empty_fields(email) or not validate_empty_fields(username):
+    if not InputTextValidation().validate_empty_fields(option, email, username):
         return jsonify({"status": "error", "message": "Field required!"}), 400
-    if not validate_email(email):
+    if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not validate_username(username):
+    if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
     if not check_email_exists(email):
         return jsonify({"status": "error", "message": "Email address does not exist!"}), 404
@@ -135,9 +133,9 @@ def reset_password(token: str):
 
     password = request.json["password"]
 
-    if not validate_empty_fields(password):
+    if not InputTextValidation().validate_empty_fields(password):
         return jsonify({"status": "error", "message": "Create a new password!"}), 400
-    if not validate_password(password):
+    if not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Follow the password rules below!"}), 400
     if not password_reset(token, password):
         return jsonify({"status": "error", "message": "Link session expired!"}), 404
@@ -163,19 +161,19 @@ def signup():
     password = request.json['password']
     role = request.json['role']
 
-    if not validate_empty_fields(email, first_name, last_name, username, password, role):
+    if not InputTextValidation().validate_empty_fields(email, first_name, last_name, username, password, role):
         return jsonify({"status": "error", "message": "Please fill in all the fields!"}), 400
-    if not validate_email(email):
+    if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not validate_username(username):
+    if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
-    if not validate_password(password):
+    if not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Follow the password rules below!"}), 400
-    if not validate_text(first_name):
+    if not InputTextValidation(first_name).validate_text():
         return jsonify({"status": "error", "message": "Invalid first name!"}), 400
-    if not validate_text(last_name):
+    if not InputTextValidation(last_name).validate_text():
         return jsonify({"status": "error", "message": "Invalid last name!"}), 400
-    if not validate_text(role):
+    if not InputTextValidation(role).validate_text():
         return jsonify({"status": "error", "message": "Invalid role!"}), 400
     if not create_user(email, first_name, last_name, username, password, role):
         return jsonify({"status": "error", "message": "Email already exists!"}), 409
@@ -189,9 +187,9 @@ def verify_security_code():
 
     code = request.json["code"]
 
-    if not validate_empty_fields(code):
+    if not InputTextValidation().validate_empty_fields(code):
         return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
-    if not validate_number(code) and len(code) != 7:
+    if not InputTextValidation(code).validate_number() and len(code) != 7:
         return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
     if not verify_tfa(code):
         return jsonify({"status": "error", "message": "Invalid security code!"}), 401

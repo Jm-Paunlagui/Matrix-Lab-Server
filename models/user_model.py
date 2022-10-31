@@ -1,5 +1,5 @@
 from config.configurations import db
-from modules.datetime_tz import timezone_current_time
+from modules.module import Timezone
 
 
 # desc: User model class
@@ -34,9 +34,9 @@ class User(db.Model):
     password: str = db.Column(db.String(255), nullable=False)
     role: str = db.Column(db.String(255), nullable=False, default="user")
     created_at: str = db.Column(db.DateTime, nullable=False,
-                                default=timezone_current_time)
+                                default=Timezone("Asia/Manila").get_timezone_current_time())
     updated_at: str = db.Column(db.DateTime, nullable=False,
-                                default=timezone_current_time)
+                                default=Timezone("Asia/Manila").get_timezone_current_time())
     flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token = db.Column(db.Text, nullable=True)
 
