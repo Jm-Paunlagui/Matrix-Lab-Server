@@ -10,5 +10,6 @@ def encode_payload(payload):
 
 def decode_payload(encoded):
     """Decode payload with public key"""
-    decoded = jwt.decode(encoded, public_key, algorithms=["RS256"], verify=True)
+    decoded = jwt.decode(encoded, public_key, algorithms=[
+                         "RS256"], verify=True)
     return decoded
