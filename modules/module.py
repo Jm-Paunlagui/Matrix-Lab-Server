@@ -24,7 +24,7 @@ bcrypt = Bcrypt(app)
 class Timezone:
     """Get the current time in the local timezone."""
 
-    def __init__(self, timezone: str):
+    def __init__(self, timezone: str = None):
         self.timezone = timezone
 
     def get_timezone_current_time(self):
@@ -70,7 +70,7 @@ class InputTextValidation:
 class PasswordBcrypt:
     """Hash and check password."""
 
-    def __init__(self, password: str):
+    def __init__(self, password: str = None):
         self.password = password
 
     def password_generator(self):
@@ -86,7 +86,7 @@ class PasswordBcrypt:
 
     def password_hasher(self):
         """Hash the password and return the hashed password."""
-        return bcrypt.generate_password_hash(self.password).decode("utf-8")
+        return bcrypt.generate_password_hash(self.password)
 
     def password_hash_check(self, password_hash):
         """Check if the password is correct and return a boolean value."""

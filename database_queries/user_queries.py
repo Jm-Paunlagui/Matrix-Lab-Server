@@ -298,7 +298,7 @@ def password_reset(password_reset_token: str, password: str):
             new_password: User = User.query.filter_by(
                 email=email["sub"]).first()
             new_password.password = hashed_password
-            new_password.password_reset_token = ""
+            new_password.password_reset_token = None
             db.session.commit()
             source = get_os_browser_versions()
             msg = Message("Password Reset Successful",
@@ -338,12 +338,11 @@ def password_reset(password_reset_token: str, password: str):
     except jwt.exceptions.InvalidTokenError:
         token: User = User.query.filter_by(
             password_reset_token=password_reset_token).first()
-        token.password_reset_token = ""
+        token.password_reset_token = None
         db.session.commit()
         return False
 
 
-# @TODO: Convert to token-based retrieval of user data (for security)
 def has_emails():
     """Gets the email and recovery email of the user based on user session."""
     user_id: int = session.get('user_id')
@@ -447,5 +446,4 @@ def remove_email(option: str, email: str, username: str):
             db.session.commit()
             return True
         return False
-
     return False
