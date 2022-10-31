@@ -7,19 +7,8 @@ from flask import session
 from flask_mail import Message
 from flask_session import Session
 from models.user_model import User
-# from modules.datetime_tz import timezone_current_time
-# from modules.password_bcrypt import password_hash_check, password_hasher
-# from modules.topt_code import topt_code, verify_code
-# from modules.user_agent import get_os_browser_versions
-# from modules.payload_signature import encode_payload, decode_payload
-from modules.module import (
-    Timezone,
-    InputTextValidation,
-    PasswordBcrypt,
-    PayloadSignature,
-    ToptCode,
-    get_os_browser_versions
-)
+from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
+                            ToptCode, get_os_browser_versions)
 
 # desc: Session configuration
 server_session = Session(app)
@@ -30,8 +19,8 @@ def check_email_exists(email: str):
     is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email).filter(
         (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
     if (
-        is_email is not None
-        and email in (is_email.email, is_email.secondary_email, is_email.recovery_email)
+            is_email is not None
+            and email in (is_email.email, is_email.secondary_email, is_email.recovery_email)
     ):
         return True
     return False
@@ -41,8 +30,8 @@ def check_username_exists(username: str):
     """Checks if the username exists in the database."""
     is_username: User = User.query.filter_by(username=username).first()
     if (
-        is_username is not None
-        and username == is_username.username
+            is_username is not None
+            and username == is_username.username
     ):
         return True
     return False
@@ -200,7 +189,7 @@ def send_tfa(email: str):
         {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
         style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
         not recognize this email to your {username}'s email address, you can 
-        <a href="{"http://localhost:3000/remove-email-from-account/" +link}" 
+        <a href="{"http://localhost:3000/remove-email-from-account/" + link}" 
         style="color:#44578b;text-decoration:none;font-weight:bold;">click here</a> to remove the email address from 
         that account.</p><p style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: 
         left;">Thanks, <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td 
@@ -356,19 +345,23 @@ def password_reset(password_reset_token: str, password: str):
 def has_emails():
     """Gets the email and recovery email of the user based on user session."""
     user_id: int = session.get('user_id')
-    user_role: User = User.query.filter_by(user_id=user_id).first()
-    match user_role.role:
-        case 'admin':
-            id1: str = user_role.email
-            id2: str = user_role.secondary_email
-            id3: str = user_role.recovery_email
-            return id1, id2, id3
-        case 'user':
-            id1: str = user_role.email
-            id2: str = user_role.secondary_email
-            id3: str = user_role.recovery_email
-            return id1, id2, id3
-    return "/"
+
+    if user_id is None:
+        return False
+
+    user_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email)\
+        .filter_by(user_id=user_id).first()
+
+    user_emails = {
+        "iss": "http://127.0.0.1:5000",
+        "sub": "has_emails",
+        "id1": user_email.email,
+        "id2": user_email.secondary_email,
+        "id3": user_email.recovery_email,
+        "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+        "jti": str(uuid.uuid4())
+    }
+    return PayloadSignature(payload=user_emails).encode_payload()
 
 
 def redirect_to():
