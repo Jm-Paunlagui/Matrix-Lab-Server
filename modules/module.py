@@ -23,6 +23,7 @@ bcrypt = Bcrypt(app)
 
 class Timezone:
     """Get the current time in the local timezone."""
+
     def __init__(self, timezone: str):
         self.timezone = timezone
 
@@ -34,6 +35,7 @@ class Timezone:
 
 class InputTextValidation:
     """Validate user text input"""
+
     def __init__(self, user_input: str = None):
         self.user_input = user_input
 
@@ -67,6 +69,7 @@ class InputTextValidation:
 
 class PasswordBcrypt:
     """Hash and check password."""
+
     def __init__(self, password: str):
         self.password = password
 
@@ -75,7 +78,8 @@ class PasswordBcrypt:
         password_length = 15
         special_characters = "#?!@$%^&*-"
         password_characters = string.ascii_letters + string.digits + special_characters
-        passwords = ''.join(random.choices(password_characters, k=password_length))
+        passwords = ''.join(random.choices(
+            password_characters, k=password_length))
         if InputTextValidation(passwords).validate_password():
             return passwords
         return self.password_generator()
@@ -91,6 +95,7 @@ class PasswordBcrypt:
 
 class PayloadSignature:
     """Encode and decode payload with private and public key."""
+
     def __init__(self, encoded: str = None, payload: dict = None):
         self.encoded = encoded
         self.payload = payload
@@ -168,4 +173,3 @@ def get_os_browser_versions():
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
         datetime.now().strftime("%A, %I:%M:%S %p")
-
