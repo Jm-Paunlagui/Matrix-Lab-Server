@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 
 import jwt
-from config.configurations import app, db, mail, private_key, public_key
+from config.configurations import app, db, mail
 from flask import session
 from flask_mail import Message
 from flask_session import Session
@@ -11,6 +11,7 @@ from modules.datetime_tz import timezone_current_time
 from modules.password_bcrypt import password_hash_check, password_hasher
 from modules.topt_code import topt_code, verify_code
 from modules.user_agent import get_os_browser_versions
+from modules.payload_signature import encode_payload, decode_payload
 
 # desc: Session configuration
 server_session = Session(app)
@@ -74,7 +75,7 @@ def check_email_exists_by_username(username: str):
             "iat": datetime.timestamp(timezone_current_time),
             "jti": str(uuid.uuid4())
         }
-        emails = jwt.encode(payload, private_key, algorithm="RS256")
+        emails = encode_payload(payload)
         return emails
     return False
 
@@ -159,7 +160,7 @@ def send_tfa(email: str):
             "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
         }
-        link = jwt.encode(payload, private_key, algorithm="RS256")
+        link = encode_payload(payload)
 
         username = is_email[3]
         source = get_os_browser_versions()
@@ -237,7 +238,7 @@ def password_reset_link(email: str):
         "exp": datetime.timestamp(timezone_current_time + timedelta(hours=24)),
         "jti": str(uuid.uuid4())
     }
-    password_reset_token = jwt.encode(payload, private_key, algorithm="RS256")
+    password_reset_token = encode_payload(payload)
     source = get_os_browser_versions()
     User.query.filter((User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).update(
         {"password_reset_token": password_reset_token})
@@ -290,8 +291,7 @@ def password_reset(password_reset_token: str, password: str):
     otherwise.
     """
     try:
-        email: dict = jwt.decode(password_reset_token, public_key, algorithms=[
-            "RS256"], verify=True)
+        email: dict = decode_payload(password_reset_token)
         hashed_password: str = password_hasher(password)
         intoken: User = User.query.filter_by(email=email["sub"]).first()
         email_name = intoken.first_name
@@ -344,6 +344,7 @@ def password_reset(password_reset_token: str, password: str):
         return False
 
 
+# @TODO: Convert to token-based retrieval of user data (for security)
 def has_emails():
     """Gets the email and recovery email of the user based on user session."""
     user_id: int = session.get('user_id')
@@ -387,8 +388,7 @@ def remove_session():
 def verify_remove_token(token: str):
     """Verifies the token for the user to remove their account."""
     try:
-        user_info: dict = jwt.decode(
-            token, public_key, algorithms=["RS256"], verify=True)
+        user_info: dict = decode_payload(token)
         return user_info
     except jwt.exceptions.InvalidTokenError:
         return False
