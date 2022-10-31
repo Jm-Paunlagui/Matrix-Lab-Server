@@ -288,8 +288,10 @@ def password_reset(password_reset_token: str, password: str):
     otherwise.
     """
     try:
-        email: dict = PayloadSignature(encoded=password_reset_token).decode_payload()
-        hashed_password: str = PasswordBcrypt(password=password).password_hasher()
+        email: dict = PayloadSignature(
+            encoded=password_reset_token).decode_payload()
+        hashed_password: str = PasswordBcrypt(
+            password=password).password_hasher()
         intoken: User = User.query.filter_by(email=email["sub"]).first()
         email_name = intoken.first_name
         if intoken.password_reset_token == password_reset_token:
