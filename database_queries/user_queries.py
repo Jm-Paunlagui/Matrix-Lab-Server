@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import jwt
 from config.configurations import app, db, mail
-from flask import session
+from flask import session, jsonify
 from flask_mail import Message
 from flask_session import Session
 from models.user_model import User
@@ -216,7 +216,18 @@ def authenticated_user():
     if user_id is None:
         return False
     user_data: User = User.query.filter_by(user_id=user_id).first()
-    return user_data
+    payload = {
+        "sub": "user",
+        "token": "true", "id": user_data.user_id,
+        "email": user_data.email, "secondary_email": user_data.secondary_email,
+        "recovery_email": user_data.recovery_email, "first_name": user_data.first_name,
+        "last_name": user_data.last_name, "username": user_data.username, "role": user_data.role, "path": redirect_to(),
+        "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=24)),
+        "jti": str(uuid.uuid4())
+    }
+    user_data_token = PayloadSignature(payload=payload).encode_payload()
+    return user_data_token
 
 
 def password_reset_link(email: str):
@@ -350,7 +361,7 @@ def has_emails():
     if user_id is None:
         return False
 
-    user_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email)\
+    user_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email) \
         .filter_by(user_id=user_id).first()
 
     user_emails = {
@@ -389,6 +400,15 @@ def remove_session():
 
 def verify_remove_token(token: str):
     """Verifies the token for the user to remove their account."""
+    try:
+        user_info: dict = PayloadSignature(encoded=token).decode_payload()
+        return user_info
+    except jwt.exceptions.InvalidTokenError:
+        return False
+
+
+def verify_authenticated_token(token: str):
+    """Verifies the token for the user to access the dashboard."""
     try:
         user_info: dict = PayloadSignature(encoded=token).decode_payload()
         return user_info
@@ -447,3 +467,76 @@ def remove_email(option: str, email: str, username: str):
             return True
         return False
     return False
+
+
+def update_password(old_password: str, new_password: str):
+    """Updates the password of the user"""
+    user_id: int = session.get("user_id")
+    user: User = User.query.with_entities(User.password) \
+        .filter(User.user_id == user_id).first()
+    if user_id is not None and user is not None and \
+            PasswordBcrypt(password=old_password).password_hash_check(user.password):
+        User.query.filter_by(user_id=user_id).update({
+            User.password: PasswordBcrypt(password=new_password).password_hasher()
+        })
+        db.session.commit()
+        return True
+    return False
+
+
+def update_personal_info(email: str, first_name: str, last_name: str):
+    """Updates the personal information of the user"""
+    user_id: int = session.get("user_id")
+    user: User = User.query.with_entities(User.email, User.first_name, User.last_name) \
+        .filter(User.user_id == user_id).first()
+    if user_id is None and user is None:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    if user.email != email and check_email_exists(email):
+        return jsonify({"status": "warn", "message": "Email already exists"}), 409
+    User.query.filter_by(user_id=user_id).update({
+        User.email: email,
+        User.first_name: first_name,
+        User.last_name: last_name
+    })
+    db.session.commit()
+    return jsonify({"status": "success",
+                    "message": "Your personal information has been updated successfully.",
+                    "token": authenticated_user()}), 200
+
+
+def update_security_info(secondary_email: str, recovery_email: str):
+    """Updates the security information of the user"""
+    user_id: int = session.get("user_id")
+    user: User = User.query.with_entities(User.secondary_email, User.recovery_email) \
+        .filter(User.user_id == user_id).first()
+    if user_id is None and user is None:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    if user.secondary_email != secondary_email and check_email_exists(secondary_email):
+        return jsonify({"status": "warn", "message": "Email already exists"}), 409
+    if user.recovery_email != recovery_email and check_email_exists(recovery_email):
+        return jsonify({"status": "warn", "message": "Email already exists"}), 409
+    User.query.filter_by(user_id=user_id).update({
+        User.secondary_email: secondary_email,
+        User.recovery_email: recovery_email
+    })
+    db.session.commit()
+    return jsonify({"status": "success",
+                    "message": "Your security information has been updated successfully.",
+                    "token": authenticated_user()}), 200
+
+
+def update_username(username: str):
+    """Updates the username of the user"""
+    user_id: int = session.get("user_id")
+    user: User = User.query.with_entities(User.username).filter(User.user_id == user_id).first()
+    if user_id is None and user is None:
+        return jsonify({"status": "error", "message": "User not found"}), 404
+    if user.username != username and check_username_exists(username):
+        return jsonify({"status": "warn", "message": "Username already exists"}), 409
+    User.query.filter_by(user_id=user_id).update({
+        User.username: username
+    })
+    db.session.commit()
+    return jsonify({"status": "success",
+                    "message": "Your username has been updated successfully.",
+                    "token": authenticated_user()}), 200
