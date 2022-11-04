@@ -89,7 +89,6 @@ def forgot_password():
 
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
-
     token: str = request.headers["Authorization"]
     if not token:
         return jsonify({"status": "error", "message": "Invalid request!"}), 400
@@ -202,7 +201,6 @@ def update_user_password():
 
 def update_user_personal_info():
     """Updates the user's personal information by inputting his/her new information."""
-
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
 
