@@ -37,7 +37,8 @@ class InputTextValidation:
     def __init__(self, user_input: str = None):
         self.user_input = user_input
 
-    def validate_empty_fields(self, *args: str):
+    @staticmethod
+    def validate_empty_fields(*args: str):
         """Checks if any of the fields are empty."""
         return all(not arg == "" or arg is None or arg == " " for arg in args)
 
