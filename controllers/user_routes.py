@@ -7,8 +7,10 @@ from database_queries.user_queries import (authenticate_user,
                                            has_emails, password_reset,
                                            password_reset_link, redirect_to,
                                            remove_email, remove_session,
-                                           send_tfa, verify_remove_token,
-                                           verify_tfa)
+                                           send_tfa, verify_remove_token, verify_authenticated_token,
+                                           verify_tfa, update_password, update_personal_info,
+                                           update_security_info, update_username
+                                           )
 from flask import jsonify, request
 from modules.module import InputTextValidation
 
@@ -42,7 +44,7 @@ def check_email():
     if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
     if not check_email_exists_by_username(username):
-        return jsonify({"status": "error", "message": username + " does not exist!"}), 404
+        return jsonify({"status": "warn", "message": username + " does not exist!"}), 404
     return jsonify({"status": "success", "message": "Email retrieved successfully.",
                     "emails": check_email_exists_by_username(username)}), 200
 
@@ -78,25 +80,24 @@ def forgot_password():
     if email != confirm_email:
         return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
     if not check_email_exists(email):
-        return jsonify({"status": "error", "message": "Email address does not exist!"}), 404
+        return jsonify({"status": "warn", "message": "Email address does not exist!"}), 404
     if check_password_reset_token_exists(email):
-        return jsonify({"status": "error", "message": "Password reset link already sent!"}), 409
+        return jsonify({"status": "warn", "message": "Password reset link already sent!"}), 409
     password_reset_link(email)
     return jsonify({"status": "success", "message": "Password reset link sent successfully."}), 200
 
 
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
-    user = authenticated_user()
-    if not user:
-        return jsonify({"status": "error", "message": "Unauthorized access", "path": "/"}), 401
-    return jsonify({"status": "success", "message": "User retrieved successfully",
-                    "user": {
-                        "token": "true", "id": user.user_id,
-                        "email": user.email, "secondary_email": user.secondary_email,
-                        "recovery_email": user.recovery_email, "first_name": user.first_name,
-                        "last_name": user.last_name, "username": user.username, "role": user.role, "path": redirect_to()
-                    }}), 200
+    token: str = request.headers["Authorization"]
+    if not token:
+        return jsonify({"status": "error", "message": "Invalid request!"}), 400
+
+    verified_token: dict = verify_authenticated_token(token)
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+    return jsonify({"status": "success", "message": "User retrieved successfully.",
+                    "user": verified_token}), 200
 
 
 def remove_email_from_account():
@@ -115,9 +116,9 @@ def remove_email_from_account():
     if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
     if not check_email_exists(email):
-        return jsonify({"status": "error", "message": "Email address does not exist!"}), 404
+        return jsonify({"status": "warn", "message": "Email address does not exist!"}), 404
     if not check_username_exists(username):
-        return jsonify({"status": "error", "message": "Username does not exist!"}), 404
+        return jsonify({"status": "warn", "message": "Username does not exist!"}), 404
     if option == "yes":
         return jsonify({"status": "success", "message": "No changes made to your account."}), 200
     if not remove_email(option, email, username):
@@ -176,8 +177,74 @@ def signup():
     if not InputTextValidation(role).validate_text():
         return jsonify({"status": "error", "message": "Invalid role!"}), 400
     if not create_user(email, first_name, last_name, username, password, role):
-        return jsonify({"status": "error", "message": "Email already exists!"}), 409
+        return jsonify({"status": "warn", "message": "Email already exists!"}), 409
     return jsonify({"status": "success", "message": "User account created successfully."}), 201
+
+
+def update_user_password():
+    """Updates the user's password by inputting his/her current password and new password."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    current_password = request.json["old_password"]
+    new_password = request.json["new_password"]
+
+    if not InputTextValidation().validate_empty_fields(current_password, new_password):
+        return jsonify({"status": "error", "message": "Field required!"}), 400
+    if not InputTextValidation(new_password).validate_password():
+        return jsonify({"status": "error", "message": "Follow the password rules below!"}), 400
+    if not update_password(current_password, new_password):
+        return jsonify({"status": "error", "message": "Current password is incorrect!"}), 401
+    return jsonify({"status": "success",
+                    "message": "Your password has been updated successfully."}), 200
+
+
+def update_user_personal_info():
+    """Updates the user's personal information by inputting his/her new information."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    email = request.json["email"]
+    first_name = request.json["first_name"]
+    last_name = request.json["last_name"]
+
+    if not InputTextValidation(email).validate_email():
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if not InputTextValidation(first_name).validate_text():
+        return jsonify({"status": "error", "message": "Invalid first name!"}), 400
+    if not InputTextValidation(last_name).validate_text():
+        return jsonify({"status": "error", "message": "Invalid last name!"}), 400
+    return update_personal_info(email, first_name, last_name)
+
+
+def update_user_security_info():
+    """Updates the user's security emails to be an extra option to send the 2FA codes"""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    secondary_email = request.json["secondary_email"]
+    recovery_email = request.json["recovery_email"]
+
+    if not InputTextValidation(secondary_email).validate_email() or not \
+            InputTextValidation(recovery_email).validate_email():
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if secondary_email == recovery_email:
+        return jsonify({"status": "error", "message": "Emails cannot be the same!"}), 400
+    return update_security_info(secondary_email, recovery_email)
+
+
+def update_user_username():
+    """Updates the user's username by making sure the username is not taken."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    username = request.json["username"]
+
+    if not InputTextValidation().validate_empty_fields(username):
+        return jsonify({"status": "error", "message": "Field required!"}), 400
+    if not InputTextValidation(username).validate_username():
+        return jsonify({"status": "error", "message": "Invalid username!"}), 400
+    return update_username(username)
 
 
 def verify_security_code():
@@ -193,7 +260,11 @@ def verify_security_code():
         return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
     if not verify_tfa(code):
         return jsonify({"status": "error", "message": "Invalid security code!"}), 401
-    return jsonify({"status": "success", "message": "Security code verified successfully", "path": redirect_to()}), 200
+    return jsonify({"status": "success",
+                    "message": "Security code verified successfully",
+                    "path": redirect_to(),
+                    "token": authenticated_user(),
+                    }), 200
 
 
 def verify_remove_account_token(token: str):

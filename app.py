@@ -9,6 +9,10 @@ from controllers.user_routes import (
     send_security_code,
     signout,
     signup,
+    update_user_password,
+    update_user_personal_info,
+    update_user_security_info,
+    update_user_username,
     verify_remove_account_token,
     verify_security_code,
 )
@@ -32,6 +36,14 @@ app.add_url_rule("/user/sign-out",
                  view_func=signout, methods=["POST"])
 app.add_url_rule("/user/signup",
                  view_func=signup, methods=["POST"])
+app.add_url_rule("/user/update-password",
+                 view_func=update_user_password, methods=["PUT"])
+app.add_url_rule("/user/update-personal-info",
+                 view_func=update_user_personal_info, methods=["PUT"])
+app.add_url_rule("/user/update-security-info",
+                 view_func=update_user_security_info, methods=["PUT"])
+app.add_url_rule("/user/update-username",
+                 view_func=update_user_username, methods=["PUT"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
 app.add_url_rule("/user/verify-remove-account-token/<token>",
