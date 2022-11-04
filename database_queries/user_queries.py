@@ -477,7 +477,8 @@ def update_password(old_password: str, new_password: str):
     if user_id is not None and user is not None and \
             PasswordBcrypt(password=old_password).password_hash_check(user.password):
         User.query.filter_by(user_id=user_id).update({
-            User.password: PasswordBcrypt(password=new_password).password_hasher()
+            User.password: PasswordBcrypt(
+                password=new_password).password_hasher()
         })
         db.session.commit()
         return True
@@ -528,7 +529,8 @@ def update_security_info(secondary_email: str, recovery_email: str):
 def update_username(username: str):
     """Updates the username of the user"""
     user_id: int = session.get("user_id")
-    user: User = User.query.with_entities(User.username).filter(User.user_id == user_id).first()
+    user: User = User.query.with_entities(
+        User.username).filter(User.user_id == user_id).first()
     if user_id is None and user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
     if user.username != username and check_username_exists(username):
