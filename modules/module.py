@@ -59,11 +59,11 @@ class InputTextValidation:
 
     def validate_text(self):
         """Checks if the text is valid."""
-        return bool(re.compile(r"^[^0-9_!¡?÷?¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$").match(self.user_input))
+        return bool(re.compile(r"^[^0-9_!¡?÷¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$").match(self.user_input))
 
     def validate_number(self):
         """Checks if the number is valid."""
-        return bool(re.compile(r"^[0-9]{1,}$").match(str(self.user_input)))
+        return bool(re.compile(r"^[0-9]+$").match(str(self.user_input)))
 
 
 class PasswordBcrypt:
@@ -114,7 +114,7 @@ class ToptCode:
 
     @staticmethod
     def topt_code():
-        """Generates a 6 digit code for 2FA. The code expires after 5 minutes."""
+        """Generates a 6-digit code for 2FA. The code expires after 5 minutes."""
         return ToptCode.totp.now()
 
     @staticmethod
