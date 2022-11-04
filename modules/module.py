@@ -6,11 +6,9 @@ import pyotp
 import pytz
 import random
 import string
-
-from config.configurations import app
+from config.configurations import app, private_key, public_key
 from flask_bcrypt import Bcrypt
 import jwt
-from config.configurations import private_key, public_key
 from flask import request
 from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
