@@ -2,13 +2,13 @@ import uuid
 from datetime import datetime, timedelta
 
 import jwt
-from config.configurations import app, db, mail
+from nlp_app.__init__ import app, db, mail
 from flask import session, jsonify
 from flask_mail import Message
 from flask_session import Session
-from models.user_model import User
-from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
-                            ToptCode, get_os_browser_versions)
+from nlp_app.models.user_model import User
+from nlp_app.modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
+                                    ToptCode, get_os_browser_versions)
 
 # desc: Session configuration
 server_session = Session(app)

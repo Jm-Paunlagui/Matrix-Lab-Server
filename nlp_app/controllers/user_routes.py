@@ -1,18 +1,18 @@
-from database_queries.user_queries import (authenticate_user,
-                                           authenticated_user,
-                                           check_email_exists,
-                                           check_email_exists_by_username,
-                                           check_password_reset_token_exists,
-                                           check_username_exists, create_user,
-                                           has_emails, password_reset,
-                                           password_reset_link, redirect_to,
-                                           remove_email, remove_session,
-                                           send_tfa, verify_remove_token, verify_authenticated_token,
-                                           verify_tfa, update_password, update_personal_info,
-                                           update_security_info, update_username
-                                           )
+from nlp_app.database_queries.user_queries import (authenticate_user,
+                                                   authenticated_user,
+                                                   check_email_exists,
+                                                   check_email_exists_by_username,
+                                                   check_password_reset_token_exists,
+                                                   check_username_exists, create_user,
+                                                   has_emails, password_reset,
+                                                   password_reset_link, redirect_to,
+                                                   remove_email, remove_session,
+                                                   send_tfa, verify_remove_token, verify_authenticated_token,
+                                                   verify_tfa, update_password, update_personal_info,
+                                                   update_security_info, update_username
+                                                   )
 from flask import jsonify, request
-from modules.module import InputTextValidation
+from nlp_app.modules.module import InputTextValidation
 
 
 def authenticate():

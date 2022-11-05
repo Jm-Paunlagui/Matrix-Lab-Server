@@ -1,4 +1,4 @@
-import models.user_model  # skipcq: PY-W2000
+import nlp_app.models.user_model  # skipcq: PY-W2000
 import os
 import socket
 
@@ -9,13 +9,13 @@ from flask_mail import Mail
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import database_exists, create_database
 
-# Create the Flask app and load the config file
+# Create the Flask nlp_app and load the nlp_app file
 app = Flask(__name__)
 
 # @desc: This method pushes the application context to the top of the stack.
 app.app_context().push()
 
-# @desc: Email configuration for the Flask app
+# @desc: Email configuration for the Flask nlp_app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
 app.config["MAIL_USE_SSL"] = True
 app.config["MAIL_USE_TLS"] = False
@@ -27,7 +27,7 @@ app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
 
-# @desc: Cross-Origin Resource Sharing configuration for the Flask app to allow requests from the client
+# @desc: Cross-Origin Resource Sharing configuration for the Flask nlp_app to allow requests from the client
 CORS(app, supports_credentials=True,
      methods="GET,POST,PUT,DELETE,OPTIONS")
 
@@ -42,7 +42,7 @@ public_key = b"-----BEGIN PUBLIC KEY-----\n" + \
              os.environ.get("MATRIX_RSA_PUBLIC_KEY").encode() + \
              b"\n-----END PUBLIC KEY-----"
 
-# @desc: The redis configuration for the Flask app
+# @desc: The redis configuration for the Flask nlp_app
 SESSION_TYPE = "redis"
 SESSION_PERMANENT = False
 SESSION_USE_SIGNER = True
@@ -63,7 +63,7 @@ db = SQLAlchemy(app)
 
 db.create_all()
 
-# @desc: Config from object method of the Flask app (Should be the last line of the configs)
+# @desc: Config from object method of the Flask nlp_app (Should be the last line of the configs)
 app.config.from_object(__name__)
 
 

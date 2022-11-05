@@ -1,5 +1,5 @@
-from config.configurations import app, db
-from controllers.user_routes import (
+from nlp_app.__init__ import app, db
+from nlp_app.controllers.user_routes import (
     authenticate,
     check_email,
     forgot_password,
