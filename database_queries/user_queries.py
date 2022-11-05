@@ -304,7 +304,8 @@ def password_reset(password_reset_token: str, password: str):
         hashed_password: str = PasswordBcrypt(
             password=password).password_hasher()
         intoken: User = User.query.filter(
-            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (User.recovery_email == email["sub"])
+            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
+                User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.first_name
         if intoken.password_reset_token == password_reset_token:
