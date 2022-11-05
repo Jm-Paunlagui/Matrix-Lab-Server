@@ -1,7 +1,7 @@
 .idea/workspace.xml
 .env
+/test
 test.py
-test1.py
 venv
 /.idea/dataSources.xml
 /.idea/Matrix-Lab-Server.iml
