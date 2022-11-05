@@ -303,13 +303,13 @@ def password_reset(password_reset_token: str, password: str):
             encoded=password_reset_token).decode_payload()
         hashed_password: str = PasswordBcrypt(
             password=password).password_hasher()
-        intoken: User = User.query.filter_by(email=email["sub"]).first()
+        intoken: User = User.query.filter(
+            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (User.recovery_email == email["sub"])
+        ).first()
         email_name = intoken.first_name
         if intoken.password_reset_token == password_reset_token:
-            new_password: User = User.query.filter_by(
-                email=email["sub"]).first()
-            new_password.password = hashed_password
-            new_password.password_reset_token = None
+            intoken.password = hashed_password
+            intoken.password_reset_token = None
             db.session.commit()
             source = get_os_browser_versions()
             msg = Message("Password Reset Successful",

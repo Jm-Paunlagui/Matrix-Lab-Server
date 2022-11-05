@@ -225,8 +225,7 @@ def update_user_security_info():
     secondary_email = request.json["secondary_email"]
     recovery_email = request.json["recovery_email"]
 
-    if not InputTextValidation(secondary_email).validate_email() or not \
-            InputTextValidation(recovery_email).validate_email():
+    if not InputTextValidation(secondary_email or recovery_email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
     if secondary_email == recovery_email:
         return jsonify({"status": "error", "message": "Emails cannot be the same!"}), 400
