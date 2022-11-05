@@ -1,5 +1,5 @@
-from nlp_app.__init__ import db
-from nlp_app.modules.module import Timezone
+from config.configurations import db
+from modules.module import Timezone
 
 
 # desc: User model class

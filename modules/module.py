@@ -6,7 +6,7 @@ import pyotp
 import pytz
 import random
 import string
-from nlp_app.__init__ import app, private_key, public_key
+from config.configurations import app, private_key, public_key
 from flask_bcrypt import Bcrypt
 import jwt
 from flask import request
