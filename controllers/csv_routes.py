@@ -35,17 +35,19 @@ def upload_csv():
         return jsonify({"status": "error", "message": "File already exists"}), 400
 
     # @desc: Save the csv file
-    csv_file.save(os.path.join(app.config["CSV_FOLDER"], AllowedFile(csv_file.filename).secure_filename()))
+    csv_file.save(os.path.join(app.config["CSV_FOLDER"], AllowedFile(
+        csv_file.filename).secure_filename()))
 
     # @desc: Check if the csv file follows the required format: sentence, evaluatee, department and course code.
-    csv_file_ = pd.read_csv(app.config["CSV_FOLDER"] + "/" + AllowedFile(csv_file.filename).secure_filename())
+    csv_file_ = pd.read_csv(
+        app.config["CSV_FOLDER"] + "/" + AllowedFile(csv_file.filename).secure_filename())
     csv_columns = csv_file_.columns
     if csv_columns[0] != "sentence" or csv_columns[1] \
             != "evaluatee" or csv_columns[2] != "department" or csv_columns[3] != "course_code":
         # @desc: Delete the csv file if it does not follow the required format
-        os.remove(os.path.join(app.config["CSV_FOLDER"], AllowedFile(csv_file.filename).secure_filename()))
+        os.remove(os.path.join(app.config["CSV_FOLDER"], AllowedFile(
+            csv_file.filename).secure_filename()))
         return jsonify({"status": "error", "message": "Invalid csv file format"}), 400
-
 
     # if csv_header[0] != "sentence" or csv_header[1] != "evaluatee" or csv_header[2] != "department" \
     #         or csv_header[3] != "course_code":  # noqa: E501
@@ -61,4 +63,3 @@ def upload_csv():
     # csv_file.save(os.path.join(app.config["CSV_FOLDER"], AllowedFile(csv_file.filename).secure_filename()))
     #
     # return save_csv(csv_file.filename, csv_file_path)
-
