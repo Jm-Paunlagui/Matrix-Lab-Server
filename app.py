@@ -1,4 +1,5 @@
 from config.configurations import app, db
+from controllers.csv_routes import upload_csv
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -16,6 +17,10 @@ from controllers.user_routes import (
     verify_remove_account_token,
     verify_security_code,
 )
+
+# @desc: CSV routes for uploading csv files
+app.add_url_rule("/data/upload_csv",
+                 view_func=upload_csv, methods=["POST"])
 
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
