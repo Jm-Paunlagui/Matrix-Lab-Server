@@ -1,5 +1,5 @@
 from config.configurations import app, db
-from controllers.csv_routes import upload_csv
+from controllers.csv_routes import upload_csv, view_columns
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -21,6 +21,8 @@ from controllers.user_routes import (
 # @desc: CSV routes for uploading csv files
 app.add_url_rule("/data/upload_csv",
                  view_func=upload_csv, methods=["POST"])
+app.add_url_rule("/data/view_columns",
+                 view_func=view_columns, methods=["POST"])
 
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",

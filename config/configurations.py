@@ -1,4 +1,3 @@
-from models import user_model, csv_model  # skipcq: PY-W2000
 import os
 import socket
 
@@ -71,6 +70,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
+from models import user_model, csv_model  # skipcq: PY-W2000
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)

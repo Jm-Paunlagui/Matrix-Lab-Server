@@ -7,7 +7,8 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
 from models.csv_model import CsvModel
-from modules.module import AllowedFile
+from modules.module import AllowedFile, PayloadSignature
+from json import JSONEncoder
 
 
 def check_csv_name_exists(csv_name: str, csv_question: str) -> bool:
@@ -54,3 +55,33 @@ def save_csv(csv_name: str, csv_file_path: str, csv_question: str, csv_file: Fil
     return jsonify({"status": "success", "message": "File uploaded successfully"}), 200
 
 
+def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, int]:
+    """
+    View the csv file columns with pandas.
+
+    :param csv_file_to_view: The csv file to be viewed
+    :return: The status and message
+    """
+
+    csv_file_to_view.save(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], AllowedFile(
+        csv_file_to_view.filename).secure_filename()))
+    csv_file_ = pd.read_csv(
+        app.config["CSV_REFORMATTED_FOLDER"] + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
+    csv_columns = csv_file_.columns
+
+    csv_columns_to_return = []
+    for column, index_in_column in zip(csv_columns, range(len(csv_columns))):
+        csv_columns_to_return.append({"index_number": index_in_column, "column_name": column})
+
+    csv_columns_payload = {
+        "iss": "http://127.0.0.1:5000",
+        "sub": "Columns of the csv file",
+        "csv_file_name": AllowedFile(csv_file_to_view.filename).secure_filename(),
+        "csv_columns": csv_columns_to_return
+    }
+
+    csv_columns_token = PayloadSignature(payload=csv_columns_payload).encode_payload()
+
+    return jsonify({"status": "success",
+                    "message": "File columns viewed successfully",
+                    "token_columns": csv_columns_token}), 200
