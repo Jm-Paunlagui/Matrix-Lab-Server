@@ -1,4 +1,3 @@
-import models.user_model  # skipcq: PY-W2000
 import os
 import socket
 
@@ -14,6 +13,12 @@ app = Flask(__name__)
 
 # @desc: This method pushes the application context to the top of the stack.
 app.app_context().push()
+
+# @desc: Root path of the application (the directory where the application is located)
+app.config["ROOT_PATH"] = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# @desc: CSV file upload path configuration for the Flask app
+app.config["CSV_FOLDER"] = os.path.join(app.config["ROOT_PATH"], "csv_files\\uploaded_csv_files")
+app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
 # @desc: Email configuration for the Flask app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
@@ -60,6 +65,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
+from models import user_model, csv_model # skipcq: PY-W2000
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
