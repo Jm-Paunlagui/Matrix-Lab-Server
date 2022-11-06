@@ -19,7 +19,8 @@ def check_csv_name_exists(csv_name: str, csv_question: str) -> bool:
     :param csv_question: The csv question to be checked
     :return: True if the csv name exists, False otherwise
     """
-    csv = CsvModel.query.filter_by(csv_name=csv_name, csv_question=csv_question).first()
+    csv = CsvModel.query.filter_by(
+        csv_name=csv_name, csv_question=csv_question).first()
     return True if csv else False
 
 
@@ -49,7 +50,8 @@ def save_csv(csv_name: str, csv_file_path: str, csv_question: str, csv_file: Fil
         return jsonify({"status": "error", "message": "Invalid csv file format"}), 400
 
     # @desc: Save the csv file details to the database
-    csv = CsvModel(csv_name=csv_name, csv_file_path=csv_file_path, csv_question=csv_question)
+    csv = CsvModel(csv_name=csv_name, csv_file_path=csv_file_path,
+                   csv_question=csv_question)
     db.session.add(csv)
     db.session.commit()
     return jsonify({"status": "success", "message": "File uploaded successfully"}), 200
@@ -71,7 +73,8 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
 
     csv_columns_to_return = []
     for column, index_in_column in zip(csv_columns, range(len(csv_columns))):
-        csv_columns_to_return.append({"index_number": index_in_column, "column_name": column})
+        csv_columns_to_return.append(
+            {"index_number": index_in_column, "column_name": column})
 
     csv_columns_payload = {
         "iss": "http://127.0.0.1:5000",
@@ -80,7 +83,8 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
         "csv_columns": csv_columns_to_return
     }
 
-    csv_columns_token = PayloadSignature(payload=csv_columns_payload).encode_payload()
+    csv_columns_token = PayloadSignature(
+        payload=csv_columns_payload).encode_payload()
 
     return jsonify({"status": "success",
                     "message": "File columns viewed successfully",
