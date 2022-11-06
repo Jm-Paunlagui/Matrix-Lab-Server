@@ -19,6 +19,30 @@ from werkzeug.utils import cached_property
 bcrypt = Bcrypt(app)
 
 
+class AllowedFile:
+    """The allowed file class."""
+
+    def __init__(self, filename: str):
+        self.filename = filename
+
+    def allowed_file(self) -> bool:
+        """
+        Check if the file is allowed to be uploaded.
+
+        :return: True if the file is allowed, False otherwise
+        """
+        return '.' in self.filename and \
+               self.filename.rsplit('.', 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+
+    def secure_filename(self) -> str:
+        """
+        Secure the filename.
+
+        :return: The secure filename
+        """
+        return re.sub(r'[^a-zA-Z0-9_.]', '', self.filename)
+
+
 class Timezone:
     """Get the current time in the local timezone."""
 
@@ -29,6 +53,124 @@ class Timezone:
         """Return the current time in the local timezone."""
         timezone = pytz.timezone(self.timezone)
         return timezone.localize(datetime.now())
+
+
+class InputFileValidation:
+    """Validate the input file."""
+
+    def __init__(self, file):
+        self.file = file
+
+    def validate_file(self):
+        """Validate the input file."""
+        if self.file.filename == '':
+            return False
+        if not AllowedFile(self.file.filename).allowed_file():
+            return False
+        return True
+
+
+class TextPreprocessing:
+    """Text preprocessing class."""
+
+    def __init__(self, text: str):
+        self.text = text
+
+    def remove_punctuation(self) -> str:
+        """
+        Remove punctuation from the text.
+
+        :return: The text without punctuation
+        """
+        return re.sub(r'[^\w\s]', '', self.text)
+
+    def remove_numbers(self) -> str:
+        """
+        Remove numbers from the text.
+
+        :return: The text without numbers
+        """
+        return re.sub(r'\d+', '', self.text)
+
+    def remove_non_ascii_characters(self) -> str:
+        """
+        Remove non-ASCII characters from the text.
+
+        :return: The text without non-ASCII characters
+        """
+        return self.text.encode("ascii", "ignore").decode()
+
+    def remove_tabs_carriage_newline(self) -> str:
+        """
+        Remove tabs, carriage and newline characters from the text.
+
+        :return: The text without tabs, carriage and newline characters
+        """
+        return re.sub(r'[\t\r\n]', '', self.text)
+
+    def remove_whitespace(self) -> str:
+        """
+        Remove whitespace from the text.
+
+        :return: The text without whitespace
+        """
+        return " ".join(self.text.split())
+
+    def remove_special_characters(self) -> str:
+        """
+        Remove special characters from the text.
+
+        :return: The text without special characters
+        """
+        return re.sub(r'[^\w\s]', '', self.text)
+
+    def remove_single_characters(self) -> str:
+        """
+        Remove single characters from the text.
+
+        :return: The text without single characters
+        """
+        return re.sub(r'\b[a-zA-Z]\b', '', self.text)
+
+    def remove_multiple_whitespaces(self) -> str:
+        """
+        Remove multiple whitespaces from the text.
+
+        :return: The text without multiple whitespaces
+        """
+        return re.sub(r'\s+', ' ', self.text)
+
+    def remove_multiple_characters(self) -> str:
+        """
+        Remove multiple characters from the text.
+
+        :return: The text without multiple characters
+        """
+        return re.sub(r'(.)\1+', r'\1', self.text)
+
+    def remove_urls(self) -> str:
+        """
+        Remove URLs from the text.
+
+        :return: The text without URLs
+        """
+        return re.sub(r'http\S+', '', self.text)
+
+    def remove_emails(self) -> str:
+        """
+        Remove emails from the text.
+
+        :return: The text without emails
+        """
+        return re.sub(r'\S+@\S+', '', self.text)
+
+    def remove_html_tags(self) -> str:
+        """
+        Remove HTML tags
+
+        :return: The text without HTML tags
+        """
+        return re.sub(r'<.*?>', '', self.text)
 
 
 class InputTextValidation:
