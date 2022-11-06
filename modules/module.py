@@ -32,7 +32,8 @@ class AllowedFile:
         :return: True if the file is allowed, False otherwise
         """
         return '.' in self.filename and \
-               self.filename.rsplit('.', 1)[1].lower() in app.config["ALLOWED_EXTENSIONS"]
+               self.filename.rsplit('.', 1)[1].lower(
+               ) in app.config["ALLOWED_EXTENSIONS"]
 
     def secure_filename(self) -> str:
         """
