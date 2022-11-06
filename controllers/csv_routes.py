@@ -43,4 +43,3 @@ def upload_csv():
     # @desc: Save the csv file details to the database
     return save_csv(csv_file.filename, app.config["CSV_FOLDER"] + "/" + AllowedFile(
         csv_file.filename).secure_filename(), csv_question, csv_file)
-

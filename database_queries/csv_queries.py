@@ -18,7 +18,8 @@ def check_csv_name_exists(csv_name: str, csv_question: str) -> bool:
     :param csv_question: The csv question to be checked
     :return: True if the csv name exists, False otherwise
     """
-    csv = CsvModel.query.filter_by(csv_name=csv_name, csv_question=csv_question).first()
+    csv = CsvModel.query.filter_by(
+        csv_name=csv_name, csv_question=csv_question).first()
     return True if csv else False
 
 
@@ -48,9 +49,8 @@ def save_csv(csv_name: str, csv_file_path: str, csv_question: str, csv_file: Fil
         return jsonify({"status": "error", "message": "Invalid csv file format"}), 400
 
     # @desc: Save the csv file details to the database
-    csv = CsvModel(csv_name=csv_name, csv_file_path=csv_file_path, csv_question=csv_question)
+    csv = CsvModel(csv_name=csv_name, csv_file_path=csv_file_path,
+                   csv_question=csv_question)
     db.session.add(csv)
     db.session.commit()
     return jsonify({"status": "success", "message": "File uploaded successfully"}), 200
-
-
