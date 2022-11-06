@@ -50,7 +50,11 @@ class Timezone:
         self.timezone = timezone
 
     def get_timezone_current_time(self):
-        """Return the current time in the local timezone."""
+        """
+        Return the current time in the local timezone.
+
+        :return: The current time in the local timezone
+        """
         timezone = pytz.timezone(self.timezone)
         return timezone.localize(datetime.now())
 
@@ -62,7 +66,11 @@ class InputFileValidation:
         self.file = file
 
     def validate_file(self):
-        """Validate the input file."""
+        """
+        Validate the input file.
+
+        :return: True if the file is valid, False otherwise
+        """
         if self.file.filename == '':
             return False
         if not AllowedFile(self.file.filename).allowed_file():
@@ -181,30 +189,54 @@ class InputTextValidation:
 
     @staticmethod
     def validate_empty_fields(*args: str):
-        """Checks if any of the fields are empty."""
+        """
+        Checks if any of the fields are empty.
+
+        :param args: The fields to check
+        """
         return all(not arg == "" or arg is None or arg == " " for arg in args)
 
     def validate_email(self):
-        """Checks if the email is valid."""
+        """
+        Checks if the email is valid.
+
+        :return: True if the email is valid, False otherwise
+        """
         return bool(re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@(["
                                r"-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
                     .match(self.user_input))
 
     def validate_password(self):
-        """Checks if the password is valid."""
+        """
+        Checks if the password is valid.
+
+        :return: True if the password is valid, False otherwise
+        """
         return bool(re.compile(r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$")
                     .match(self.user_input))
 
     def validate_username(self):
-        """Checks if the username is valid."""
+        """
+        Checks if the username is valid.
+
+        :return: True if the username is valid, False otherwise
+        """
         return bool(re.compile(r"^[a-zA-Z0-9_-]{5,20}$").match(self.user_input))
 
     def validate_text(self):
-        """Checks if the text is valid."""
+        """
+        Checks if the text is valid.
+
+        :return: True if the text is valid, False otherwise
+        """
         return bool(re.compile(r"^[^0-9_!¡?÷¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$").match(self.user_input))
 
     def validate_number(self):
-        """Checks if the number is valid."""
+        """
+        Checks if the number is valid.
+
+        :return: True if the number is valid, False otherwise
+        """
         return bool(re.compile(r"^[0-9]+$").match(str(self.user_input)))
 
 
@@ -215,7 +247,11 @@ class PasswordBcrypt:
         self.password = password
 
     def password_generator(self):
-        """Password generator function with a length of 15 characters."""
+        """
+        Password generator function with a length of 15 characters.
+
+        :return: The generated password
+        """
         password_length = 15
         special_characters = "#?!@$%^&*-"
         password_characters = string.ascii_letters + string.digits + special_characters
@@ -226,11 +262,20 @@ class PasswordBcrypt:
         return self.password_generator()
 
     def password_hasher(self):
-        """Hash the password and return the hashed password."""
+        """
+        Hash the password and return the hashed password.
+
+        :return: The hashed password
+        """
         return bcrypt.generate_password_hash(self.password)
 
     def password_hash_check(self, password_hash):
-        """Check if the password is correct and return a boolean value."""
+        """
+        Check if the password is correct and return a boolean value.
+
+        :param password_hash: The hashed password
+        :return: True if the password is correct, False otherwise
+        """
         return bcrypt.check_password_hash(password_hash, self.password)
 
 
@@ -242,11 +287,19 @@ class PayloadSignature:
         self.payload = payload
 
     def encode_payload(self):
-        """Encode payload with private key."""
+        """
+        Encode payload with private key.
+
+        :return: The encoded payload
+        """
         return jwt.encode(self.payload, private_key, algorithm="RS256")
 
     def decode_payload(self):
-        """Decode payload with public key."""
+        """
+        Decode payload with public key.
+
+        :return: The decoded payload
+        """
         return jwt.decode(self.encoded, public_key, algorithms=["RS256"], verify=True)
 
 
@@ -256,12 +309,21 @@ class ToptCode:
 
     @staticmethod
     def topt_code():
-        """Generates a 6-digit code for 2FA. The code expires after 5 minutes."""
+        """
+        Generates a 6-digit code for 2FA. The code expires after 30 seconds.
+
+        :return: The generated 2FA code
+        """
         return ToptCode.totp.now()
 
     @staticmethod
     def verify_code(code):
-        """Verifies the 2FA code."""
+        """
+        Verifies the 2FA code.
+
+        :param code: The 2FA code
+        :return: True if the code is correct, False otherwise
+        """
         return ToptCode.totp.verify(code, valid_window=1)
 
 
@@ -277,22 +339,36 @@ class ParsedUserAgent(UserAgent):
         """
         Parse the user agent string and return a dictionary of the
         parsed user agent string.
+
+        :return: A dictionary of the parsed user agent string
         """
         return user_agent_parser.Parse(self.string)
 
     @property
     def platform(self):
-        """Return the operating system name."""
+        """
+        Return the operating system name.
+
+        :return: The operating system name
+        """
         return self._details['os']['family']
 
     @property
     def browser(self):
-        """Return the browser name."""
+        """
+        Return the browser name.
+
+        :return: The browser name
+        """
         return self._details['user_agent']['family']
 
     @property
     def version(self):
-        """Return the browser version."""
+        """
+        Return the browser version.
+
+        :return: The browser version
+        """
         return '.'.join(
             part
             for key in ('major', 'minor', 'patch')
@@ -301,7 +377,11 @@ class ParsedUserAgent(UserAgent):
 
     @property
     def os_version(self):
-        """Return the operating system version."""
+        """
+        Return the operating system version.
+
+        :return: The operating system version
+        """
         return '.'.join(
             part
             for key in ('major', 'minor', 'patch')
@@ -310,7 +390,11 @@ class ParsedUserAgent(UserAgent):
 
 
 def get_os_browser_versions():
-    """Get the User's browser and OS from the request header."""
+    """
+    Get the User's browser and OS from the request header.
+
+    :return: The User's browser and OS versions and time as a dictionary object
+    """
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
         datetime.now().strftime("%A, %I:%M:%S %p")
