@@ -16,3 +16,4 @@ werkzeug
 Flask-SQLAlchemy
 SQLAlchemy-Utils
 pyotp
+pandas
