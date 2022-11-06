@@ -1,4 +1,3 @@
-from models import user_model, csv_model  # skipcq: PY-W2000
 import os
 import socket
 
@@ -21,6 +20,9 @@ app.config["ROOT_PATH"] = os.path.dirname(
 # @desc: CSV file upload path configuration for the Flask app
 app.config["CSV_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "csv_files\\uploaded_csv_files")
+# @desc: CSV file reformatted path configuration for the Flask app
+app.config["CSV_REFORMATTED_FOLDER"] = os.path.join(
+    app.config["ROOT_PATH"], "csv_files\\reformatted_csv_files")
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
 # @desc: Email configuration for the Flask app
@@ -68,6 +70,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
+from models import user_model, csv_model  # skipcq: PY-W2000
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
