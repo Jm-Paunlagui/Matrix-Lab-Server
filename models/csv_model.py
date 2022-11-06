@@ -7,6 +7,7 @@ class CsvModel(db.Model):
     Csv model class attributes
     csv_id: Csv id number (primary key) (auto increment) bigint
     csv_name: Csv name varchar(255)
+    csv_question: Csv question varchar(255)
     csv_file_path: Csv file path text
     date_uploaded: Csv date uploaded timestamp
     date_processed: Csv date processed timestamp
@@ -15,6 +16,7 @@ class CsvModel(db.Model):
     __tablename__ = 'csvs'
     csv_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
     csv_name: str = db.Column(db.String(255), nullable=False)
+    csv_question: str = db.Column(db.String(255), nullable=False)
     csv_file_path: str = db.Column(db.Text, nullable=False)
     date_uploaded: str = db.Column(db.DateTime, nullable=False,
                                    default=Timezone("Asia/Manila").get_timezone_current_time())
