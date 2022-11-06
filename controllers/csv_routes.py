@@ -66,5 +66,3 @@ def view_columns():
         return jsonify({"status": "error", "message": "File not allowed"}), 400
 
     return view_columns_with_pandas(csv_file_to_view)
-
-
