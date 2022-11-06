@@ -133,14 +133,6 @@ class TextPreprocessing:
         """
         return re.sub(r'[^\w\s]', '', self.text)
 
-    def remove_single_characters(self) -> str:
-        """
-        Remove single characters from the text.
-
-        :return: The text without single characters
-        """
-        return re.sub(r'\b[a-zA-Z]\b', '', self.text)
-
     def remove_multiple_whitespaces(self) -> str:
         """
         Remove multiple whitespaces from the text.
@@ -148,14 +140,6 @@ class TextPreprocessing:
         :return: The text without multiple whitespaces
         """
         return re.sub(r'\s+', ' ', self.text)
-
-    def remove_multiple_characters(self) -> str:
-        """
-        Remove multiple characters from the text.
-
-        :return: The text without multiple characters
-        """
-        return re.sub(r'(.)\1+', r'\1', self.text)
 
     def remove_urls(self) -> str:
         """
@@ -180,6 +164,33 @@ class TextPreprocessing:
         :return: The text without HTML tags
         """
         return re.sub(r'<.*?>', '', self.text)
+
+    def remove_whitespace_at_beginning_and_end(self) -> str:
+        """
+        Remove whitespace at the beginning and end of the text.
+
+        :return: The text without whitespace at the beginning and end
+        """
+        return self.text.strip()
+
+    def clean_text(self) -> str:
+        """
+        Clean the text.
+
+        :return: The cleaned text
+        """
+        self.text = self.remove_punctuation()
+        self.text = self.remove_numbers()
+        self.text = self.remove_non_ascii_characters()
+        self.text = self.remove_tabs_carriage_newline()
+        self.text = self.remove_whitespace()
+        self.text = self.remove_special_characters()
+        self.text = self.remove_multiple_whitespaces()
+        self.text = self.remove_urls()
+        self.text = self.remove_emails()
+        self.text = self.remove_html_tags()
+        self.text = self.remove_whitespace_at_beginning_and_end()
+        return self.text
 
 
 class InputTextValidation:
