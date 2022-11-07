@@ -66,3 +66,31 @@ def view_columns():
         return jsonify({"status": "error", "message": "File not allowed"}), 400
 
     return view_columns_with_pandas(csv_file_to_view)
+
+
+def analyze_save_csv():
+
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    csv_file = request.json["file_name"]
+    sentence_column = request.json["selected_column_for_sentence"]
+    evaluatee_column = request.json["selected_column_for_evaluatee"]
+    department_column = request.json["selected_column_for_department"]
+    course_code_column = request.json["selected_column_for_course_code"]
+    csv_question = request.json["csv_question"]
+    school_year = request.json["school_year"]
+
+    if not InputTextValidation().validate_empty_fields(csv_file, sentence_column, evaluatee_column, department_column,
+                                                       course_code_column, csv_question, school_year):
+        return jsonify({"status": "error", "message": "Some of the inputs are unsuccessfully retrieved"}), 400
+    if not InputTextValidation(sentence_column).validate_number() and not \
+            InputTextValidation(evaluatee_column).validate_number() and not \
+            InputTextValidation(department_column).validate_number() and not \
+            InputTextValidation(course_code_column).validate_number():
+        return jsonify({"status": "error", "message": "Invalid column number"}), 400
+    if not InputTextValidation(csv_question).validate_empty_fields():
+        return jsonify({"status": "error", "message": "Invalid question"}), 400
+    if not InputTextValidation(school_year).validate_school_year():
+        return jsonify({"status": "error", "message": "Invalid school year"}), 400
+    return jsonify({"status": "success", "message": "Successfully retrieved the inputs"}), 200

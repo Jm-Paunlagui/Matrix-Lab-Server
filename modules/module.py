@@ -251,6 +251,22 @@ class InputTextValidation:
         """
         return bool(re.compile(r"^[0-9]+$").match(str(self.user_input)))
 
+    def validate_question(self):
+        """
+        Checks if the question is valid.
+
+        :return: True if the question is valid, False otherwise
+        """
+        return bool(re.compile(r"^[^0-9_!¡?÷¿/\\+=@#$%ˆ&*(){}|~<>;:[\]]{2,}$").match(self.user_input))
+
+    def validate_school_year(self):
+        """
+        Checks if the school year is valid.
+
+        :return: True if the school year is valid, False otherwise
+        """
+        return bool(re.compile(r"^(S\.Y\. )\d{4}-\d{4}$").match(self.user_input))
+
 
 class PasswordBcrypt:
     """Hash and check password."""
