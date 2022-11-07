@@ -9,6 +9,7 @@ class CsvModel(db.Model):
     csv_name: Csv name varchar(255)
     csv_question: Csv question varchar(255)
     csv_file_path: Csv file path text
+    school_year: School year varchar(255)
     date_uploaded: Csv date uploaded timestamp
     date_processed: Csv date processed timestamp
     """
@@ -18,6 +19,7 @@ class CsvModel(db.Model):
     csv_name: str = db.Column(db.String(255), nullable=False)
     csv_question: str = db.Column(db.String(255), nullable=False)
     csv_file_path: str = db.Column(db.Text, nullable=False)
+    school_year: str = db.Column(db.String(255), nullable=False)
     date_uploaded: str = db.Column(db.DateTime, nullable=False,
                                    default=Timezone("Asia/Manila").get_timezone_current_time())
     date_processed: str = db.Column(db.DateTime, nullable=False,
@@ -25,5 +27,6 @@ class CsvModel(db.Model):
 
     def __repr__(self):
         """Csv model class representation."""
-        return f"CsvModel('{self.csv_id}', '{self.csv_name}', '{self.csv_file_path}', '{self.date_uploaded}', " \
-               f"'{self.date_processed}')"
+        return f"CsvModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
+               f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
+               f"date_uploaded={self.date_uploaded}, date_processed={self.date_processed})"
