@@ -89,6 +89,3 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     return jsonify({"status": "success",
                     "message": "File columns viewed successfully",
                     "token_columns": csv_columns_token}), 200
-
-
-
