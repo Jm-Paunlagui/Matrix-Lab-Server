@@ -74,7 +74,7 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     csv_columns_to_return = []
     for column, index_in_column in zip(csv_columns, range(len(csv_columns))):
         csv_columns_to_return.append(
-            {"index_number": index_in_column, "column_name": column})
+            {"id": index_in_column, "name": column})
 
     csv_columns_payload = {
         "iss": "http://127.0.0.1:5000",
@@ -89,3 +89,6 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     return jsonify({"status": "success",
                     "message": "File columns viewed successfully",
                     "token_columns": csv_columns_token}), 200
+
+
+
