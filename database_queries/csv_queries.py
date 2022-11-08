@@ -117,10 +117,12 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     })
 
     # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
-    columns_to_not_drop = ["sentence", "evaluatee", "department", "course_code"]
+    columns_to_not_drop = ["sentence",
+                           "evaluatee", "department", "course_code"]
 
     # @desc: Get the columns that are not required for the evaluation with a seperator of comma
-    columns_to_drop = [column for column in reformatted_csv if column not in columns_to_not_drop]
+    columns_to_drop = [
+        column for column in reformatted_csv if column not in columns_to_not_drop]
 
     reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
 
@@ -128,17 +130,20 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
 
     # desc: Pass 2 is to remove emoves the text if its a single character like 'a', 'b', 'c', etc.
-    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len() > 1]
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
+    ) > 1]
 
     # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
     for index, row in reformatted_csv.iterrows():
-        reformatted_csv.at[index, "sentence"] = TextPreprocessing(row["sentence"]).clean_text()
+        reformatted_csv.at[index, "sentence"] = TextPreprocessing(
+            row["sentence"]).clean_text()
 
     # desc: Pass 4 is to remove Blank sentences again from the csv file after cleaning
     reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
 
     # @desc: Save the reformatted csv file to the database
-    reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+    reformatted_csv.to_csv(
+        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
     os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
