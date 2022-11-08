@@ -1,4 +1,3 @@
-
 import os
 import socket
 
@@ -19,11 +18,14 @@ app.app_context().push()
 app.config["ROOT_PATH"] = os.path.dirname(
     os.path.dirname(os.path.abspath(__file__)))
 # @desc: CSV file upload path configuration for the Flask app
-app.config["CSV_FOLDER"] = os.path.join(
+app.config["CSV_UPLOADED_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "csv_files\\uploaded_csv_files")
 # @desc: CSV file reformatted path configuration for the Flask app
 app.config["CSV_REFORMATTED_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "csv_files\\reformatted_csv_files")
+# @desc: CSV file analyzed path configuration for the Flask app
+app.config["CSV_ANALYZED_FOLDER"] = os.path.join(
+    app.config["ROOT_PATH"], "csv_files\\analyzed_csv_files")
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
 # @desc: Email configuration for the Flask app
@@ -73,6 +75,7 @@ db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
 # from models import user_model, csv_model
 from models import user_model, csv_model
+
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)

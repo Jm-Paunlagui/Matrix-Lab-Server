@@ -7,7 +7,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
 from models.csv_model import CsvModel
-from modules.module import AllowedFile, PayloadSignature
+from modules.module import AllowedFile, PayloadSignature, TextPreprocessing
 from json import JSONEncoder
 
 
@@ -65,10 +65,10 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     :return: The status and message
     """
 
-    csv_file_to_view.save(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], AllowedFile(
+    csv_file_to_view.save(os.path.join(app.config["CSV_UPLOADED_FOLDER"], AllowedFile(
         csv_file_to_view.filename).secure_filename()))
     csv_file_ = pd.read_csv(
-        app.config["CSV_REFORMATTED_FOLDER"] + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
+        app.config["CSV_UPLOADED_FOLDER"] + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
     csv_columns = csv_file_.columns
 
     csv_columns_to_return = []
@@ -89,3 +89,56 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     return jsonify({"status": "success",
                     "message": "File columns viewed successfully",
                     "token_columns": csv_columns_token}), 200
+
+
+def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
+                  course_code_index: int):
+    """
+    Format the csv file.
+
+    :param file_name: The csv file name
+    :param sentence_index: The sentence index
+    :param evaluatee_index: The evaluatee index
+    :param department_index: The department index
+    :param course_code_index: The course code index
+    :return: The status and message
+    """
+    # @desc: Read the csv file and return a pandas dataframe object
+    csv_file = pd.read_csv(app.config["CSV_UPLOADED_FOLDER"] + "/" + file_name)
+
+    # @desc: Get all the columns of the csv file
+    csv_columns = csv_file.columns
+
+    reformatted_csv = csv_file.rename(columns={
+        csv_columns[sentence_index]: "sentence",
+        csv_columns[evaluatee_index]: "evaluatee",
+        csv_columns[department_index]: "department",
+        csv_columns[course_code_index]: "course_code"
+    })
+
+    # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
+    columns_to_not_drop = ["sentence", "evaluatee", "department", "course_code"]
+
+    # @desc: Get the columns that are not required for the evaluation with a seperator of comma
+    columns_to_drop = [column for column in reformatted_csv if column not in columns_to_not_drop]
+
+    reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
+
+    # desc: Pass 1 is to remove Blank sentences from the csv file
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
+
+    # desc: Pass 2 is to remove emoves the text if its a single character like 'a', 'b', 'c', etc.
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len() > 1]
+
+    # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
+    for index, row in reformatted_csv.iterrows():
+        reformatted_csv.at[index, "sentence"] = TextPreprocessing(row["sentence"]).clean_text()
+
+    # desc: Pass 4 is to remove Blank sentences again from the csv file after cleaning
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
+
+    # @desc: Save the reformatted csv file to the database
+    reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+
+    # @desc: Delete the csv file from the uploaded folder
+    os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
