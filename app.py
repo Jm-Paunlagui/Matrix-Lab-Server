@@ -1,5 +1,8 @@
 from config.configurations import app, db
-from controllers.csv_routes import view_columns, analyze_save_csv
+from controllers.csv_routes import (
+    view_columns,
+    analyze_save_csv, getting_all_data_from_csv,
+)
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -23,6 +26,8 @@ app.add_url_rule("/data/view-columns",
                  view_func=view_columns, methods=["POST"])
 app.add_url_rule("/data/analyze-save-csv",
                  view_func=analyze_save_csv, methods=["POST"])
+app.add_url_rule("/data/get-all-data-from-csv",
+                 view_func=getting_all_data_from_csv, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

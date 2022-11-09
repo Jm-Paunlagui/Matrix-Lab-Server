@@ -5,7 +5,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
+from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -60,3 +60,7 @@ def analyze_save_csv():
         return jsonify({"status": "error", "message": "Invalid school year"}), 400
     return csv_evaluator(csv_file, int(sentence_column), int(evaluatee_column), int(department_column),
                          int(course_code_column), csv_question, school_year)
+
+
+def getting_all_data_from_csv():
+    return get_all_the_details_from_csv()
