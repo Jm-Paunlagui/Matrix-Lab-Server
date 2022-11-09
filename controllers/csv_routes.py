@@ -5,7 +5,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import  view_columns_with_pandas, csv_evaluator
+from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
