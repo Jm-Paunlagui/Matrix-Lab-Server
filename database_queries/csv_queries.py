@@ -149,6 +149,19 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
 
 def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
                   course_code_index: int, csv_question: str, school_year: str):
+
+    school_year = school_year.replace("S.Y.", "SY").replace(" ", "")
+    csv_question = csv_question.title()
+    csv_question = csv_question.replace("?", "")
+    csv_question = csv_question.replace(" ", "_")
+
+    # @desc: Check if the csv file has already been evaluated by csv_question and school_year
+    csv_evaluated = CsvModel.query.filter_by(
+        csv_question=csv_question, school_year=school_year).first()
+
+    if csv_evaluated:
+        return jsonify({"status": "error", "message": "The csv file has already been evaluated"}), 409
+
     # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
     csv_formatter(file_name, sentence_index, evaluatee_index,
                   department_index, course_code_index)
@@ -188,15 +201,19 @@ def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, dep
     # @desc: Add the predictions to the csv file
     csv_to_pred["sentiment"] = predictions
 
-    school_year = school_year.replace("S.Y.", "SY").replace(" ", "")
-    csv_question = csv_question.title()
-    csv_question = csv_question.replace("?", "")
-    csv_question = csv_question.replace(" ", "_")
+    # @desc: Save the csv file to the folder
     csv_to_pred.to_csv(
         app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year + ".csv", index=False)
 
     # @desc: Delete the reformatted csv file from the reformatted folder
     os.remove(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], file_name))
+
+    # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
+    csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
+                        csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
+                        school_year + ".csv", school_year=school_year)
+    db.session.add(csv_file)
+    db.session.commit()
 
     return jsonify({"status": "success",
                     "message": "CSV file evaluated successfully",
