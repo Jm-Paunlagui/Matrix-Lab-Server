@@ -118,10 +118,12 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     })
 
     # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
-    columns_to_not_drop = ["sentence", "evaluatee", "department", "course_code"]
+    columns_to_not_drop = ["sentence",
+                           "evaluatee", "department", "course_code"]
 
     # @desc: Get the columns that are not required for the evaluation with a seperator of comma
-    columns_to_drop = [column for column in reformatted_csv if column not in columns_to_not_drop]
+    columns_to_drop = [
+        column for column in reformatted_csv if column not in columns_to_not_drop]
 
     reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
 
@@ -129,14 +131,17 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     reformatted_csv.dropna(subset=["sentence"], inplace=True)
 
     # desc: Pass 2 is to remove the text if its a single character like 'a', 'b', 'c', etc.
-    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len() > 1]
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
+    ) > 1]
 
     # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
     for index, row in reformatted_csv.iterrows():
-        reformatted_csv.at[index, "sentence"] = TextPreprocessing(row["sentence"]).clean_text()
+        reformatted_csv.at[index, "sentence"] = TextPreprocessing(
+            row["sentence"]).clean_text()
 
     # @desc: Save the reformatted csv file to the database
-    reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+    reformatted_csv.to_csv(
+        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
     os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
@@ -145,10 +150,12 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
 def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
                   course_code_index: int, csv_question: str, school_year: str):
     # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
-    csv_formatter(file_name, sentence_index, evaluatee_index, department_index, course_code_index)
+    csv_formatter(file_name, sentence_index, evaluatee_index,
+                  department_index, course_code_index)
 
     # @desc: Read the reformatted csv file and return a pandas dataframe object
-    csv_to_pred = pd.read_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name)
+    csv_to_pred = pd.read_csv(
+        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name)
 
     # remove the rows that have empty values in the sentence column
     csv_to_pred = csv_to_pred.dropna(subset=["sentence"])
@@ -169,12 +176,14 @@ def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, dep
     tokenized_sentences = tokenizer.texts_to_sequences(sentences)
 
     # @desc: Pad the tokenized sentences
-    padded_sentences = pad_sequences(tokenized_sentences, maxlen=300, padding='post')
+    padded_sentences = pad_sequences(
+        tokenized_sentences, maxlen=300, padding='post')
 
     # @desc: Predict the sentiment of the sentences
     predictions = model.predict(padded_sentences)
 
-    predictions = [round(round(prediction[0], 4) * 100, 2) for prediction in predictions]
+    predictions = [round(round(prediction[0], 4) * 100, 2)
+                   for prediction in predictions]
 
     # @desc: Add the predictions to the csv file
     csv_to_pred["sentiment"] = predictions
