@@ -12,16 +12,16 @@ from modules.module import AllowedFile, PayloadSignature, TextPreprocessing
 from keras.models import load_model
 
 
-def check_csv_name_exists(csv_name: str, csv_question: str) -> bool:
+def check_csv_name_exists(csv_question: str, school_year: str) -> bool:
     """
     Check if the csv name exists in the database.
 
-    :param csv_name: The csv name to be checked
-    :param csv_question: The csv question to be checked
-    :return: True if the csv name exists, False otherwise
+    :param csv_question: The csv question
+    :param school_year: The school year
+    :return: True if the csv name exists, else False
     """
-    csv = CsvModel.query.filter_by(
-        csv_name=csv_name, csv_question=csv_question).first()
+    csv = CsvModel.query.filter_by(csv_question=csv_question,
+                                   school_year=school_year).first()
     return True if csv else False
 
 
@@ -62,7 +62,7 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     """
     View the csv file columns with pandas.
 
-    :param csv_file_to_view: The csv file to be viewed
+    :param csv_file_to_view: The csv file to view
     :return: The status and message
     """
 
@@ -102,7 +102,7 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     :param evaluatee_index: The evaluatee index
     :param department_index: The department index
     :param course_code_index: The course code index
-    :return: The status and message
+    :return: The formatted csv file
     """
     # @desc: Read the csv file and return a pandas dataframe object
     csv_file = pd.read_csv(app.config["CSV_UPLOADED_FOLDER"] + "/" + file_name)
@@ -149,6 +149,18 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
 
 def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
                   course_code_index: int, csv_question: str, school_year: str):
+    """
+    Evaluate the csv file.
+
+    :param file_name: The csv file name
+    :param sentence_index: The sentence index
+    :param evaluatee_index: The evaluatee index
+    :param department_index: The department index
+    :param course_code_index: The course code index
+    :param csv_question: The csv question
+    :param school_year: The school year
+    :return: The evaluated csv file
+    """
 
     school_year = school_year.replace("S.Y.", "SY").replace(" ", "")
     csv_question = csv_question.title()
@@ -156,11 +168,8 @@ def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, dep
     csv_question = csv_question.replace(" ", "_")
 
     # @desc: Check if the csv file has already been evaluated by csv_question and school_year
-    csv_evaluated = CsvModel.query.filter_by(
-        csv_question=csv_question, school_year=school_year).first()
-
-    if csv_evaluated:
-        return jsonify({"status": "error", "message": "The csv file has already been evaluated"}), 409
+    if check_csv_name_exists(csv_question, school_year):
+        return jsonify({"status": "error", "message": "File already evaluated"}), 409
 
     # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
     csv_formatter(file_name, sentence_index, evaluatee_index,
