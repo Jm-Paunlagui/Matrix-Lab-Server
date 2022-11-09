@@ -236,44 +236,55 @@ def get_all_the_details_from_csv():
 
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
-    evaluatees = [pd.read_csv(csv_files.csv_file_path)["evaluatee"].to_list() for csv_files in csv_files]
+    evaluatees = [pd.read_csv(csv_files.csv_file_path)[
+        "evaluatee"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of list of evaluatee
-    evaluatees = [evaluatee for evaluatees in evaluatees for evaluatee in evaluatees]
+    evaluatees = [
+        evaluatee for evaluatees in evaluatees for evaluatee in evaluatees]
 
     # @desc: Remove the duplicates in the list of evaluatee
     evaluatees = list(set(evaluatees))
 
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
-    departments = [pd.read_csv(csv_files.csv_file_path)["department"].to_list() for csv_files in csv_files]
+    departments = [pd.read_csv(csv_files.csv_file_path)[
+        "department"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of list of department
-    departments = [department for departments in departments for department in departments]
+    departments = [
+        department for departments in departments for department in departments]
 
     # @desc: Remove the duplicates in the list of department
     departments = list(set(departments))
 
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
-    course_codes = [pd.read_csv(csv_files.csv_file_path)["course_code"].to_list() for csv_files in csv_files]
+    course_codes = [pd.read_csv(csv_files.csv_file_path)[
+        "course_code"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of list of course_code
-    course_codes = [course_code for course_codes in course_codes for course_code in course_codes]
+    course_codes = [
+        course_code for course_codes in course_codes for course_code in course_codes]
 
     # @desc: Remove the duplicates in the list of course_code
     course_codes = list(set(course_codes))
 
     # desc: Titles the list of evaluatee, department and course_code
-    titles = ["No. of Professors", "No. of Departments", "No. of Courses", "No. of CSV Files"]
+    titles = ["No. of Professors", "No. of Departments",
+              "No. of Courses", "No. of CSV Files"]
 
     # @desc: Return the list of evaluatee
     return jsonify({"status": "success",
                     "details": [
-                        {"title": titles[0], "value": len(evaluatees), "id": 1,  "icon": "fas fa-user-tie"},
-                        {"title": titles[1], "value": len(departments), "id": 2, "icon": "fas fa-building"},
-                        {"title": titles[2], "value": len(course_codes), "id": 3, "icon": "fas fa-book"},
-                        {"title": titles[3], "value": len(csv_files), "id": 4, "icon": "fas fa-file-csv"}
+                        {"title": titles[0], "value": len(
+                            evaluatees), "id": 1,  "icon": "fas fa-user-tie"},
+                        {"title": titles[1], "value": len(
+                            departments), "id": 2, "icon": "fas fa-building"},
+                        {"title": titles[2], "value": len(
+                            course_codes), "id": 3, "icon": "fas fa-book"},
+                        {"title": titles[3], "value": len(
+                            csv_files), "id": 4, "icon": "fas fa-file-csv"}
                     ],
                     "evaluatees": [
                         {"name": evaluatee, "id": index + 1} for index, evaluatee in enumerate(evaluatees)
@@ -288,4 +299,3 @@ def get_all_the_details_from_csv():
                         {"csv_file": csv_file.csv_name, "id": csv_file.csv_id} for csv_file in csv_files
                     ]
                     }), 200
-
