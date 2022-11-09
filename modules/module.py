@@ -14,7 +14,6 @@ from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
 from werkzeug.utils import cached_property
 
-
 # @desc: The bcrypt instance
 bcrypt = Bcrypt(app)
 
@@ -362,6 +361,7 @@ class ParsedUserAgent(UserAgent):
     and operating system properties. It also provides a method to
     return a dictionary of the parsed user agent string.
     """
+
     @cached_property
     def _details(self):
         """
@@ -425,4 +425,4 @@ def get_os_browser_versions():
     """
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
-        datetime.now().strftime("%A, %I:%M:%S %p")
+           datetime.now().strftime("%A, %I:%M:%S %p")

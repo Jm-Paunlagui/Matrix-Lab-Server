@@ -5,7 +5,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import check_csv_name_exists, save_csv, view_columns_with_pandas
+from database_queries.csv_queries import check_csv_name_exists, save_csv, view_columns_with_pandas, csv_evaluator
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -69,17 +69,16 @@ def view_columns():
 
 
 def analyze_save_csv():
-
     if not request.is_json:
         return jsonify({"status": "error", "message": "Invalid request!"})
 
-    csv_file = request.json["file_name"]
-    sentence_column = request.json["selected_column_for_sentence"]
-    evaluatee_column = request.json["selected_column_for_evaluatee"]
-    department_column = request.json["selected_column_for_department"]
-    course_code_column = request.json["selected_column_for_course_code"]
-    csv_question = request.json["csv_question"]
-    school_year = request.json["school_year"]
+    csv_file: str = request.json["file_name"]
+    sentence_column: str = request.json["selected_column_for_sentence"]
+    evaluatee_column: str = request.json["selected_column_for_evaluatee"]
+    department_column: str = request.json["selected_column_for_department"]
+    course_code_column: str = request.json["selected_column_for_course_code"]
+    csv_question: str = request.json["csv_question"]
+    school_year: str = request.json["school_year"]
 
     if not InputTextValidation().validate_empty_fields(csv_file, sentence_column, evaluatee_column, department_column,
                                                        course_code_column, csv_question, school_year):
@@ -93,4 +92,5 @@ def analyze_save_csv():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
     if not InputTextValidation(school_year).validate_school_year():
         return jsonify({"status": "error", "message": "Invalid school year"}), 400
-    return jsonify({"status": "success", "message": "Successfully retrieved the inputs"}), 200
+    return csv_evaluator(csv_file, int(sentence_column), int(evaluatee_column), int(department_column),
+                         int(course_code_column), csv_question, school_year)

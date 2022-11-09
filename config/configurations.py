@@ -26,6 +26,8 @@ app.config["CSV_REFORMATTED_FOLDER"] = os.path.join(
 # @desc: CSV file analyzed path configuration for the Flask app
 app.config["CSV_ANALYZED_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "csv_files\\analyzed_csv_files")
+app.config["DEEP_LEARNING_MODEL_FOLDER"] = os.path.join(
+    app.config["ROOT_PATH"], "deep_learning_model")
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
 # @desc: Email configuration for the Flask app

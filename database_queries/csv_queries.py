@@ -1,14 +1,15 @@
 import os
-from typing import Tuple
+import pickle
 
 import pandas as pd
 from flask import jsonify, Response
+from keras.utils import pad_sequences
 from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
 from models.csv_model import CsvModel
 from modules.module import AllowedFile, PayloadSignature, TextPreprocessing
-from json import JSONEncoder
+from keras.models import load_model
 
 
 def check_csv_name_exists(csv_name: str, csv_question: str) -> bool:
@@ -124,21 +125,70 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
 
     reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
 
-    # desc: Pass 1 is to remove Blank sentences from the csv file
-    reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
+    # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
+    reformatted_csv.dropna(subset=["sentence"], inplace=True)
 
-    # desc: Pass 2 is to remove emoves the text if its a single character like 'a', 'b', 'c', etc.
+    # desc: Pass 2 is to remove the text if its a single character like 'a', 'b', 'c', etc.
     reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len() > 1]
 
     # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
     for index, row in reformatted_csv.iterrows():
         reformatted_csv.at[index, "sentence"] = TextPreprocessing(row["sentence"]).clean_text()
 
-    # desc: Pass 4 is to remove Blank sentences again from the csv file after cleaning
-    reformatted_csv = reformatted_csv[reformatted_csv["sentence"] != ""]
-
     # @desc: Save the reformatted csv file to the database
     reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
     os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+
+
+def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
+                  course_code_index: int, csv_question: str, school_year: str):
+    # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
+    csv_formatter(file_name, sentence_index, evaluatee_index, department_index, course_code_index)
+
+    # @desc: Read the reformatted csv file and return a pandas dataframe object
+    csv_to_pred = pd.read_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name)
+
+    # remove the rows that have empty values in the sentence column
+    csv_to_pred = csv_to_pred.dropna(subset=["sentence"])
+
+    tokenizer = pickle.load(open(
+        app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/tokenizer.pickle", "rb"))
+
+    model = load_model(
+        app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/model.h5")
+
+    # @desc: Get the sentences from the csv file
+    sentences = csv_to_pred["sentence"].to_list()
+
+    # @desc: Lowercase
+    sentences = [sentence.lower() for sentence in sentences]
+
+    # @desc: Tokenize the sentences
+    tokenized_sentences = tokenizer.texts_to_sequences(sentences)
+
+    # @desc: Pad the tokenized sentences
+    padded_sentences = pad_sequences(tokenized_sentences, maxlen=300, padding='post')
+
+    # @desc: Predict the sentiment of the sentences
+    predictions = model.predict(padded_sentences)
+
+    predictions = [round(round(prediction[0], 4) * 100, 2) for prediction in predictions]
+
+    # @desc: Add the predictions to the csv file
+    csv_to_pred["sentiment"] = predictions
+
+    school_year = school_year.replace("S.Y.", "SY").replace(" ", "")
+    csv_question = csv_question.title()
+    csv_question = csv_question.replace("?", "")
+    csv_question = csv_question.replace(" ", "_")
+    csv_to_pred.to_csv(
+        app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year + ".csv", index=False)
+
+    # @desc: Delete the reformatted csv file from the reformatted folder
+    os.remove(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], file_name))
+
+    return jsonify({"status": "success",
+                    "message": "CSV file evaluated successfully",
+                    "csv_file": "ANALYZED-" + csv_question + "_" + school_year + ".csv"}), 200
