@@ -12,16 +12,17 @@ from modules.module import AllowedFile, PayloadSignature, TextPreprocessing
 from keras.models import load_model
 
 
-def check_csv_name_exists(csv_question: str, school_year: str) -> bool:
+def check_csv_name_exists(csv_question: str, school_year: str, school_semester: str) -> bool:
     """
     Check if the csv name exists in the database.
 
     :param csv_question: The csv question
     :param school_year: The school year
+    :param school_semester: The school semester
     :return: True if the csv name exists, else False
     """
     csv = CsvModel.query.filter_by(csv_question=csv_question,
-                                   school_year=school_year).first()
+                                   school_year=school_year, school_semester=school_semester).first()
     return True if csv else False
 
 
@@ -72,10 +73,17 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
         app.config["CSV_UPLOADED_FOLDER"] + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
     csv_columns = csv_file_.columns
 
+    # desc: Check if the first 3 headers are evaluatee, department and course code
+    if csv_columns[0] != "evaluatee" or csv_columns[1] != "department" or csv_columns[2] != "course_code":
+        # @desc: Delete the csv file if it does not follow the required format
+        os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], AllowedFile(
+            csv_file_to_view.filename).secure_filename()))
+        return jsonify({"status": "error", "message": "Invalid header format"}), 400
+
     csv_columns_to_return = []
-    for column, index_in_column in zip(csv_columns, range(len(csv_columns))):
-        csv_columns_to_return.append(
-            {"id": index_in_column, "name": column})
+    # @desc: Do not return the first 3 headers since they are not questions to be evaluated
+    for i in range(3, len(csv_columns)):
+        csv_columns_to_return.append({"id": i, "name": csv_columns[i]})
 
     csv_columns_payload = {
         "iss": "http://127.0.0.1:5000",
@@ -111,7 +119,6 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     csv_columns = csv_file.columns
 
     reformatted_csv = csv_file.rename(columns={
-        csv_columns[sentence_index]: "sentence",
         csv_columns[evaluatee_index]: "evaluatee",
         csv_columns[department_index]: "department",
         csv_columns[course_code_index]: "course_code"
@@ -147,33 +154,68 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
 
 
-def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
-                  course_code_index: int, csv_question: str, school_year: str):
+def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
+    """
+    Format the csv file to evaluate.
+
+    :param file_name: The csv file name
+    :param sentence_index: The sentence index
+    :return: The formatted csv file
+    """
+    # @desc: Read the csv file and return a pandas dataframe object
+    csv_file = pd.read_csv(app.config["CSV_UPLOADED_FOLDER"] + "/" + file_name)
+
+    # @desc: Get all the columns of the csv file
+    csv_columns = csv_file.columns
+
+    reformatted_csv = csv_file.rename(columns={
+        csv_columns[sentence_index]: "sentence"
+    })
+
+    # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
+    reformatted_csv.dropna(subset=["sentence"], inplace=True)
+
+    # desc: Pass 2 is to remove the text if its a single character like 'a', 'b', 'c', etc.
+    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
+    ) > 1]
+
+    # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
+    for index, row in reformatted_csv.iterrows():
+        reformatted_csv.at[index, "sentence"] = TextPreprocessing(
+            row["sentence"]).clean_text()
+
+    # @desc: Save the reformatted csv file to the database
+    reformatted_csv.to_csv(
+        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+
+    # @desc: Delete the csv file from the uploaded folder
+    os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+
+
+def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
     """
     Evaluate the csv file.
 
     :param file_name: The csv file name
     :param sentence_index: The sentence index
-    :param evaluatee_index: The evaluatee index
-    :param department_index: The department index
-    :param course_code_index: The course code index
-    :param csv_question: The csv question
+    :param school_semester: The school semester
     :param school_year: The school year
+    :param csv_question: The csv question
     :return: The evaluated csv file
     """
 
     school_year = school_year.replace("S.Y.", "SY").replace(" ", "")
+    school_semester = school_semester.replace(" ", "_")
     csv_question = csv_question.title()
     csv_question = csv_question.replace("?", "")
     csv_question = csv_question.replace(" ", "_")
 
     # @desc: Check if the csv file has already been evaluated by csv_question and school_year
-    if check_csv_name_exists(csv_question, school_year):
+    if check_csv_name_exists(csv_question, school_year, school_semester):
         return jsonify({"status": "error", "message": "File already evaluated"}), 409
 
     # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
-    csv_formatter(file_name, sentence_index, evaluatee_index,
-                  department_index, course_code_index)
+    csv_formatter_to_evaluate(file_name, sentence_index)
 
     # @desc: Read the reformatted csv file and return a pandas dataframe object
     csv_to_pred = pd.read_csv(
@@ -212,7 +254,8 @@ def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, dep
 
     # @desc: Save the csv file to the folder
     csv_to_pred.to_csv(
-        app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year + ".csv", index=False)
+        app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year
+        + "_" + school_semester + ".csv", index=False)
 
     # @desc: Delete the reformatted csv file from the reformatted folder
     os.remove(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], file_name))
@@ -220,7 +263,7 @@ def csv_evaluator(file_name: str, sentence_index: int, evaluatee_index: int, dep
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                        school_year + ".csv", school_year=school_year)
+                        school_year + ".csv", school_year=school_year, school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
 
