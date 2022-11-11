@@ -272,7 +272,7 @@ class InputTextValidation:
 
         :return: True if the school semester is valid, False otherwise
         """
-        return bool(re.compile(r"^(1st Semester|2nd Semester|3rd Semester)$").match(self.user_input))
+        return bool(re.compile(r"^(1st Semester|2nd Semester|3rd Semester|Summer)$").match(self.user_input))
 
 
 class PasswordBcrypt:
