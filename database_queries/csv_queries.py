@@ -2,6 +2,7 @@ import os
 import pickle
 
 import pandas as pd
+
 from flask import jsonify, Response
 from keras.utils import pad_sequences
 from werkzeug.datastructures import FileStorage
@@ -10,6 +11,17 @@ from config.configurations import db, app
 from models.csv_model import CsvModel
 from modules.module import AllowedFile, PayloadSignature, TextPreprocessing
 from keras.models import load_model
+import nltk
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
+from nltk.tokenize import word_tokenize, TweetTokenizer
+from textblob import TextBlob, Word, Blobber
+from sklearn.feature_extraction.text import CountVectorizer
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 
 
 def check_csv_name_exists(csv_question: str, school_year: str, school_semester: str) -> bool:
@@ -137,7 +149,7 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
     reformatted_csv.dropna(subset=["sentence"], inplace=True)
 
-    # desc: Pass 2 is to remove the text if its a single character like 'a', 'b', 'c', etc.
+    # desc: Pass 2 is to remove the text if it's a single character like 'a', 'b', 'c', etc.
     reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
     ) > 1]
 
@@ -172,10 +184,18 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
         csv_columns[sentence_index]: "sentence"
     })
 
+    # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
+    columns_to_not_drop = ["evaluatee", "department", "course_code", "sentence"]
+
+    # @desc: Get the columns that are not required for the evaluation with a seperator of comma
+    columns_to_drop = [column for column in reformatted_csv if column not in columns_to_not_drop]
+
+    reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
+
     # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
     reformatted_csv.dropna(subset=["sentence"], inplace=True)
 
-    # desc: Pass 2 is to remove the text if its a single character like 'a', 'b', 'c', etc.
+    # desc: Pass 2 is to remove the text if it's a single character like 'a', 'b', 'c', etc.
     reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
     ) > 1]
 
@@ -263,7 +283,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                        school_year + ".csv", school_year=school_year, school_semester=school_semester)
+                        school_year + "_" + school_semester + ".csv", school_year=school_year,
+                        school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
 
@@ -272,7 +293,87 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                     "csv_file": "ANALYZED-" + csv_question + "_" + school_year + ".csv"}), 200
 
 
+def count_overall_positive_negative():
+    """
+    Count the overall positive and negative sentiments.
+
+    :return: The overall positive and negative sentiments
+    """
+    positive = 0
+    negative = 0
+
+    csv_files = CsvModel.query.all()
+
+    for csv_file in csv_files:
+        csv_file = pd.read_csv(csv_file.csv_file_path)
+
+        for index, row in csv_file.iterrows():
+            if row["sentiment"] >= 50:
+                positive += 1
+            else:
+                negative += 1
+
+    # @desc: Return 0 if there are no positive and negative sentiments
+    positive_percentage = round((positive / (positive + negative)) * 100, 2) if positive > 0 else "0"
+    negative_percentage = round((negative / (positive + negative)) * 100, 2) if negative > 0 else "0"
+
+    # desc: Starting year and ending year of the csv files
+    starting_year = csv_files[0].school_year.split("-")[0] if len(csv_files) > 0 else "----"
+    ending_year = csv_files[-1].school_year.split("-")[1] if len(csv_files) > 0 else "----"
+    # desc: remove the SY from the school year
+    starting_year = starting_year.replace("SY", "") if len(csv_files) > 0 else "----"
+    ending_year = ending_year.replace("SY", "") if len(csv_files) > 0 else "-----"
+
+    return positive, negative, positive_percentage, negative_percentage, starting_year, ending_year
+
+
+nltk.download('stopwords')
+# Custom stop words
+new_stopwords = [
+    "mo", "wla..", "ako", "sa", "akin", "ko", "aking", "sarili", "kami", "atin", "ang", "aming", "lang",
+    "amin", "ating", "ka", "iyong", "iyo", "inyong", "siya", "kanya", "mismo", "ito", "nito", "kanyang", "sila",
+    "nila",
+    "kanila", "kanilang", "kung", "ano", "alin", "sino", "kanino", "na", "mga", "iyon", "am", "ay", "maging",
+    "naging",
+    "mayroon", "may", "nagkaroon", "pagkakaroon", "gumawa", "ginagawa", "ginawa", "paggawa", "ibig", "dapat",
+    "maaari",
+    "marapat", "kong", "ikaw", "ta-yo", "namin", "gusto", "nais", "niyang", "nilang", "niya", "huwag", "ginawang",
+    "gagawin", "maaaring", "sabihin", "narito", "kapag", "ni", "nasaan", "bakit", "paano", "kailangan", "walang",
+    "katiyakan", "isang", "at", "pero", "o", "dahil", "bilang", "hanggang", "habang", "ng", "pamamagitan", "para",
+    "tungkol", "laban", "pagitan", "panahon", "bago", "pagkatapos", "itaas", "ibaba", "mula", "pataas", "pababa",
+    "palabas", "ibabaw", "ilalim", "muli", "pa", "minsan", "dito", "doon", "saan", "lahat", "anumang", "kapwa",
+    "bawat",
+    "ilan", "karamihan", "iba", "tulad", "lamang", "pareho", "kaya", "kaysa", "masyado", "napaka", "isa", "bababa",
+    "kulang", "marami", "ngayon", "kailanman", "sabi", "nabanggit", "din", "kumuha", "pumunta", "pumupunta",
+    "ilagay",
+    "makita", "nakita", "katulad", "likod", "kahit", "paraan", "noon", "gayunman", "dalawa", "tatlo", "apat",
+    "lima",
+    "una", "pangalawa", "yung", "po"
+]
+stpwrd = nltk.corpus.stopwords.words('english')
+stpwrd.remove("no")
+stpwrd.remove("t")
+stpwrd.extend(new_stopwords)
+
+
+def remove_stopwords(text):
+    """
+    Remove the stop words from the text.
+
+    :param text: The text to remove the stop words
+    :return: The text without the stop words
+    """
+    tokens = TweetTokenizer(strip_handles=True, reduce_len=True).tokenize(text)
+    filtered_tokens = [token for token in tokens if token.lower() not in stpwrd]
+    filtered_text = ' '.join(filtered_tokens)
+
+    return filtered_text
+
+
 def get_all_the_details_from_csv():
+    """
+    Get all the details from the csv file. This is used for the admin dashboard.
+    """
 
     # @desc: Read all the csv file in the database
     csv_files = CsvModel.query.all()
@@ -280,9 +381,9 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
     evaluatees = [pd.read_csv(csv_files.csv_file_path)[
-        "evaluatee"].to_list() for csv_files in csv_files]
+                      "evaluatee"].to_list() for csv_files in csv_files]
 
-    # @desc: Flatten the list of list of evaluatee
+    # @desc: Flatten the list of evaluatee
     evaluatees = [
         evaluatee for evaluatees in evaluatees for evaluatee in evaluatees]
 
@@ -292,9 +393,9 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
     departments = [pd.read_csv(csv_files.csv_file_path)[
-        "department"].to_list() for csv_files in csv_files]
+                       "department"].to_list() for csv_files in csv_files]
 
-    # @desc: Flatten the list of list of department
+    # @desc: Flatten the list of department
     departments = [
         department for departments in departments for department in departments]
 
@@ -304,9 +405,9 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
     course_codes = [pd.read_csv(csv_files.csv_file_path)[
-        "course_code"].to_list() for csv_files in csv_files]
+                        "course_code"].to_list() for csv_files in csv_files]
 
-    # @desc: Flatten the list of list of course_code
+    # @desc: Flatten the list of course_code
     course_codes = [
         course_code for course_codes in course_codes for course_code in course_codes]
 
@@ -317,11 +418,23 @@ def get_all_the_details_from_csv():
     titles = ["No. of Professors", "No. of Departments",
               "No. of Courses", "No. of CSV Files"]
 
+    # @desc: Get total number of sentences in each csv file and return a list of total number of sentences and also the
+    # School Year and School Semester
+    # structure of the list: [[total number of sentences, school year, school semester],
+    # [total number of sentences, school year, school semester]]
+    total_number_of_sentences = [
+        [len(pd.read_csv(csv_files.csv_file_path)), csv_files.school_year, csv_files.school_semester]
+        for csv_files in csv_files]
+
+    # desc: Overall positive and negative sentiments
+    positive, negative, positive_percentage, negative_percentage, starting_year, ending_year = \
+        count_overall_positive_negative()
+
     # @desc: Return the list of evaluatee
     return jsonify({"status": "success",
                     "details": [
                         {"title": titles[0], "value": len(
-                            evaluatees), "id": 1,  "icon": "fas fa-user-tie"},
+                            evaluatees), "id": 1, "icon": "fas fa-user-tie"},
                         {"title": titles[1], "value": len(
                             departments), "id": 2, "icon": "fas fa-building"},
                         {"title": titles[2], "value": len(
@@ -340,5 +453,24 @@ def get_all_the_details_from_csv():
                     ],
                     "csv_files": [
                         {"csv_file": csv_file.csv_name, "id": csv_file.csv_id} for csv_file in csv_files
+                    ],
+                    "total_responses": [
+                        {"total_number_of_responses": total_number_of_sentences[0],
+                         "school_year": total_number_of_sentences[1],
+                         "school_semester": total_number_of_sentences[2],
+                         "id": index + 1} for index, total_number_of_sentences
+                        in enumerate(total_number_of_sentences)
+                    ],
+                    "overall_sentiments": [
+                        {"id": 1, "title": "Positive",
+                         "value": f"{positive:,}",
+                         "percentage": positive_percentage,
+                         "year": starting_year + " - " + ending_year,
+                         "icon": "fas fa-face-smile-beam"},
+                        {"id": 2, "title": "Negative",
+                         "value": f"{negative:,}",
+                         "percentage": negative_percentage,
+                         "year": starting_year + " - " + ending_year,
+                         "icon": "fas fa-face-frown"}
                     ]
                     }), 200
