@@ -65,4 +65,3 @@ def getting_all_data_from_csv():
 
 def getting_top_department():
     return get_top_department()
-

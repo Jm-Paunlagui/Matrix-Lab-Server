@@ -286,7 +286,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                                      school_year + "_" + school_semester + ".csv", school_year=school_year,
+                        school_year + "_" + school_semester + ".csv", school_year=school_year,
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
@@ -396,15 +396,18 @@ def get_top_department():
 
         for index, row in csv_file.iterrows():
             if row["department"] not in sentiment_each_department:
-                sentiment_each_department[row["department"]] = [row["sentiment"]]
+                sentiment_each_department[row["department"]] = [
+                    row["sentiment"]]
             else:
-                sentiment_each_department[row["department"]].append(row["sentiment"])
+                sentiment_each_department[row["department"]].append(
+                    row["sentiment"])
 
     # @desc: Get the average sentiment of each department
     average_sentiment_each_department = {}
 
     for department, sentiments in sentiment_each_department.items():
-        average_sentiment_each_department[department] = round(sum(sentiments) / len(sentiments), 2)
+        average_sentiment_each_department[department] = round(
+            sum(sentiments) / len(sentiments), 2)
 
     # @desc: Rank the departments by their average sentiment
     average_sentiment_each_department = dict(sorted(average_sentiment_each_department.items(),
