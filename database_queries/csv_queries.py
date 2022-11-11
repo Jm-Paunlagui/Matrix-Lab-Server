@@ -451,7 +451,8 @@ def get_top_profesors():
             if row["evaluatee"] not in sentiment_each_professor:
                 sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
             else:
-                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
+                sentiment_each_professor[row["evaluatee"]].append(
+                    row["sentiment"])
 
     # desc: The department of each professor on were they are teaching
     department_of_each_professor = {}
@@ -461,14 +462,17 @@ def get_top_profesors():
 
         for index, row in csv_file.iterrows():
             if row["evaluatee"] not in department_of_each_professor:
-                department_of_each_professor[row["evaluatee"]] = row["department"]
+                department_of_each_professor[row["evaluatee"]
+                                             ] = row["department"]
 
     # @desc: Get the average sentiment of each professor
     average_sentiment_each_professor = {}
 
     for professor, sentiments in sentiment_each_professor.items():
-        average_sentiment_each_professor[professor] = round(sum(sentiments) / len(sentiments), 2)
-        print(round(sum(sentiments) / len(sentiments), 2), sentiments, sum(sentiments), len(sentiments))
+        average_sentiment_each_professor[professor] = round(
+            sum(sentiments) / len(sentiments), 2)
+        print(round(sum(sentiments) / len(sentiments), 2),
+              sentiments, sum(sentiments), len(sentiments))
 
     # @desc: Rank the professors by their average sentiment
     average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
@@ -506,7 +510,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
     evaluatees = [pd.read_csv(csv_files.csv_file_path)[
-                      "evaluatee"].to_list() for csv_files in csv_files]
+        "evaluatee"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of evaluatee
     evaluatees = [
@@ -518,7 +522,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
     departments = [pd.read_csv(csv_files.csv_file_path)[
-                       "department"].to_list() for csv_files in csv_files]
+        "department"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of department
     departments = [
@@ -530,7 +534,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
     course_codes = [pd.read_csv(csv_files.csv_file_path)[
-                        "course_code"].to_list() for csv_files in csv_files]
+        "course_code"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of course_code
     course_codes = [
