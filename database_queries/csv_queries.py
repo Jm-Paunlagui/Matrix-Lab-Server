@@ -185,10 +185,12 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
     })
 
     # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
-    columns_to_not_drop = ["evaluatee", "department", "course_code", "sentence"]
+    columns_to_not_drop = ["evaluatee",
+                           "department", "course_code", "sentence"]
 
     # @desc: Get the columns that are not required for the evaluation with a seperator of comma
-    columns_to_drop = [column for column in reformatted_csv if column not in columns_to_not_drop]
+    columns_to_drop = [
+        column for column in reformatted_csv if column not in columns_to_not_drop]
 
     reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
 
@@ -315,15 +317,21 @@ def count_overall_positive_negative():
                 negative += 1
 
     # @desc: Return 0 if there are no positive and negative sentiments
-    positive_percentage = round((positive / (positive + negative)) * 100, 2) if positive > 0 else "0"
-    negative_percentage = round((negative / (positive + negative)) * 100, 2) if negative > 0 else "0"
+    positive_percentage = round(
+        (positive / (positive + negative)) * 100, 2) if positive > 0 else "0"
+    negative_percentage = round(
+        (negative / (positive + negative)) * 100, 2) if negative > 0 else "0"
 
     # desc: Starting year and ending year of the csv files
-    starting_year = csv_files[0].school_year.split("-")[0] if len(csv_files) > 0 else "----"
-    ending_year = csv_files[-1].school_year.split("-")[1] if len(csv_files) > 0 else "----"
+    starting_year = csv_files[0].school_year.split(
+        "-")[0] if len(csv_files) > 0 else "----"
+    ending_year = csv_files[-1].school_year.split(
+        "-")[1] if len(csv_files) > 0 else "----"
     # desc: remove the SY from the school year
-    starting_year = starting_year.replace("SY", "") if len(csv_files) > 0 else "----"
-    ending_year = ending_year.replace("SY", "") if len(csv_files) > 0 else "-----"
+    starting_year = starting_year.replace(
+        "SY", "") if len(csv_files) > 0 else "----"
+    ending_year = ending_year.replace(
+        "SY", "") if len(csv_files) > 0 else "-----"
 
     return positive, negative, positive_percentage, negative_percentage, starting_year, ending_year
 
@@ -365,7 +373,8 @@ def remove_stopwords(text):
     :return: The text without the stop words
     """
     tokens = TweetTokenizer(strip_handles=True, reduce_len=True).tokenize(text)
-    filtered_tokens = [token for token in tokens if token.lower() not in stpwrd]
+    filtered_tokens = [
+        token for token in tokens if token.lower() not in stpwrd]
     filtered_text = ' '.join(filtered_tokens)
 
     return filtered_text
@@ -382,7 +391,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
     evaluatees = [pd.read_csv(csv_files.csv_file_path)[
-                      "evaluatee"].to_list() for csv_files in csv_files]
+        "evaluatee"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of evaluatee
     evaluatees = [
@@ -394,7 +403,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
     departments = [pd.read_csv(csv_files.csv_file_path)[
-                       "department"].to_list() for csv_files in csv_files]
+        "department"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of department
     departments = [
@@ -406,7 +415,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
     course_codes = [pd.read_csv(csv_files.csv_file_path)[
-                        "course_code"].to_list() for csv_files in csv_files]
+        "course_code"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of course_code
     course_codes = [
@@ -424,7 +433,8 @@ def get_all_the_details_from_csv():
     # structure of the list: [[total number of sentences, school year, school semester],
     # [total number of sentences, school year, school semester]]
     total_number_of_sentences = [
-        [len(pd.read_csv(csv_files.csv_file_path)), csv_files.school_year, csv_files.school_semester]
+        [len(pd.read_csv(csv_files.csv_file_path)),
+         csv_files.school_year, csv_files.school_semester]
         for csv_files in csv_files]
 
     # desc: Overall positive and negative sentiments
