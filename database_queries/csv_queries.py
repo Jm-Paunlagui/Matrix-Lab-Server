@@ -274,7 +274,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
     # @desc: Save the csv file to the folder
     csv_to_pred.to_csv(
-        app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year
+        app.config["CSV_ANALYZED_FOLDER"] + "/" +
+        "ANALYZED-" + csv_question + "_" + school_year
         + "_" + school_semester + ".csv", index=False)
 
     # @desc: Delete the reformatted csv file from the reformatted folder
