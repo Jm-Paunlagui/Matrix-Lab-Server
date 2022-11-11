@@ -6,7 +6,7 @@ from werkzeug.datastructures import FileStorage
 from config.configurations import app
 import csv
 from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv, \
-    get_top_department
+    get_top_department, get_top_profesors
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -65,3 +65,7 @@ def getting_all_data_from_csv():
 
 def getting_top_department():
     return get_top_department()
+
+
+def getting_top_professor():
+    return get_top_profesors()
