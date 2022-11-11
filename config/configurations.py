@@ -1,4 +1,4 @@
-from models import user_model, csv_model
+
 import os
 import socket
 
@@ -31,6 +31,14 @@ app.config["DEEP_LEARNING_MODEL_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "deep_learning_model")
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
+# @desc: Creates directories for the CSV files if they do not exist
+if not os.path.exists(app.config["CSV_UPLOADED_FOLDER"]):
+    os.makedirs(app.config["CSV_UPLOADED_FOLDER"])
+if not os.path.exists(app.config["CSV_REFORMATTED_FOLDER"]):
+    os.makedirs(app.config["CSV_REFORMATTED_FOLDER"])
+if not os.path.exists(app.config["CSV_ANALYZED_FOLDER"]):
+    os.makedirs(app.config["CSV_ANALYZED_FOLDER"])
+
 # @desc: Email configuration for the Flask app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
 app.config["MAIL_USE_SSL"] = True
@@ -42,7 +50,6 @@ app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
 # @desc: Secret key of the application
 app.secret_key = os.environ.get("SECRET_KEY")
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-
 # @desc: Cross-Origin Resource Sharing configuration for the Flask app to allow requests from the client
 CORS(app, supports_credentials=True,
      methods="GET,POST,PUT,DELETE,OPTIONS")
@@ -77,6 +84,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
 # from models import user_model, csv_model
+from models import user_model, csv_model
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)

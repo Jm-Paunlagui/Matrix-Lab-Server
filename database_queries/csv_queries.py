@@ -284,7 +284,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                        school_year + "_" + school_semester + ".csv", school_year=school_year,
+                                      school_year + "_" + school_semester + ".csv", school_year=school_year,
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
@@ -369,6 +369,56 @@ def remove_stopwords(text):
     filtered_text = ' '.join(filtered_tokens)
 
     return filtered_text
+
+
+def get_top_department():
+    """
+    Get the top department.
+
+    :return: The top department
+    """
+    csv_files = CsvModel.query.all()
+
+    # @desc: Get the sentiment of each department
+    sentiment_each_department = {}
+
+    for csv_file in csv_files:
+        csv_file = pd.read_csv(csv_file.csv_file_path)
+
+        for index, row in csv_file.iterrows():
+            if row["department"] not in sentiment_each_department:
+                sentiment_each_department[row["department"]] = [row["sentiment"]]
+            else:
+                sentiment_each_department[row["department"]].append(row["sentiment"])
+
+    # @desc: Get the average sentiment of each department
+    average_sentiment_each_department = {}
+
+    for department, sentiments in sentiment_each_department.items():
+        average_sentiment_each_department[department] = round(sum(sentiments) / len(sentiments), 2)
+
+    # @desc: Rank the departments by their average sentiment
+    average_sentiment_each_department = dict(sorted(average_sentiment_each_department.items(),
+                                                    key=lambda item: item[1], reverse=True))
+
+    return jsonify({
+        "top_department": [
+            {
+                "id": index,
+                "department": department,
+                "overall_sentiment": average_sentiment_each_department[department],
+                "number_of_sentiments": len(sentiment_each_department[department]),
+                "positive_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_department[department]
+                          if sentiment >= 50]) / len(sentiment_each_department[department])) * 100, 2),
+                "negative_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_department[department]
+                          if sentiment < 50]) / len(sentiment_each_department[department])) * 100, 2),
+                "share": round((len(sentiment_each_department[department]) / sum(
+                    [len(sentiments) for sentiments in sentiment_each_department.values()])) * 100, 2)
+            } for index, department in enumerate(average_sentiment_each_department)
+        ]
+    })
 
 
 def get_all_the_details_from_csv():

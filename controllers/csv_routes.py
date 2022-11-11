@@ -5,7 +5,8 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv
+from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv, \
+    get_top_department
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -60,3 +61,8 @@ def analyze_save_csv():
 
 def getting_all_data_from_csv():
     return get_all_the_details_from_csv()
+
+
+def getting_top_department():
+    return get_top_department()
+
