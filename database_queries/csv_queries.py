@@ -286,7 +286,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                                      school_year + "_" + school_semester + ".csv", school_year=school_year,
+                        school_year + "_" + school_semester + ".csv", school_year=school_year,
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
