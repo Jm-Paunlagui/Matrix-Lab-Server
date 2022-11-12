@@ -468,7 +468,8 @@ def get_top_department_by_file(page: int):
                                                     key=lambda item: item[1], reverse=True))
 
     # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
-    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
+    school_year = csv_files.items[0].school_year.replace(
+        "SY", "S.Y. ").replace("-", "-")
     school_semester = csv_files.items[0].school_semester.replace("_", " ")
     question = csv_files.items[0].csv_question.replace("_", " ")
 
@@ -520,15 +521,18 @@ def get_top_professors_overall():
         for index, row in csv_file.iterrows():
             if row["evaluatee"] not in sentiment_each_professor:
                 sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
-                department_of_each_professor[row["evaluatee"]] = row["department"]
+                department_of_each_professor[row["evaluatee"]
+                                             ] = row["department"]
             else:
-                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
+                sentiment_each_professor[row["evaluatee"]].append(
+                    row["sentiment"])
 
     # @desc: Get the average sentiment of each professor
     average_sentiment_each_professor = {}
 
     for professor, sentiments in sentiment_each_professor.items():
-        average_sentiment_each_professor[professor] = round(sum(sentiments) / len(sentiments), 2)
+        average_sentiment_each_professor[professor] = round(
+            sum(sentiments) / len(sentiments), 2)
 
     # @desc: Rank the professors by their average sentiment
     average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
@@ -578,19 +582,23 @@ def get_top_professors_by_file(page: int):
         for index, row in csv_file.iterrows():
             if row["evaluatee"] not in sentiment_each_professor:
                 sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
-                department_of_each_professor[row["evaluatee"]] = row["department"]
+                department_of_each_professor[row["evaluatee"]
+                                             ] = row["department"]
             else:
-                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
+                sentiment_each_professor[row["evaluatee"]].append(
+                    row["sentiment"])
 
     for evaluatee, sentiment in sentiment_each_professor.items():
-        average_sentiment_each_professor[evaluatee] = round(sum(sentiment) / len(sentiment), 2)
+        average_sentiment_each_professor[evaluatee] = round(
+            sum(sentiment) / len(sentiment), 2)
 
     # @desc: Sort the average sentiment of each professor in descending order
     average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
                                                    key=lambda item: item[1], reverse=True))
 
     # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
-    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
+    school_year = csv_files.items[0].school_year.replace(
+        "SY", "S.Y. ").replace("-", "-")
     school_semester = csv_files.items[0].school_semester.replace("_", " ")
     question = csv_files.items[0].csv_question.replace("_", " ")
 
@@ -634,7 +642,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
     evaluatees = [pd.read_csv(csv_files.csv_file_path)[
-                      "evaluatee"].to_list() for csv_files in csv_files]
+        "evaluatee"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of evaluatee
     evaluatees = [
@@ -646,7 +654,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
     departments = [pd.read_csv(csv_files.csv_file_path)[
-                       "department"].to_list() for csv_files in csv_files]
+        "department"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of department
     departments = [
@@ -658,7 +666,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
     course_codes = [pd.read_csv(csv_files.csv_file_path)[
-                        "course_code"].to_list() for csv_files in csv_files]
+        "course_code"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of course_code
     course_codes = [
