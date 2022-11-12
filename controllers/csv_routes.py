@@ -6,7 +6,7 @@ from werkzeug.datastructures import FileStorage
 from config.configurations import app
 import csv
 from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv, \
-    get_top_department, get_top_profesors
+    get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -60,12 +60,35 @@ def analyze_save_csv():
 
 
 def getting_all_data_from_csv():
+    """
+    Get all the data from the csv file.
+    """
     return get_all_the_details_from_csv()
 
 
-def getting_top_department():
-    return get_top_department()
+def getting_top_department_overall():
+    """
+    Get the top department overall.
+    """
+    return get_top_department_overall()
 
 
-def getting_top_professor():
-    return get_top_profesors()
+def getting_top_professor_overall():
+    """
+    Get the top professor overall.
+    """
+    return get_top_professors_overall()
+
+
+def getting_top_department_by_file(page: str):
+    """
+    Get the top department by file.
+    """
+    return get_top_department_by_file(int(page))
+
+
+def getting_top_professor_by_file(page: str):
+    """
+    Get the top professor by file.
+    """
+    return get_top_professors_by_file(int(page))

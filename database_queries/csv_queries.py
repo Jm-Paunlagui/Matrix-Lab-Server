@@ -286,7 +286,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" +
-                        school_year + "_" + school_semester + ".csv", school_year=school_year,
+                                      school_year + "_" + school_semester + ".csv", school_year=school_year,
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
@@ -380,7 +380,7 @@ def remove_stopwords(text):
     return filtered_text
 
 
-def get_top_department():
+def get_top_department_overall():
     """
     Get the top department.
 
@@ -433,9 +433,76 @@ def get_top_department():
     })
 
 
-def get_top_profesors():
+def get_top_department_by_file(page: int):
     """
-    Get the top professors.
+    Get the top department by file.
+
+    :param page: The page
+    :return: The top department by file
+    """
+    csv_files = CsvModel.query.paginate(page=page, per_page=1)
+
+    # @desc: Get the sentiment of each department
+    sentiment_each_department = {}
+
+    for csv_file in csv_files.items:
+        csv_file = pd.read_csv(csv_file.csv_file_path)
+
+        for index, row in csv_file.iterrows():
+            if row["department"] not in sentiment_each_department:
+                sentiment_each_department[row["department"]] = [
+                    row["sentiment"]]
+            else:
+                sentiment_each_department[row["department"]].append(
+                    row["sentiment"])
+
+    # @desc: Get the average sentiment of each department
+    average_sentiment_each_department = {}
+
+    for department, sentiments in sentiment_each_department.items():
+        average_sentiment_each_department[department] = round(
+            sum(sentiments) / len(sentiments), 2)
+
+    # @desc: Rank the departments by their average sentiment
+    average_sentiment_each_department = dict(sorted(average_sentiment_each_department.items(),
+                                                    key=lambda item: item[1], reverse=True))
+
+    # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
+    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
+    school_semester = csv_files.items[0].school_semester.replace("_", " ")
+    question = csv_files.items[0].csv_question.replace("_", " ")
+
+    return jsonify({
+        "status": "success",
+        "previous_page": csv_files.prev_num,
+        "next_page": csv_files.next_num,
+        "file_name": csv_files.items[0].csv_name,
+        "file_id": csv_files.items[0].csv_id,
+        "s_y": school_year + " " + school_semester,
+        "question": f"{question}?",
+        "total_pages": csv_files.pages,
+        "top_department": [
+            {
+                "id": index,
+                "department": department,
+                "overall_sentiment": average_sentiment_each_department[department],
+                "number_of_sentiments": len(sentiment_each_department[department]),
+                "positive_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_department[department]
+                          if sentiment >= 50]) / len(sentiment_each_department[department])) * 100, 2),
+                "negative_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_department[department]
+                          if sentiment < 50]) / len(sentiment_each_department[department])) * 100, 2),
+                "share": round((len(sentiment_each_department[department]) / sum(
+                    [len(sentiments) for sentiments in sentiment_each_department.values()])) * 100, 2)
+            } for index, department in enumerate(average_sentiment_each_department)
+        ]
+    })
+
+
+def get_top_professors_overall():
+    """
+    Get the top professors overall.
 
     :return: The top professors
     """
@@ -444,15 +511,6 @@ def get_top_profesors():
     # @desc: Get the sentiment of each professor
     sentiment_each_professor = {}
 
-    for csv_file in csv_files:
-        csv_file = pd.read_csv(csv_file.csv_file_path)
-
-        for index, row in csv_file.iterrows():
-            if row["evaluatee"] not in sentiment_each_professor:
-                sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
-            else:
-                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
-
     # desc: The department of each professor on were they are teaching
     department_of_each_professor = {}
 
@@ -460,15 +518,17 @@ def get_top_profesors():
         csv_file = pd.read_csv(csv_file.csv_file_path)
 
         for index, row in csv_file.iterrows():
-            if row["evaluatee"] not in department_of_each_professor:
+            if row["evaluatee"] not in sentiment_each_professor:
+                sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
                 department_of_each_professor[row["evaluatee"]] = row["department"]
+            else:
+                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
 
     # @desc: Get the average sentiment of each professor
     average_sentiment_each_professor = {}
 
     for professor, sentiments in sentiment_each_professor.items():
         average_sentiment_each_professor[professor] = round(sum(sentiments) / len(sentiments), 2)
-        print(round(sum(sentiments) / len(sentiments), 2), sentiments, sum(sentiments), len(sentiments))
 
     # @desc: Rank the professors by their average sentiment
     average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
@@ -493,6 +553,74 @@ def get_top_profesors():
             } for index, professor in enumerate(average_sentiment_each_professor)
         ]
     })
+
+
+def get_top_professors_by_file(page: int):
+    """
+    Get the top professors by file.
+    """
+
+    # @desc: Paginate the csv files
+    csv_files = CsvModel.query.paginate(page=page, per_page=1)
+
+    # @desc: Get the sentiment of each professor
+    sentiment_each_professor = {}
+
+    # desc: The department of each professor on were they are teaching
+    department_of_each_professor = {}
+
+    # @desc: Get the average sentiment of each professor
+    average_sentiment_each_professor = {}
+
+    for csv_file in csv_files.items:
+        csv_file = pd.read_csv(csv_file.csv_file_path)
+
+        for index, row in csv_file.iterrows():
+            if row["evaluatee"] not in sentiment_each_professor:
+                sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
+                department_of_each_professor[row["evaluatee"]] = row["department"]
+            else:
+                sentiment_each_professor[row["evaluatee"]].append(row["sentiment"])
+
+    for evaluatee, sentiment in sentiment_each_professor.items():
+        average_sentiment_each_professor[evaluatee] = round(sum(sentiment) / len(sentiment), 2)
+
+    # @desc: Sort the average sentiment of each professor in descending order
+    average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
+                                                   key=lambda item: item[1], reverse=True))
+
+    # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
+    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
+    school_semester = csv_files.items[0].school_semester.replace("_", " ")
+    question = csv_files.items[0].csv_question.replace("_", " ")
+
+    return jsonify({
+        "status": "success",
+        "previous_page": csv_files.prev_num,
+        "next_page": csv_files.next_num,
+        "file_name": csv_files.items[0].csv_name,
+        "file_id": csv_files.items[0].csv_id,
+        "s_y": school_year + " " + school_semester,
+        "question": f"{question}?",
+        "total_pages": csv_files.pages,
+        "top_professors": [
+            {
+                "id": index,
+                "professor": professor,
+                "department": department_of_each_professor[professor],
+                "overall_sentiment": average_sentiment_each_professor[professor],
+                "number_of_sentiments": len(sentiment_each_professor[professor]),
+                "positive_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_professor[professor]
+                          if sentiment >= 50]) / len(sentiment_each_professor[professor])) * 100, 2),
+                "negative_sentiments_percentage": round(
+                    (len([sentiment for sentiment in sentiment_each_professor[professor]
+                          if sentiment < 50]) / len(sentiment_each_professor[professor])) * 100, 2),
+                "share": round((len(sentiment_each_professor[professor]) / sum(
+                    [len(sentiments) for sentiments in sentiment_each_professor.values()])) * 100, 2)
+            } for index, professor in enumerate(average_sentiment_each_professor)
+        ]
+    }), 200
 
 
 def get_all_the_details_from_csv():

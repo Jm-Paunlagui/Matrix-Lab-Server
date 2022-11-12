@@ -1,7 +1,11 @@
 from config.configurations import app, db
 from controllers.csv_routes import (
     view_columns,
-    analyze_save_csv, getting_all_data_from_csv, getting_top_department, getting_top_professor
+    analyze_save_csv,
+    getting_all_data_from_csv,
+    getting_top_department_overall,
+    getting_top_professor_overall,
+    getting_top_professor_by_file, getting_top_department_by_file
 )
 from controllers.user_routes import (
     authenticate,
@@ -28,10 +32,14 @@ app.add_url_rule("/data/analyze-save-csv",
                  view_func=analyze_save_csv, methods=["POST"])
 app.add_url_rule("/data/get-all-data-from-csv",
                  view_func=getting_all_data_from_csv, methods=["GET"])
-app.add_url_rule("/data/get-top-department",
-                 view_func=getting_top_department, methods=["GET"])
-app.add_url_rule("/data/get-top-professors",
-                 view_func=getting_top_professor, methods=["GET"])
+app.add_url_rule("/data/get-top-department-overall",
+                 view_func=getting_top_department_overall, methods=["GET"])
+app.add_url_rule("/data/get-top-professors-overall",
+                 view_func=getting_top_professor_overall, methods=["GET"])
+app.add_url_rule("/data/get-top-department-by-file/<page>",
+                 view_func=getting_top_department_by_file, methods=["GET"])
+app.add_url_rule("/data/get-top-professors-by-file/<page>",
+                 view_func=getting_top_professor_by_file, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])
