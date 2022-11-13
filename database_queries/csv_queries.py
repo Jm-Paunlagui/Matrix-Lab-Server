@@ -322,6 +322,17 @@ def count_overall_positive_negative():
     negative_percentage = round(
         (negative / (positive + negative)) * 100, 2) if negative > 0 else "0"
 
+    return positive, negative, positive_percentage, negative_percentage
+
+
+def get_starting_ending_year():
+    """
+    Get the starting and ending year of the csv files.
+
+    :return: The starting and ending year of the csv files
+    """
+    csv_files = CsvModel.query.all()
+
     # desc: Starting year and ending year of the csv files
     starting_year = csv_files[0].school_year.split(
         "-")[0] if len(csv_files) > 0 else "----"
@@ -331,9 +342,9 @@ def count_overall_positive_negative():
     starting_year = starting_year.replace(
         "SY", "") if len(csv_files) > 0 else "----"
     ending_year = ending_year.replace(
-        "SY", "") if len(csv_files) > 0 else "-----"
+        "SY", "") if len(csv_files) > 0 else "----"
 
-    return positive, negative, positive_percentage, negative_percentage, starting_year, ending_year
+    return starting_year, ending_year
 
 
 nltk.download('stopwords')
@@ -413,7 +424,12 @@ def get_top_department_overall():
     average_sentiment_each_department = dict(sorted(average_sentiment_each_department.items(),
                                                     key=lambda item: item[1], reverse=True))
 
+    # desc: Starting year and ending year of the csv files
+    starting_year, ending_year = get_starting_ending_year()
+
     return jsonify({
+        "status": "success",
+        "year": f"{starting_year} - {ending_year}",
         "top_department": [
             {
                 "id": index,
@@ -440,7 +456,9 @@ def get_top_department_by_file(page: int):
     :param page: The page
     :return: The top department by file
     """
-    csv_files = CsvModel.query.paginate(page=page, per_page=1)
+    # paginate in ascending order from the latest file to the oldest file (reverse=True)
+    csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
+        page=page, per_page=1)
 
     # @desc: Get the sentiment of each department
     sentiment_each_department = {}
@@ -468,20 +486,36 @@ def get_top_department_by_file(page: int):
                                                     key=lambda item: item[1], reverse=True))
 
     # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
-    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
-    school_semester = csv_files.items[0].school_semester.replace("_", " ")
-    question = csv_files.items[0].csv_question.replace("_", " ")
+    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-") if csv_files.items else "----"
+    school_semester = csv_files.items[0].school_semester.replace("_", " ") if csv_files.items else ""
+    question = csv_files.items[0].csv_question.replace("_", " ") if csv_files.items else "----"
+
+    all_csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).all()
+    pages = [
+        {
+            "id": index if index else 1,
+            "page": index if index else 1,
+            "school_year": csv_file.school_year.replace("SY", "S.Y. ").replace("-", "-") if csv_file else "----",
+            "school_semester": csv_file.school_semester.replace("_", " ") if csv_file else "",
+            "question": csv_file.csv_question.replace("_", " ") if csv_file else "----"
+        } for index, csv_file in enumerate(all_csv_files, start=1)
+    ]
 
     return jsonify({
         "status": "success",
-        "previous_page": csv_files.prev_num,
-        "next_page": csv_files.next_num,
-        "file_name": csv_files.items[0].csv_name,
-        "file_id": csv_files.items[0].csv_id,
+        "previous_page": csv_files.prev_num if csv_files.has_prev else None,
+        "next_page": csv_files.next_num if csv_files.has_next else None,
+        "file_name": csv_files.items[0].csv_name if csv_files.items else "----",
+        "file_id": csv_files.items[0].csv_id if csv_files.items else "----",
         "s_y": school_year + " " + school_semester,
-        "question": f"{question}?",
+        "question_type": f"{question}?",
         "total_pages": csv_files.pages,
-        "top_department": [
+        "pages_to_choose": pages,
+        "pages_to_choose_old": [{
+            "id": page,
+            "page": page
+        } for page in range(1, csv_files.pages + 1)],
+        "top_department_per_sem": [
             {
                 "id": index,
                 "department": department,
@@ -533,7 +567,12 @@ def get_top_professors_overall():
     # @desc: Rank the professors by their average sentiment
     average_sentiment_each_professor = dict(sorted(average_sentiment_each_professor.items(),
                                                    key=lambda item: item[1], reverse=True))
+
+    starting_year, ending_year = get_starting_ending_year()
+
     return jsonify({
+        "status": "success",
+        "year": f"{starting_year} - {ending_year}",
         "top_professors": [
             {
                 "id": index,
@@ -560,8 +599,9 @@ def get_top_professors_by_file(page: int):
     Get the top professors by file.
     """
 
-    # @desc: Paginate the csv files
-    csv_files = CsvModel.query.paginate(page=page, per_page=1)
+    # paginate in ascending order from the latest file to the oldest file (reverse=True)
+    csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
+        page=page, per_page=1)
 
     # @desc: Get the sentiment of each professor
     sentiment_each_professor = {}
@@ -590,9 +630,20 @@ def get_top_professors_by_file(page: int):
                                                    key=lambda item: item[1], reverse=True))
 
     # format to School Year - School Semester from SY2022-2023 1st_Semester to S.Y. 2022-2023 1st Semester
-    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-")
-    school_semester = csv_files.items[0].school_semester.replace("_", " ")
-    question = csv_files.items[0].csv_question.replace("_", " ")
+    school_year = csv_files.items[0].school_year.replace("SY", "S.Y. ").replace("-", "-") if csv_files.items else "----"
+    school_semester = csv_files.items[0].school_semester.replace("_", " ") if csv_files.items else ""
+    question = csv_files.items[0].csv_question.replace("_", " ") if csv_files.items else "----"
+
+    all_csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).all()
+    pages = [
+        {
+            "id": index if index else 1,
+            "page": index if index else 1,
+            "school_year": csv_file.school_year.replace("SY", "S.Y. ").replace("-", "-") if csv_file else "----",
+            "school_semester": csv_file.school_semester.replace("_", " ") if csv_file else "",
+            "question": csv_file.csv_question.replace("_", " ") if csv_file else "----"
+        } for index, csv_file in enumerate(all_csv_files, start=1)
+    ]
 
     return jsonify({
         "status": "success",
@@ -601,9 +652,10 @@ def get_top_professors_by_file(page: int):
         "file_name": csv_files.items[0].csv_name,
         "file_id": csv_files.items[0].csv_id,
         "s_y": school_year + " " + school_semester,
-        "question": f"{question}?",
+        "question_type": f"{question}?",
         "total_pages": csv_files.pages,
-        "top_professors": [
+        "pages_to_choose": pages,
+        "top_professor_per_sem": [
             {
                 "id": index,
                 "professor": professor,
@@ -681,8 +733,8 @@ def get_all_the_details_from_csv():
         for csv_files in csv_files]
 
     # desc: Overall positive and negative sentiments
-    positive, negative, positive_percentage, negative_percentage, starting_year, ending_year = \
-        count_overall_positive_negative()
+    positive, negative, positive_percentage, negative_percentage = count_overall_positive_negative()
+    starting_year, ending_year = get_starting_ending_year()
 
     # @desc: Return the list of evaluatee
     return jsonify({"status": "success",
