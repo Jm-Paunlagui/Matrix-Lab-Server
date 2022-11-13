@@ -12,6 +12,3 @@ model = load_model(
     app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/model.h5")
 
 print(model.summary())
-
-
-

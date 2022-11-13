@@ -23,4 +23,3 @@ print(csv_rows)
 if csv_columns[0] != "sentence" or csv_columns[1] \
         != "evaluatee" or csv_columns[2] != "department" or csv_columns[3] != "course_code":  # noqa: E501
     print("Invalid csv file format")
-

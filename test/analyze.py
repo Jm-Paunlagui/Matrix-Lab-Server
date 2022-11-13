@@ -62,5 +62,3 @@
 #     app.config["CSV_ANALYZED_FOLDER"] + "/" + "ANALYZED-" + csv_question + "_" + school_year + ".csv", index=False)
 # # @desc: Delete the reformatted csv file from the reformatted folder
 # os.remove(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], file_name))
-
-
