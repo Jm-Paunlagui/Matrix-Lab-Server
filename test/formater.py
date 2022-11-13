@@ -29,7 +29,8 @@ reformatted_csv = reformatted_csv.drop(columns=[csv_columns[3]])
 print(reformatted_csv.columns)
 
 # @desc: Write the reformatted csv file to the csv folder
-reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+reformatted_csv.to_csv(
+    app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
 
 
 # # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
@@ -55,7 +56,3 @@ reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, i
 
 # # write the reformatted csv file to the csv folder
 # reformatted_csv.to_csv(app.config["CSV_REFORMATTED_FOLDER"] + "/" + "preprocess" + "_" + file_name, index=False)
-
-
-
-

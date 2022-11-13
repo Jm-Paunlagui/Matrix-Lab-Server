@@ -17,7 +17,8 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         print(hashed_password)
         intoken: User = User.query.filter(
-            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (User.recovery_email == email["sub"])
+            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
+                User.recovery_email == email["sub"])
         ).first()
         print(intoken)
 
