@@ -17,3 +17,9 @@ Flask-SQLAlchemy
 SQLAlchemy-Utils
 pyotp
 pandas
+wordcloud
+nltk
+scikit-learn
+textblob
+seaborn
+matplotlib
