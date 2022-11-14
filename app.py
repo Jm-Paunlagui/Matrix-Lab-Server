@@ -36,9 +36,9 @@ app.add_url_rule("/data/get-top-department-overall",
                  view_func=getting_top_department_overall, methods=["GET"])
 app.add_url_rule("/data/get-top-professors-overall",
                  view_func=getting_top_professor_overall, methods=["GET"])
-app.add_url_rule("/data/get-top-department-by-file/<page>",
+app.add_url_rule("/data/get-top-department-by-file/<file_number>",
                  view_func=getting_top_department_by_file, methods=["GET"])
-app.add_url_rule("/data/get-top-professors-by-file/<page>",
+app.add_url_rule("/data/get-top-professors-by-file/<file_number>",
                  view_func=getting_top_professor_by_file, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",

@@ -449,7 +449,7 @@ def get_top_department_overall():
     })
 
 
-def get_top_department_by_file(page: int):
+def get_top_department_by_file(file_number: int):
     """
     Get the top department by file.
 
@@ -458,7 +458,7 @@ def get_top_department_by_file(page: int):
     """
     # paginate in ascending order from the latest file to the oldest file (reverse=True)
     csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
-        page=page, per_page=1)
+        page=file_number, per_page=1)
 
     # @desc: Get the sentiment of each department
     sentiment_each_department = {}
@@ -600,14 +600,14 @@ def get_top_professors_overall():
     })
 
 
-def get_top_professors_by_file(page: int):
+def get_top_professors_by_file(file_number: int):
     """
     Get the top professors by file.
     """
 
     # paginate in ascending order from the latest file to the oldest file (reverse=True)
     csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
-        page=page, per_page=1)
+        page=file_number, per_page=1)
 
     # @desc: Get the sentiment of each professor
     sentiment_each_professor = {}

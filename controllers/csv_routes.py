@@ -80,15 +80,15 @@ def getting_top_professor_overall():
     return get_top_professors_overall()
 
 
-def getting_top_department_by_file(page: str):
+def getting_top_department_by_file(file_number: str):
     """
     Get the top department by file.
     """
-    return get_top_department_by_file(int(page))
+    return get_top_department_by_file(int(file_number))
 
 
-def getting_top_professor_by_file(page: str):
+def getting_top_professor_by_file(file_number: str):
     """
     Get the top professor by file.
     """
-    return get_top_professors_by_file(int(page))
+    return get_top_professors_by_file(int(file_number))
