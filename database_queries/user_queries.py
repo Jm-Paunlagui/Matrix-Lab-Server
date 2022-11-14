@@ -408,6 +408,15 @@ def verify_remove_token(token: str):
         return False
 
 
+def verify_reset_token(token: str):
+    """Verifies the token for the user to reset their password."""
+    try:
+        user_info: dict = PayloadSignature(encoded=token).decode_payload()
+        return user_info
+    except jwt.exceptions.InvalidTokenError:
+        return False
+
+
 def verify_authenticated_token(token: str):
     """Verifies the token for the user to access the dashboard."""
     try:

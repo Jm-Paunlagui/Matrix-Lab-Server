@@ -9,7 +9,7 @@ from database_queries.user_queries import (authenticate_user,
                                            remove_email, remove_session,
                                            send_tfa, verify_remove_token, verify_authenticated_token,
                                            verify_tfa, update_password, update_personal_info,
-                                           update_security_info, update_username
+                                           update_security_info, update_username, verify_reset_token
                                            )
 from flask import jsonify, request
 from modules.module import InputTextValidation
@@ -273,3 +273,12 @@ def verify_remove_account_token(token: str):
         return jsonify({"status": "error", "message": "Invalid token!"}), 498
     return jsonify({"status": "success", "message": "Token verified successfully",
                     "user_data": {"email": user_data["sub"], "username": user_data["username"]}}), 200
+
+
+def verify_reset_password_token(token: str):
+    """Verifies the reset password token that was sent to the user's email address."""
+    user_data = verify_reset_token(token)
+    if not user_data:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 498
+    return jsonify({"status": "success", "message": "Token verified successfully",
+                    "user_data": {"email": user_data["sub"]}}), 200

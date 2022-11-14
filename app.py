@@ -22,7 +22,7 @@ from controllers.user_routes import (
     update_user_security_info,
     update_user_username,
     verify_remove_account_token,
-    verify_security_code,
+    verify_security_code, verify_reset_password_token,
 )
 
 # @desc: CSV routes for uploading csv files
@@ -71,6 +71,8 @@ app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
 app.add_url_rule("/user/verify-remove-account-token/<token>",
                  view_func=verify_remove_account_token, methods=["GET"])
+app.add_url_rule("/user/verify-reset-password-token/<token>",
+                 view_func=verify_reset_password_token, methods=["GET"])
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
