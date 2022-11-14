@@ -453,7 +453,7 @@ def get_top_department_by_file(file_number: int):
     """
     Get the top department by file.
 
-    :param page: The page
+    :param file_number: The page
     :return: The top department by file
     """
     # paginate in ascending order from the latest file to the oldest file (reverse=True)
@@ -603,6 +603,9 @@ def get_top_professors_overall():
 def get_top_professors_by_file(file_number: int):
     """
     Get the top professors by file.
+
+    :param file_number: The file number
+    :return: The top professors
     """
 
     # paginate in ascending order from the latest file to the oldest file (reverse=True)
