@@ -131,6 +131,7 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     csv_columns = csv_file.columns
 
     reformatted_csv = csv_file.rename(columns={
+        csv_columns[sentence_index]: "sentence",
         csv_columns[evaluatee_index]: "evaluatee",
         csv_columns[department_index]: "department",
         csv_columns[course_code_index]: "course_code"
@@ -290,6 +291,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
+
+    # @desc: For analysis purposes
 
     return jsonify({"status": "success",
                     "message": "CSV file evaluated successfully",
@@ -514,10 +517,6 @@ def get_top_department_by_file(file_number: int):
         "question_type": f"{question}?",
         "total_pages": csv_files.pages,
         "pages_to_choose": pages,
-        "pages_to_choose_old": [{
-            "id": page,
-            "page": page
-        } for page in range(1, csv_files.pages + 1)],
         "top_department_per_sem": [
             {
                 "id": index,
