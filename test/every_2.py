@@ -118,8 +118,6 @@ def department_analysis(file_path: str):
     average_sentiment_each_department = dict(sorted(average_sentiment_each_department.items(),
                                                     key=lambda item: item[1], reverse=True))
 
-    print(average_sentiment_each_department)
-
     department_list = []
     department_overall_sentiment = []
     department_evaluatee = []
@@ -166,5 +164,8 @@ def department_analysis(file_path: str):
     print(csv_file)
 
 
-professor_analysis(
-    "C:\\Users\\PC-165\\PycharmProjects\\Matrix-Lab-Server\\csv_files\\analyzed_csv_files/ANALYZED-What_Are_The_Strengths_Of_The_Instructor_In_Teaching_The_Course_SY2022-2023_1st_Semester.csv")
+# professor_analysis(
+#     "C:\\Users\\PC-165\\PycharmProjects\\Matrix-Lab-Server\\csv_files\\analyzed_csv_files/ANALYZED-What_Are_The_Strengths_Of_The_Instructor_In_Teaching_The_Course_SY2022-2023_1st_Semester.csv")
+
+#professor_analysis("C:\\Users\\paunl\\Jm-Paunlagui\\Pycharm-Projects\\Matrix-Lab-Server\\csv_files\\analyzed_csv_files/ANALYZED-What_Are_The_Strengths_Of_The_Instructor_In_Teaching_The_Course_SY2022-2023_1st_Semester.csv")
+department_analysis("C:\\Users\\paunl\\Jm-Paunlagui\\Pycharm-Projects\\Matrix-Lab-Server\\csv_files\\analyzed_csv_files/ANALYZED-What_Are_The_Strengths_Of_The_Instructor_In_Teaching_The_Course_SY2022-2023_1st_Semester.csv")
