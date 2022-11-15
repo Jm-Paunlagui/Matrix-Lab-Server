@@ -50,9 +50,11 @@ def professor_analysis(file_path: str):
 
     for index, evaluatee in enumerate(average_sentiment_each_professor):
         evaluatee_list.append(evaluatee)
-        evaluatee_overall_sentiment.append(average_sentiment_each_professor[evaluatee])
+        evaluatee_overall_sentiment.append(
+            average_sentiment_each_professor[evaluatee])
         evaluatee_department.append(department_of_each_professor[evaluatee])
-        evaluatee_number_of_sentiments.append(len(sentiment_each_professor[evaluatee]))
+        evaluatee_number_of_sentiments.append(
+            len(sentiment_each_professor[evaluatee]))
         evaluatee_positive_sentiments_percentage.append(
             round((len([sentiment for sentiment in sentiment_each_professor[evaluatee]
                         if sentiment >= 50]) / len(sentiment_each_professor[evaluatee])) * 100, 2))
@@ -80,6 +82,8 @@ def professor_analysis(file_path: str):
     # @desc: Add the dataframe to the current csv file and save it
     csv_file = pd.concat([csv_file, df], axis=1)
     csv_file.to_csv(file_path, index=False)
+
+
 def department_analysis(file_path: str):
     """
     department_list: The list of the professors without duplicates
@@ -125,10 +129,13 @@ def department_analysis(file_path: str):
 
     for index, department in enumerate(average_sentiment_each_department):
         department_list.append(department)
-        department_overall_sentiment.append(average_sentiment_each_department[department])
+        department_overall_sentiment.append(
+            average_sentiment_each_department[department])
         # count the number of evaluatee per department and append it to the list of the departments by integer not float
-        department_evaluatee.append(int(csv_file[csv_file["department"] == department]["evaluatee"].nunique()))
-        department_number_of_sentiments.append(len(sentiment_each_department[department]))
+        department_evaluatee.append(
+            int(csv_file[csv_file["department"] == department]["evaluatee"].nunique()))
+        department_number_of_sentiments.append(
+            len(sentiment_each_department[department]))
         department_positive_sentiments_percentage.append(
             round((len([sentiment for sentiment in sentiment_each_department[department]
                         if sentiment >= 50]) / len(sentiment_each_department[department])) * 100, 2))
