@@ -593,7 +593,7 @@ def read_overall_data_department_analysis_csv_files():
                 "id": index,
                 "department": department,
                 "overall_sentiment": sentiment_each_department[department],
-                "number_of_sentiments": department_number_of_sentiments[department],
+                "number_of_sentiments": "{:,}".format(round(department_number_of_sentiments[department], 2)),
                 "positive_sentiments_percentage": department_positive_sentiments_percentage[department],
                 "negative_sentiments_percentage": department_negative_sentiments_percentage[department],
                 "share": department_share[department],
@@ -691,13 +691,64 @@ def read_overall_data_professor_analysis_csv_files():
                 "id": index,
                 "professor": professor,
                 "overall_sentiment": evaluatee_overall_sentiment[professor],
-                "number_of_sentiments": evaluatee_number_of_sentiments[professor],
+                "number_of_sentiments": "{:,}".format(round(evaluatee_number_of_sentiments[professor], 2)),
                 "positive_sentiments_percentage": evaluatee_positive_sentiments_percentage[professor],
                 "negative_sentiments_percentage": evaluatee_negative_sentiments_percentage[professor],
                 "share": evaluatee_share[professor],
                 "evaluatee_department": evaluatee_department[professor]
             } for index, professor in enumerate(evaluatee_overall_sentiment)
         ]}), 200
+
+
+def options_read_single_data():
+
+    csv_file = CsvModel.query.all()
+
+    # @desc: Do not return duplicate school_year, school_semester, and csv_question
+    school_year = []
+    school_semester = []
+    csv_question = []
+
+    for csv in csv_file:
+        if csv.school_year not in school_year:
+            school_year.append(csv.school_year)
+
+        if csv.school_semester not in school_semester:
+            school_semester.append(csv.school_semester)
+
+        if csv.csv_question not in csv_question:
+            csv_question.append(csv.csv_question)
+
+    # @desc: Make school_year in descending order
+    school_year.sort(reverse=True)
+
+    school_year_dict = [
+        {
+            "id": index,
+            "school_year": InputTextValidation(school_year).to_readable_school_year()
+        } for index, school_year in enumerate(school_year)
+    ]
+
+    school_semester_dict = [
+        {
+            "id": index,
+            "school_semester": InputTextValidation(school_semester).to_readable_school_semester()
+        } for index, school_semester in enumerate(school_semester)
+    ]
+
+    csv_question_dict = [
+        {
+            "id": index,
+            "csv_question": InputTextValidation(csv_question).to_readable_csv_question()
+        } for index, csv_question in enumerate(csv_question)
+    ]
+
+    return jsonify({
+        "status": "success",
+        "school_year": school_year_dict,
+        "school_semester": school_semester_dict,
+        "csv_question": csv_question_dict
+    }), 200
 
 
 def read_single_data_department_analysis_csv_files(school_year: str, school_semester: str, csv_question: str):
@@ -746,7 +797,7 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
                 "id": index,
                 "department": department,
                 "overall_sentiment": sentiment_each_department[department],
-                "number_of_sentiments": department_number_of_sentiments[department],
+                "number_of_sentiments": "{:,}".format(round(department_number_of_sentiments[department], 2)),
                 "positive_sentiments_percentage": department_positive_sentiments_percentage[department],
                 "negative_sentiments_percentage": department_negative_sentiments_percentage[department],
                 "share": department_share[department],
@@ -801,7 +852,7 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
                 "id": index,
                 "professor": professor,
                 "overall_sentiment": evaluatee_overall_sentiment[professor],
-                "number_of_sentiments": evaluatee_number_of_sentiments[professor],
+                "number_of_sentiments": "{:,}".format(round(evaluatee_number_of_sentiments[professor], 2)),
                 "positive_sentiments_percentage": evaluatee_positive_sentiments_percentage[professor],
                 "negative_sentiments_percentage": evaluatee_negative_sentiments_percentage[professor],
                 "share": evaluatee_share[professor],

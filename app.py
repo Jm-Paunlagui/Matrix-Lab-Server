@@ -5,7 +5,7 @@ from controllers.csv_routes import (
     getting_all_data_from_csv,
     getting_top_department_overall,
     getting_top_professor_overall,
-    getting_top_professor_by_file, getting_top_department_by_file
+    getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data
 )
 from controllers.user_routes import (
     authenticate,
@@ -24,6 +24,7 @@ from controllers.user_routes import (
     verify_remove_account_token,
     verify_security_code, verify_reset_password_token,
 )
+from testpy.analyze import get_top_professors_by_file
 
 # @desc: CSV routes for uploading csv files
 app.add_url_rule("/data/view-columns",
@@ -36,6 +37,8 @@ app.add_url_rule("/data/get-top-department-overall",
                  view_func=getting_top_department_overall, methods=["GET"])
 app.add_url_rule("/data/get-top-professors-overall",
                  view_func=getting_top_professor_overall, methods=["GET"])
+app.add_url_rule("/data/options-for-file",
+                 view_func=options_for_file_data, methods=["GET"])
 app.add_url_rule("/data/get-top-department-by-file",
                  view_func=getting_top_department_by_file, methods=["POST"])
 app.add_url_rule("/data/get-top-professors-by-file",

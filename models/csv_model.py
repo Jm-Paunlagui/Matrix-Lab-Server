@@ -34,6 +34,14 @@ class CsvModel(db.Model):
                f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
                f"date_processed={self.date_processed})"
 
+    # @desc: For Descending Order (newest to oldest) in the csvs table
+    def __lt__(self, other):
+        return self.csv_id < other.csv_id
+
+    # @desc: For Ascending Order (oldest to newest) in the csvs table
+    def __gt__(self, other):
+        return self.csv_id > other.csv_id
+
 
 class CsvDepartmentModel(db.Model):
     """
@@ -67,6 +75,14 @@ class CsvDepartmentModel(db.Model):
                f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
                f"date_processed={self.date_processed})"
 
+    # @desc: For Descending Order (newest to oldest) in the csvs table
+    def __lt__(self, other):
+        return self.csv_id < other.csv_id
+
+    # @desc: For Ascending Order (oldest to newest) in the csvs table
+    def __gt__(self, other):
+        return self.csv_id > other.csv_id
+
 
 class CsvProfessorModel(db.Model):
     """
@@ -99,3 +115,11 @@ class CsvProfessorModel(db.Model):
                f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
                f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
                f"date_processed={self.date_processed})"
+
+    # @desc: For Descending Order (newest to oldest) in the csvs table
+    def __lt__(self, other):
+        return self.csv_id < other.csv_id
+
+    # @desc: For Ascending Order (oldest to newest) in the csvs table
+    def __gt__(self, other):
+        return self.csv_id > other.csv_id
