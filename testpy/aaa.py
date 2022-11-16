@@ -8,18 +8,18 @@
     evaluatee_share: The share of the professor in the total responses of the students
     """
 
-    # @desc: Get the sentiment of each professor
-    sentiment_each_professor = {}
+# @desc: Get the sentiment of each professor
+sentiment_each_professor = {}
 
-    # desc: The department of each professor on were they are teaching
-    department_of_each_professor = {}
+# desc: The department of each professor on were they are teaching
+department_of_each_professor = {}
 
-    # @desc: Get the average sentiment of each professor
-    average_sentiment_each_professor = {}
+ # @desc: Get the average sentiment of each professor
+ average_sentiment_each_professor = {}
 
-    csv_file = pd.read_csv(csv_file_path)
+  csv_file = pd.read_csv(csv_file_path)
 
-    for index, row in csv_file.iterrows():
+   for index, row in csv_file.iterrows():
         if row["evaluatee"] not in sentiment_each_professor:
             sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
             department_of_each_professor[row["evaluatee"]] = row["department"]
@@ -81,8 +81,8 @@
     # @desc: Save the details of the professor to the database
     professor_csv = CsvProfessorModel(csv_name=csv_name, csv_question=csv_question,
                                       csv_file_path=app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/"
-                                                    + "Analysis_for_Professors_" + csv_question + "_" + school_year +
-                                                    "_" + school_semester + ".csv", school_year=school_year,
+                                      + "Analysis_for_Professors_" + csv_question + "_" + school_year +
+                                      "_" + school_semester + ".csv", school_year=school_year,
                                       school_semester=school_semester)
     db.session.add(professor_csv)
     db.session.commit()

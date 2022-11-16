@@ -383,14 +383,15 @@ def department_analysis(csv_name: str, csv_question: str, csv_file_path: str, sc
 
     # @desc: Save the csv file to the department_analysis_csv_files folder
     df.to_csv(app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" +
-              "Analysis_for_Department_" + csv_question + "_" + school_year + "_" + school_semester + ".csv",
+              "Analysis_for_Department_" + csv_question + "_" +
+              school_year + "_" + school_semester + ".csv",
               index=False)
 
     # @desc: Save the details of the department to the database
     department_csv = CsvDepartmentModel(csv_name=csv_name, csv_question=csv_question,
                                         csv_file_path=app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" +
-                                                      "Analysis_for_Department_" + csv_question + "_" + school_year
-                                                      + "_" + school_semester + ".csv",
+                                        "Analysis_for_Department_" + csv_question + "_" + school_year
+                                        + "_" + school_semester + ".csv",
                                         school_year=school_year, school_semester=school_semester)
     db.session.add(department_csv)
     db.session.commit()
@@ -468,7 +469,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
     csv_file = CsvModel(csv_name=file_name, csv_question=csv_question,
                         csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" +
-                                      school_year + "_" + school_semester + ".csv", school_year=school_year,
+                        school_year + "_" + school_semester + ".csv", school_year=school_year,
                         school_semester=school_semester)
     db.session.add(csv_file)
     db.session.commit()
@@ -476,12 +477,12 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # @desc: For analysis purposes
     professor_analysis(csv_name=file_name, csv_question=csv_question,
                        csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" +
-                                     school_year + "_" + school_semester + ".csv", school_year=school_year,
+                       school_year + "_" + school_semester + ".csv", school_year=school_year,
                        school_semester=school_semester)
     department_analysis(csv_name=file_name, csv_question=csv_question,
-                       csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" +
-                                     school_year + "_" + school_semester + ".csv", school_year=school_year,
-                       school_semester=school_semester)
+                        csv_file_path=app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" +
+                        school_year + "_" + school_semester + ".csv", school_year=school_year,
+                        school_semester=school_semester)
 
     return jsonify({"status": "success",
                     "message": "CSV file evaluated successfully",
@@ -613,7 +614,8 @@ def get_top_department_overall():
         print(f"Average: {sum(sentiments) / len(sentiments)} for {department}")
         print(f"Total: {len(sentiments)}")
         print(f"Sentiment: {sum(sentiments)}")
-        print(f"Ave: {round(sum(sentiments) / len(sentiments), 2)} for {department}")
+        print(
+            f"Ave: {round(sum(sentiments) / len(sentiments), 2)} for {department}")
         average_sentiment_each_department[department] = round(
             sum(sentiments) / len(sentiments), 2)
 
@@ -668,7 +670,8 @@ def get_overall_sentiment_department():
 
     for department, sentiments in sentiment_each_department.items():
         # Do not include the nan values
-        sentiments = [sentiment for sentiment in sentiments if not math.isnan(sentiment)]
+        sentiments = [
+            sentiment for sentiment in sentiments if not math.isnan(sentiment)]
         average_sentiment_each_department[department] = round(
             sum(sentiments) / len(sentiments), 2 if len(sentiments) > 0 else 0)
 
@@ -780,7 +783,7 @@ def get_top_professors_overall():
             if row["evaluatee"] not in sentiment_each_professor:
                 sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
                 department_of_each_professor[row["evaluatee"]
-                ] = row["department"]
+                                             ] = row["department"]
             else:
                 sentiment_each_professor[row["evaluatee"]].append(
                     row["sentiment"])
@@ -850,7 +853,7 @@ def get_top_professors_by_file(file_number: int):
             if row["evaluatee"] not in sentiment_each_professor:
                 sentiment_each_professor[row["evaluatee"]] = [row["sentiment"]]
                 department_of_each_professor[row["evaluatee"]
-                ] = row["department"]
+                                             ] = row["department"]
             else:
                 sentiment_each_professor[row["evaluatee"]].append(
                     row["sentiment"])
@@ -923,7 +926,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
     # and return a list of evaluatee
     evaluatees = [pd.read_csv(csv_files.csv_file_path)[
-                      "evaluatee"].to_list() for csv_files in csv_files]
+        "evaluatee"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of evaluatee
     evaluatees = [
@@ -935,7 +938,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
     # and return a list of department
     departments = [pd.read_csv(csv_files.csv_file_path)[
-                       "department"].to_list() for csv_files in csv_files]
+        "department"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of department
     departments = [
@@ -947,7 +950,7 @@ def get_all_the_details_from_csv():
     # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the course_code column
     # and return a list of course_code
     course_codes = [pd.read_csv(csv_files.csv_file_path)[
-                        "course_code"].to_list() for csv_files in csv_files]
+        "course_code"].to_list() for csv_files in csv_files]
 
     # @desc: Flatten the list of course_code
     course_codes = [

@@ -322,8 +322,8 @@ def professor_analysis(csv_name: str, csv_question: str, csv_file_path: str, sch
     # @desc: Save the details of the professor to the database
     professor_csv = CsvProfessorModel(csv_name=csv_name, csv_question=csv_question,
                                       csv_file_path=app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/"
-                                                    + "Analysis_for_Professors_" + csv_question + "_" + school_year +
-                                                    "_" + school_semester + ".csv", school_year=school_year,
+                                      + "Analysis_for_Professors_" + csv_question + "_" + school_year +
+                                      "_" + school_semester + ".csv", school_year=school_year,
                                       school_semester=school_semester)
     db.session.add(professor_csv)
     db.session.commit()
@@ -407,14 +407,15 @@ def department_analysis(csv_name: str, csv_question: str, csv_file_path: str, sc
 
     # @desc: Save the csv file to the department_analysis_csv_files folder
     df.to_csv(app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" +
-              "Analysis_for_Department_" + csv_question + "_" + school_year + "_" + school_semester + ".csv",
+              "Analysis_for_Department_" + csv_question + "_" +
+              school_year + "_" + school_semester + ".csv",
               index=False)
 
     # @desc: Save the details of the department to the database
     department_csv = CsvDepartmentModel(csv_name=csv_name, csv_question=csv_question,
                                         csv_file_path=app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" +
-                                                      "Analysis_for_Department_" + csv_question + "_" + school_year
-                                                      + "_" + school_semester + ".csv",
+                                        "Analysis_for_Department_" + csv_question + "_" + school_year
+                                        + "_" + school_semester + ".csv",
                                         school_year=school_year, school_semester=school_semester)
     db.session.add(department_csv)
     db.session.commit()
@@ -482,7 +483,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
     # @desc: Path to the csv file
     path_to_analyzed_csv = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year \
-                           + "_" + school_semester + ".csv"
+        + "_" + school_semester + ".csv"
     # @desc: Save the csv file to the folder
     csv_to_pred.to_csv(
         app.config["CSV_ANALYZED_FOLDER"] + "/" +
@@ -499,8 +500,10 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     db.session.commit()
 
     # @desc: For analysis purposes
-    professor_analysis(file_name, csv_question, csv_file.csv_file_path, school_year, school_semester)
-    department_analysis(file_name, csv_question, csv_file.csv_file_path, school_year, school_semester)
+    professor_analysis(file_name, csv_question,
+                       csv_file.csv_file_path, school_year, school_semester)
+    department_analysis(file_name, csv_question,
+                        csv_file.csv_file_path, school_year, school_semester)
 
     return jsonify({"status": "success",
                     "message": "CSV file evaluated successfully",
@@ -524,9 +527,11 @@ def count_overall_data_department_analysis_csv_files():
             print(f"row: {row} index: {index}")
             # desc: Sum up the department_overall_sentiment column and divide it by the total number csv files
             if row["department_list"] in sentiment_each_department:
-                sentiment_each_department[row["department_list"]] += row["department_overall_sentiment"]
+                sentiment_each_department[row["department_list"]
+                                          ] += row["department_overall_sentiment"]
             else:
-                sentiment_each_department[row["department_list"]] = row["department_overall_sentiment"]
+                sentiment_each_department[row["department_list"]
+                                          ] = row["department_overall_sentiment"]
 
     # @desc: Once sentiment_each_department is summed up, divide it by the total number of csv files
     for key, value in sentiment_each_department.items():
