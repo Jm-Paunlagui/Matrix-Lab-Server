@@ -36,10 +36,10 @@ app.add_url_rule("/data/get-top-department-overall",
                  view_func=getting_top_department_overall, methods=["GET"])
 app.add_url_rule("/data/get-top-professors-overall",
                  view_func=getting_top_professor_overall, methods=["GET"])
-app.add_url_rule("/data/get-top-department-by-file/<file_number>",
-                 view_func=getting_top_department_by_file, methods=["GET"])
-app.add_url_rule("/data/get-top-professors-by-file/<file_number>",
-                 view_func=getting_top_professor_by_file, methods=["GET"])
+app.add_url_rule("/data/get-top-department-by-file",
+                 view_func=getting_top_department_by_file, methods=["POST"])
+app.add_url_rule("/data/get-top-professors-by-file",
+                 view_func=getting_top_professor_by_file, methods=["POST"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

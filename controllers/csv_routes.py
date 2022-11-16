@@ -5,7 +5,9 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
+from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, \
+    read_overall_data_department_analysis_csv_files, read_overall_data_professor_analysis_csv_files, \
+    read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files
 from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
@@ -71,25 +73,55 @@ def getting_top_department_overall():
     """
     Get the top department overall.
     """
-    return get_top_department_overall()
+    return read_overall_data_department_analysis_csv_files()
 
 
 def getting_top_professor_overall():
     """
     Get the top professor overall.
     """
-    return get_top_professors_overall()
+    return read_overall_data_professor_analysis_csv_files()
 
 
-def getting_top_department_by_file(file_number: str):
+def getting_top_department_by_file():
     """
     Get the top department by file.
     """
-    return get_top_department_by_file(int(file_number))
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    school_year: str = request.json["school_year"]
+    school_semester: str = request.json["school_semester"]
+    csv_question: str = request.json["csv_question"]
+
+    if not InputTextValidation().validate_empty_fields(school_year, school_semester, csv_question):
+        return jsonify({"status": "error", "message": "Some of the inputs are unsuccessfully retrieved"}), 400
+    if not InputTextValidation(school_year).validate_school_year():
+        return jsonify({"status": "error", "message": "Invalid school year"}), 400
+    if not InputTextValidation(school_semester).validate_school_semester():
+        return jsonify({"status": "error", "message": "Invalid school semester"}), 400
+    if not InputTextValidation(csv_question).validate_empty_fields():
+        return jsonify({"status": "error", "message": "Invalid question"}), 400
+    return read_single_data_department_analysis_csv_files(school_year, school_semester, csv_question)
 
 
-def getting_top_professor_by_file(file_number: str):
+def getting_top_professor_by_file():
     """
     Get the top professor by file.
     """
-    return get_top_professors_by_file(int(file_number))
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    school_year: str = request.json["school_year"]
+    school_semester: str = request.json["school_semester"]
+    csv_question: str = request.json["csv_question"]
+
+    if not InputTextValidation().validate_empty_fields(school_year, school_semester, csv_question):
+        return jsonify({"status": "error", "message": "Some of the inputs are unsuccessfully retrieved"}), 400
+    if not InputTextValidation(school_year).validate_school_year():
+        return jsonify({"status": "error", "message": "Invalid school year"}), 400
+    if not InputTextValidation(school_semester).validate_school_semester():
+        return jsonify({"status": "error", "message": "Invalid school semester"}), 400
+    if not InputTextValidation(csv_question).validate_empty_fields():
+        return jsonify({"status": "error", "message": "Invalid question"}), 400
+    return read_single_data_professor_analysis_csv_files(school_year, school_semester, csv_question)

@@ -274,6 +274,30 @@ class InputTextValidation:
         """
         return bool(re.compile(r"^(1st Semester|2nd Semester|3rd Semester|Summer)$").match(self.user_input))
 
+    def to_query_school_year(self):
+        """
+        Converts the school year to a query.
+
+        :return: The school year as a query
+        """
+        return self.user_input.replace("S.Y.", "SY").replace(" ", "")
+
+    def to_query_school_semester(self):
+        """
+        Converts the school semester to a query.
+
+        :return: The school semester as a query
+        """
+        return self.user_input.replace(" ", "_")
+
+    def to_query_csv_question(self):
+        """
+        Converts the question to a query.
+
+        :return: The question as a query
+        """
+        return self.user_input.title().replace("?", "").replace(" ", "_")
+
 
 class PasswordBcrypt:
     """Hash and check password."""
