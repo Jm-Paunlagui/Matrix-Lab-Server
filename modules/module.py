@@ -282,6 +282,14 @@ class InputTextValidation:
         """
         return self.user_input.replace("S.Y.", "SY").replace(" ", "")
 
+    def to_readable_school_year(self):
+        """
+        Converts the school year to a readable format.
+
+        :return: The school year in a readable format
+        """
+        return self.user_input.replace("SY", "S.Y. ")
+
     def to_query_school_semester(self):
         """
         Converts the school semester to a query.
@@ -290,6 +298,14 @@ class InputTextValidation:
         """
         return self.user_input.replace(" ", "_")
 
+    def to_readable_school_semester(self):
+        """
+        Converts the school semester to a readable format.
+
+        :return: The school semester in a readable format
+        """
+        return self.user_input.replace("_", " ")
+
     def to_query_csv_question(self):
         """
         Converts the question to a query.
@@ -297,6 +313,14 @@ class InputTextValidation:
         :return: The question as a query
         """
         return self.user_input.title().replace("?", "").replace(" ", "_")
+
+    def to_readable_csv_question(self):
+        """
+        Converts the question to a response.
+
+        :return: The question as a response
+        """
+        return self.user_input.replace("_", " ").title()
 
 
 class PasswordBcrypt:
