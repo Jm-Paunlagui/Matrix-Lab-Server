@@ -5,7 +5,8 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import app
 import csv
-from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, get_all_the_details_from_csv, \
+from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
+from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
 

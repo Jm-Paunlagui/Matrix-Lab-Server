@@ -5,5 +5,5 @@ def hashd(string):
     return md5(string.encode()).hexdigest()
 
 
-print(hashd("test"))
-print(hashd("test"))
+print(hashd("testpy"))
+print(hashd("testpy"))

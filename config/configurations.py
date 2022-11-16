@@ -1,5 +1,4 @@
 
-from models import user_model, csv_model
 import os
 import socket
 
@@ -28,6 +27,12 @@ app.config["CSV_REFORMATTED_FOLDER"] = os.path.join(
 # @desc: CSV file analyzed path configuration for the Flask app
 app.config["CSV_ANALYZED_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "csv_files\\analyzed_csv_files")
+# @desc: CSV file department analysis path configuration for the Flask app
+app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] = os.path.join(
+    app.config["ROOT_PATH"], "csv_files\\department_analysis_csv_files")
+# @desc: CSV file professor analysis path configuration for the Flask app
+app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] = os.path.join(
+    app.config["ROOT_PATH"], "csv_files\\professor_analysis_csv_files")
 app.config["DEEP_LEARNING_MODEL_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "deep_learning_model")
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
@@ -39,6 +44,10 @@ if not os.path.exists(app.config["CSV_REFORMATTED_FOLDER"]):
     os.makedirs(app.config["CSV_REFORMATTED_FOLDER"])
 if not os.path.exists(app.config["CSV_ANALYZED_FOLDER"]):
     os.makedirs(app.config["CSV_ANALYZED_FOLDER"])
+if not os.path.exists(app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"]):
+    os.makedirs(app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"])
+if not os.path.exists(app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"]):
+    os.makedirs(app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"])
 
 # @desc: Email configuration for the Flask app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
@@ -85,6 +94,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
 # from models import user_model, csv_model
+from models import user_model, csv_model
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
