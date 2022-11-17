@@ -24,7 +24,7 @@ def authenticate():
     password: str = request.json["password"]
 
     if not InputTextValidation().validate_empty_fields(username, password):
-        return jsonify({"status": "error", "message": "Username is required!"}), 400
+        return jsonify({"status": "error", "message": "All fields are required!"}), 400
     if not InputTextValidation(username).validate_username() or not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
     if not authenticate_user(username, password):
