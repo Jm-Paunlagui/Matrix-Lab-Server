@@ -1,7 +1,7 @@
 from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, \
     read_overall_data_department_analysis_csv_files, read_overall_data_professor_analysis_csv_files, \
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
-    options_read_single_data
+    options_read_single_data, dashboard_data_overall
 from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
@@ -67,7 +67,7 @@ def getting_all_data_from_csv():
     """
     Get all the data from the csv file.
     """
-    return get_all_the_details_from_csv()
+    return dashboard_data_overall()
 
 
 def getting_top_department_overall():
