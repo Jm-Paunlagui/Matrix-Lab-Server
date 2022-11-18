@@ -31,6 +31,7 @@ app.add_url_rule("/data/view-columns",
                  view_func=view_columns, methods=["POST"])
 app.add_url_rule("/data/analyze-save-csv",
                  view_func=analyze_save_csv, methods=["POST"])
+# @desc: Dashboard data
 app.add_url_rule("/data/get-all-data-from-csv",
                  view_func=getting_all_data_from_csv, methods=["GET"])
 app.add_url_rule("/data/get-top-department-overall",
