@@ -292,10 +292,12 @@ def professor_analysis(csv_name: str, csv_question: str, csv_file_path: str, sch
             course_code_of_each_professor[row["evaluatee"]] = []
 
         if row["course_code"] not in course_code_of_each_professor[row["evaluatee"]]:
-            course_code_of_each_professor[row["evaluatee"]].append(row["course_code"])
+            course_code_of_each_professor[row["evaluatee"]].append(
+                row["course_code"])
 
         # Remove the duplicates in the course code
-        course_code_of_each_professor[row["evaluatee"]] = list(set(course_code_of_each_professor[row["evaluatee"]]))
+        course_code_of_each_professor[row["evaluatee"]] = list(
+            set(course_code_of_each_professor[row["evaluatee"]]))
 
     for evaluatee, sentiment in sentiment_each_professor.items():
         average_sentiment_each_professor[evaluatee] = round(
@@ -524,7 +526,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         csv_to_pred.to_csv(path, index=False)
 
         # @desc: Delete the reformatted csv file from the reformatted folder
-        os.remove(os.path.join(app.config["CSV_REFORMATTED_FOLDER"], file_name))
+        os.remove(os.path.join(
+            app.config["CSV_REFORMATTED_FOLDER"], file_name))
 
         # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
         csv_file = CsvModel(csv_name=file_name, csv_question=csv_question, csv_file_path=path,
@@ -544,7 +547,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     except Exception as e:
         # @desc: Path to the csv file
         path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
-                    school_semester + ".csv"
+            school_semester + ".csv"
         pathd: str = app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Departments_" + \
             csv_question + "_" + school_year + "_" + school_semester + ".csv"
         pathp: str = app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Professors_" + \
@@ -576,7 +579,8 @@ def read_overall_data_department_analysis_csv_files():
     csv_files = CsvDepartmentModel.query.all()
 
     sentiment_each_department, department_number_of_sentiments, department_positive_sentiments_percentage, \
-        department_negative_sentiments_percentage, department_share, department_evaluatee = {}, {}, {}, {}, {}, {}
+        department_negative_sentiments_percentage, department_share, department_evaluatee = {
+        }, {}, {}, {}, {}, {}
     for csv_file in csv_files:
         # @desc: Read the csv file
         csv_file = pd.read_csv(csv_file.csv_file_path)
@@ -584,14 +588,18 @@ def read_overall_data_department_analysis_csv_files():
         for index, row in csv_file.iterrows():
             # desc: Sum up the department_overall_sentiment column and divide it by the total number csv files
             if row["department_list"] in sentiment_each_department:
-                sentiment_each_department[row["department_list"]] += row["department_overall_sentiment"]
+                sentiment_each_department[row["department_list"]
+                                          ] += row["department_overall_sentiment"]
             else:
-                sentiment_each_department[row["department_list"]] = row["department_overall_sentiment"]
+                sentiment_each_department[row["department_list"]
+                                          ] = row["department_overall_sentiment"]
 
             if row["department_list"] in department_number_of_sentiments:
-                department_number_of_sentiments[row["department_list"]] += row["department_number_of_sentiments"]
+                department_number_of_sentiments[row["department_list"]
+                                                ] += row["department_number_of_sentiments"]
             else:
-                department_number_of_sentiments[row["department_list"]] = row["department_number_of_sentiments"]
+                department_number_of_sentiments[row["department_list"]
+                                                ] = row["department_number_of_sentiments"]
 
             if row["department_list"] in department_positive_sentiments_percentage:
                 department_positive_sentiments_percentage[row["department_list"]] += \
@@ -608,14 +616,18 @@ def read_overall_data_department_analysis_csv_files():
                     row["department_negative_sentiments_percentage"]
 
             if row["department_list"] in department_share:
-                department_share[row["department_list"]] += row["department_share"]
+                department_share[row["department_list"]
+                                 ] += row["department_share"]
             else:
-                department_share[row["department_list"]] = row["department_share"]
+                department_share[row["department_list"]
+                                 ] = row["department_share"]
 
             if row["department_list"] in department_evaluatee:
-                department_evaluatee[row["department_list"]] += row["department_evaluatee"]
+                department_evaluatee[row["department_list"]
+                                     ] += row["department_evaluatee"]
             else:
-                department_evaluatee[row["department_list"]] = row["department_evaluatee"]
+                department_evaluatee[row["department_list"]
+                                     ] = row["department_evaluatee"]
 
     # @desc: Once sentiment_each_department is summed up, divide it by the total number of csv files to get the average
     # and round it to 2 decimal places
@@ -671,7 +683,8 @@ def read_overall_data_professor_analysis_csv_files():
     csv_files = CsvProfessorModel.query.all()
 
     evaluatee_overall_sentiment, evaluatee_number_of_sentiments, evaluatee_positive_sentiments_percentage, \
-        evaluatee_negative_sentiments_percentage, evaluatee_share, evaluatee_department = {}, {}, {}, {}, {}, {}
+        evaluatee_negative_sentiments_percentage, evaluatee_share, evaluatee_department = {
+        }, {}, {}, {}, {}, {}
     for csv_file in csv_files:
         # @desc: Read the csv file
         csv_file = pd.read_csv(csv_file.csv_file_path)
@@ -679,14 +692,18 @@ def read_overall_data_professor_analysis_csv_files():
         for index, row in csv_file.iterrows():
             # desc: Sum up the professor_overall_sentiment column and divide it by the total number csv files
             if row["evaluatee_list"] in evaluatee_overall_sentiment:
-                evaluatee_overall_sentiment[row["evaluatee_list"]] += row["evaluatee_overall_sentiment"]
+                evaluatee_overall_sentiment[row["evaluatee_list"]
+                                            ] += row["evaluatee_overall_sentiment"]
             else:
-                evaluatee_overall_sentiment[row["evaluatee_list"]] = row["evaluatee_overall_sentiment"]
+                evaluatee_overall_sentiment[row["evaluatee_list"]
+                                            ] = row["evaluatee_overall_sentiment"]
 
             if row["evaluatee_list"] in evaluatee_number_of_sentiments:
-                evaluatee_number_of_sentiments[row["evaluatee_list"]] += row["evaluatee_number_of_sentiments"]
+                evaluatee_number_of_sentiments[row["evaluatee_list"]
+                                               ] += row["evaluatee_number_of_sentiments"]
             else:
-                evaluatee_number_of_sentiments[row["evaluatee_list"]] = row["evaluatee_number_of_sentiments"]
+                evaluatee_number_of_sentiments[row["evaluatee_list"]
+                                               ] = row["evaluatee_number_of_sentiments"]
 
             if row["evaluatee_list"] in evaluatee_positive_sentiments_percentage:
                 evaluatee_positive_sentiments_percentage[row["evaluatee_list"]] += \
@@ -703,14 +720,17 @@ def read_overall_data_professor_analysis_csv_files():
                     row["evaluatee_negative_sentiments_percentage"]
 
             if row["evaluatee_list"] in evaluatee_share:
-                evaluatee_share[row["evaluatee_list"]] += row["evaluatee_share"]
+                evaluatee_share[row["evaluatee_list"]
+                                ] += row["evaluatee_share"]
             else:
                 evaluatee_share[row["evaluatee_list"]] = row["evaluatee_share"]
 
             if row["evaluatee_list"] in evaluatee_department:
-                evaluatee_department[row["evaluatee_list"]] = row["evaluatee_department"]
+                evaluatee_department[row["evaluatee_list"]
+                                     ] = row["evaluatee_department"]
             else:
-                evaluatee_department[row["evaluatee_list"]] = row["evaluatee_department"]
+                evaluatee_department[row["evaluatee_list"]
+                                     ] = row["evaluatee_department"]
 
     # @desc: Once evaluatee_overall_sentiment is summed up, divide it by the total number of csv files to get
     # the average and round it to 2 decimal places
@@ -818,17 +838,21 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
     csv_file = pd.read_csv(csv_file.csv_file_path)
 
     sentiment_each_department, department_number_of_sentiments, department_positive_sentiments_percentage, \
-        department_negative_sentiments_percentage, department_share, department_evaluatee = {}, {}, {}, {}, {}, {}
+        department_negative_sentiments_percentage, department_share, department_evaluatee = {
+        }, {}, {}, {}, {}, {}
 
     for index, row in csv_file.iterrows():
-        sentiment_each_department[row["department_list"]] = row["department_overall_sentiment"]
-        department_number_of_sentiments[row["department_list"]] = row["department_number_of_sentiments"]
+        sentiment_each_department[row["department_list"]
+                                  ] = row["department_overall_sentiment"]
+        department_number_of_sentiments[row["department_list"]
+                                        ] = row["department_number_of_sentiments"]
         department_positive_sentiments_percentage[row["department_list"]] = \
             row["department_positive_sentiments_percentage"]
         department_negative_sentiments_percentage[row["department_list"]] = \
             row["department_negative_sentiments_percentage"]
         department_share[row["department_list"]] = row["department_share"]
-        department_evaluatee[row["department_list"]] = row["department_evaluatee"]
+        department_evaluatee[row["department_list"]
+                             ] = row["department_evaluatee"]
 
     # @desc: Sort in descending order
     sentiment_each_department = dict(
@@ -863,7 +887,8 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
                                                  csv_question=csv_question).first()
 
     evaluatee_overall_sentiment, evaluatee_number_of_sentiments, evaluatee_positive_sentiments_percentage, \
-        evaluatee_negative_sentiments_percentage, evaluatee_share, evaluatee_department = {}, {}, {}, {}, {}, {}
+        evaluatee_negative_sentiments_percentage, evaluatee_share, evaluatee_department = {
+        }, {}, {}, {}, {}, {}
 
     if csv_file is None:
         return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -872,14 +897,17 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
     csv_file = pd.read_csv(csv_file.csv_file_path)
 
     for index, row in csv_file.iterrows():
-        evaluatee_overall_sentiment[row["evaluatee_list"]] = row["evaluatee_overall_sentiment"]
-        evaluatee_number_of_sentiments[row["evaluatee_list"]] = row["evaluatee_number_of_sentiments"]
+        evaluatee_overall_sentiment[row["evaluatee_list"]
+                                    ] = row["evaluatee_overall_sentiment"]
+        evaluatee_number_of_sentiments[row["evaluatee_list"]
+                                       ] = row["evaluatee_number_of_sentiments"]
         evaluatee_positive_sentiments_percentage[row["evaluatee_list"]] = row[
             "evaluatee_positive_sentiments_percentage"]
         evaluatee_negative_sentiments_percentage[row["evaluatee_list"]] = row[
             "evaluatee_negative_sentiments_percentage"]
         evaluatee_share[row["evaluatee_list"]] = row["evaluatee_share"]
-        evaluatee_department[row["evaluatee_list"]] = row["evaluatee_department"]
+        evaluatee_department[row["evaluatee_list"]
+                             ] = row["evaluatee_department"]
 
     # @desc: Sort in descending order
     evaluatee_overall_sentiment = dict(
@@ -914,7 +942,8 @@ def dashboard_data_overall():
                       for csv_professor_file in csv_professor_files]
 
     # @desc: Flatten the list of list
-    evaluatee_list = [evaluatee for evaluatee_list in evaluatee_list for evaluatee in evaluatee_list]
+    evaluatee_list = [
+        evaluatee for evaluatee_list in evaluatee_list for evaluatee in evaluatee_list]
 
     # @desc: Get the unique evaluatee
     evaluatee_list = list(set(evaluatee_list))
@@ -928,7 +957,8 @@ def dashboard_data_overall():
                        for csv_department_file in csv_department_files]
 
     # @desc: Flatten the list of list
-    department_list = [department for department_list in department_list for department in department_list]
+    department_list = [
+        department for department_list in department_list for department in department_list]
 
     # @desc: Get the unique department
     department_list = list(set(department_list))

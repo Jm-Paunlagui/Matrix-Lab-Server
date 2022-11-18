@@ -148,33 +148,33 @@ print(
 
 # @desc: Create a new array of psychology_course_codes based on the total number of courses needed for DAS repeat the course codes if it is less than the total number of courses needed for DAS
 psychology_course_codes_needed = (
-                                         psychology_course_codes * total_course_needed_for_das
-                                 )[:total_course_needed_for_das]
+    psychology_course_codes * total_course_needed_for_das
+)[:total_course_needed_for_das]
 
 # @desc: Create a new array of teacher_education_course_codes based on the total number of courses needed for DTE repeat the course codes if it is less than the total number of courses needed for DTE
 teacher_education_course_codes_needed = (
-                                                teacher_education_course_codes * total_course_needed_for_teach
-                                        )[:total_course_needed_for_teach]
+    teacher_education_course_codes * total_course_needed_for_teach
+)[:total_course_needed_for_teach]
 
 # @desc: Create a new array of business_course_codes based on the total number of courses needed for DBA repeat the course codes if it is less than the total number of courses needed for DBA
 business_course_codes_needed = (
-                                       business_course_codes * total_course_needed_for_bus
-                               )[:total_course_needed_for_bus]
+    business_course_codes * total_course_needed_for_bus
+)[:total_course_needed_for_bus]
 
 # @desc: Create a new array of computer_science_course_codes based on the total number of courses needed for DCI repeat the course codes if it is less than the total number of courses needed for DCI
 computer_science_course_codes_needed = (
-                                               computer_science_course_codes * total_course_needed_for_cs
-                                       )[:total_course_needed_for_cs]
+    computer_science_course_codes * total_course_needed_for_cs
+)[:total_course_needed_for_cs]
 
 # @desc Sort the department column from the csv file inplace
 department.sort()
 
 # @desc: New array of course codes based on the department
 department_needed = (
-                            psychology_course_codes_needed
-                            + business_course_codes_needed
-                            + computer_science_course_codes_needed
-                            + teacher_education_course_codes_needed
+    psychology_course_codes_needed
+    + business_course_codes_needed
+    + computer_science_course_codes_needed
+    + teacher_education_course_codes_needed
 )
 
 
