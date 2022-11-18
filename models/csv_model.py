@@ -136,7 +136,8 @@ class CsvErrorModel(db.Model):
     """
 
     __tablename__ = 'csvs_error'
-    csv_error_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    csv_error_id: int = db.Column(
+        db.Integer, primary_key=True, autoincrement=True)
     csv_id: int = db.Column(db.Integer, nullable=False)
     name_of: str = db.Column(db.String(255), nullable=False)
     csv_error: str = db.Column(db.Text, nullable=False)
