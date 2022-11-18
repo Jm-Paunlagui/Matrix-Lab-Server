@@ -9,7 +9,7 @@ from keras.utils import pad_sequences
 from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
-from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel
+from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvErrorModel
 from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation
 from keras.models import load_model
 import nltk
@@ -37,6 +37,19 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     csv = CsvModel.query.filter_by(csv_question=csv_question,
                                    school_year=school_year, school_semester=school_semester).first()
     return True if csv else False
+
+
+def error_handler(csv_id: int, error_occurred: str, name_of: str):
+    """
+    Log the error to the database.
+
+    :param csv_id: The CSV ID
+    :param error_occurred: The error occurred
+    :param name_of: The name of the error
+    """
+    db.session.add(CsvErrorModel(csv_id=csv_id, csv_error=error_occurred, name_of=name_of))
+    db.session.commit()
+    return jsonify({"status": "error", "message": error_occurred}), 500
 
 
 def get_starting_ending_year():
@@ -273,8 +286,8 @@ def professor_analysis(csv_name: str, csv_question: str, csv_file_path: str, sch
         if row["evaluatee"] not in department_of_each_professor:
             department_of_each_professor[row["evaluatee"]] = row["department"]
 
-        if row["evaluatee"] not in course_code_of_each_professor:
-            course_code_of_each_professor[row["evaluatee"]] = []
+        # if row["evaluatee"] not in course_code_of_each_professor:
+        #     course_code_of_each_professor[row["evaluatee"]] = []
 
         if row["course_code"] not in course_code_of_each_professor[row["evaluatee"]]:
             course_code_of_each_professor[row["evaluatee"]].append(row["course_code"])
@@ -384,6 +397,7 @@ def department_analysis(csv_name: str, csv_question: str, csv_file_path: str, sc
     department_list = []
     department_overall_sentiment = []
     department_evaluatee = []
+    department_evaluatee_course_code = []
     department_number_of_sentiments = []
     department_positive_sentiments_percentage = []
     department_negative_sentiments_percentage = []
@@ -395,6 +409,10 @@ def department_analysis(csv_name: str, csv_question: str, csv_file_path: str, sc
         department_evaluatee.append(
             int(csv_file[csv_file["department"] ==
                          department]["evaluatee"].nunique())
+        )
+        department_evaluatee_course_code.append(
+            int(csv_file[csv_file["department"] ==
+                         department]["course_code"].nunique())
         )
         department_number_of_sentiments.append(
             len(sentiment_each_department[department]))
@@ -416,6 +434,7 @@ def department_analysis(csv_name: str, csv_question: str, csv_file_path: str, sc
         "department_list": department_list,
         "department_overall_sentiment": department_overall_sentiment,
         "department_evaluatee": department_evaluatee,
+        "department_evaluatee_course_code": department_evaluatee_course_code,
         "department_number_of_sentiments": department_number_of_sentiments,
         "department_positive_sentiments_percentage": department_positive_sentiments_percentage,
         "department_negative_sentiments_percentage": department_negative_sentiments_percentage,
@@ -525,9 +544,10 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
                     school_semester + ".csv"
         pathd: str = app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Departments_" + \
-                    csv_question + "_" + school_year + "_" + school_semester + ".csv"
+                     csv_question + "_" + school_year + "_" + school_semester + ".csv"
         pathp: str = app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Professors_" + \
-                    csv_question + "_" + school_year + "_" + school_semester + ".csv"
+                     csv_question + "_" + school_year + "_" + school_semester + ".csv"
+        csv_id = CsvModel.query.filter_by(csv_file_path=path).first().csv_id
         # @desc: Delete the csv file from the folder
         for file in [path, pathd, pathp]:
             if os.path.exists(file):
@@ -538,7 +558,13 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         CsvProfessorModel.query.filter_by(csv_file_path=pathp).delete()
 
         db.session.commit()
-        return jsonify({"status": "error", "message": "Error occurred while evaluating the csv file"}), 500
+        error_handler(
+            csv_id=csv_id,
+            error_occurred="Error in the process of evaluating the csv file with the error: " + str(e),
+            name_of=csv_question+"_"+school_year+"_"+school_semester + ".csv"
+        )
+        return jsonify({"status": "error",
+                        "message": "Error in the process of evaluating the csv file with the error: " + str(e)}), 500
 
 
 def read_overall_data_department_analysis_csv_files():
@@ -931,3 +957,6 @@ def dashboard_data_overall():
 
     # @desc: Get the unique department
     department_list = list(set(department_list))
+
+    print(department_list)
+    print(evaluatee_list)
