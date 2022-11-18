@@ -482,7 +482,7 @@ def get_os_browser_versions():
     """
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
-           datetime.now().strftime("%A, %I:%M:%S %p")
+        datetime.now().strftime("%A, %I:%M:%S %p")
 
 
 def error_message(error_class: BaseException | BaseException | TracebackType,
