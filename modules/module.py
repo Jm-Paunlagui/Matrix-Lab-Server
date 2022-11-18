@@ -1,6 +1,7 @@
 import os
 import re
 from datetime import datetime
+from types import TracebackType
 
 import pyotp
 import pytz
@@ -481,4 +482,19 @@ def get_os_browser_versions():
     """
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
-        datetime.now().strftime("%A, %I:%M:%S %p")
+           datetime.now().strftime("%A, %I:%M:%S %p")
+
+
+def error_message(error_class: BaseException | BaseException | TracebackType,
+                  line_error: int, function_name: str, file_name: str):
+    """
+    Get the error message.
+
+    :param error_class: The error class
+    :param line_error: The line number of the error
+    :param function_name: The function name of the error
+    :param file_name: The file name of the error
+    :return: The error message
+    """
+
+    return f"Error type {error_class} at line {line_error} in function {function_name} in file {file_name}."

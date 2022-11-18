@@ -1,6 +1,8 @@
+import inspect
 import math
 import os
 import pickle
+import sys
 
 import pandas as pd
 
@@ -10,7 +12,7 @@ from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
 from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvErrorModel
-from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation
+from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message
 from keras.models import load_model
 import nltk
 import numpy as np
@@ -39,7 +41,7 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     return True if csv else False
 
 
-def error_handler(csv_id: int, error_occurred: str, name_of: str):
+def error_handler(error_occurred: str, name_of: str):
     """
     Log the error to the database.
 
@@ -47,7 +49,7 @@ def error_handler(csv_id: int, error_occurred: str, name_of: str):
     :param error_occurred: The error occurred
     :param name_of: The name of the error
     """
-    db.session.add(CsvErrorModel(csv_id=csv_id, csv_error=error_occurred, name_of=name_of))
+    db.session.add(CsvErrorModel(csv_error=error_occurred, name_of=name_of))
     db.session.commit()
     return jsonify({"status": "error", "message": error_occurred}), 500
 
@@ -286,8 +288,8 @@ def professor_analysis(csv_name: str, csv_question: str, csv_file_path: str, sch
         if row["evaluatee"] not in department_of_each_professor:
             department_of_each_professor[row["evaluatee"]] = row["department"]
 
-        # if row["evaluatee"] not in course_code_of_each_professor:
-        #     course_code_of_each_professor[row["evaluatee"]] = []
+        if row["evaluatee"] not in course_code_of_each_professor:
+            course_code_of_each_professor[row["evaluatee"]] = []
 
         if row["course_code"] not in course_code_of_each_professor[row["evaluatee"]]:
             course_code_of_each_professor[row["evaluatee"]].append(row["course_code"])
@@ -547,7 +549,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                      csv_question + "_" + school_year + "_" + school_semester + ".csv"
         pathp: str = app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Professors_" + \
                      csv_question + "_" + school_year + "_" + school_semester + ".csv"
-        csv_id = CsvModel.query.filter_by(csv_file_path=path).first().csv_id
         # @desc: Delete the csv file from the folder
         for file in [path, pathd, pathp]:
             if os.path.exists(file):
@@ -559,10 +560,9 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         db.session.commit()
         error_handler(
-            csv_id=csv_id,
-            error_occurred="Error in the process of evaluating the csv file with the error: " + str(e),
-            name_of=csv_question+"_"+school_year+"_"+school_semester + ".csv"
-        )
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__))
         return jsonify({"status": "error",
                         "message": "Error in the process of evaluating the csv file with the error: " + str(e)}), 500
 
