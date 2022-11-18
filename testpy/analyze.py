@@ -686,7 +686,7 @@ def get_top_department_by_file(file_number: int):
     :return: The top department by file
     """
     # paginate in ascending order from the latest file to the oldest file (reverse=True)
-    csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
+    csv_files = CsvModel.query.order_by(CsvModel.csv_id).paginate(
         page=file_number, per_page=1)
 
     # @desc: Get the sentiment of each department
