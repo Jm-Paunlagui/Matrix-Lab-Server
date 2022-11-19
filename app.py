@@ -5,7 +5,8 @@ from controllers.csv_routes import (
     getting_all_data_from_csv,
     getting_top_department_overall,
     getting_top_professor_overall,
-    getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data
+    getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
+    viewing_csv_file, deleting_csv_file, downloading_csv_file
 )
 from controllers.user_routes import (
     authenticate,
@@ -44,6 +45,16 @@ app.add_url_rule("/data/get-top-department-by-file",
                  view_func=getting_top_department_by_file, methods=["POST"])
 app.add_url_rule("/data/get-top-professors-by-file",
                  view_func=getting_top_professor_by_file, methods=["POST"])
+app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>",
+                 view_func=getting_list_of_csv_files, methods=["GET"])
+app.add_url_rule("/data/view-csv-file/<int:csv_id>",
+                 view_func=viewing_csv_file, methods=["GET"])
+# @desc: Delete csv file
+app.add_url_rule("/data/delete-csv-file/<int:csv_id>",
+                 view_func=deleting_csv_file, methods=["DELETE"])
+# @desc: Download csv file
+app.add_url_rule("/data/download-csv-file/<int:csv_id>",
+                 view_func=downloading_csv_file, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

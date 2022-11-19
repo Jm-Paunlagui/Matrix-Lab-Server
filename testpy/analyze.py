@@ -515,6 +515,12 @@ def count_overall_positive_negative():
     negative_percentage = round(
         (negative / (positive + negative)) * 100, 2) if negative > 0 else "0"
 
+    print(f"P: {positive} N: {negative}")
+    print(f"Positive: {positive_percentage}%")
+    print(f"Negative: {negative_percentage}%")
+    print(f"Total: {positive + negative}")
+
+
     return positive, negative, positive_percentage, negative_percentage
 
 

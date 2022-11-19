@@ -57,7 +57,7 @@ class CsvDepartmentModel(db.Model):
     """
 
     __tablename__ = 'csvs_department'
-    csv_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    csv_id: int = db.Column(db.Integer, primary_key=True)
     csv_name: str = db.Column(db.String(255), nullable=False)
     csv_question: str = db.Column(db.String(255), nullable=False)
     csv_file_path: str = db.Column(db.Text, nullable=False)

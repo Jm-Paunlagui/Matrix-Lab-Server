@@ -1,7 +1,8 @@
 from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, \
     read_overall_data_department_analysis_csv_files, read_overall_data_professor_analysis_csv_files, \
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
-    options_read_single_data, dashboard_data_overall
+    options_read_single_data, dashboard_data_overall, list_csv_files_to_view_and_delete_pagination, \
+    to_view_selected_csv_file, to_delete_selected_csv_file, to_download_selected_csv_file
 from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
@@ -126,3 +127,31 @@ def getting_top_professor_by_file():
     if not InputTextValidation(csv_question).validate_empty_fields():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
     return read_single_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
+
+
+def getting_list_of_csv_files(page: int):
+    """
+    Get the list of csv files.
+    """
+    return list_csv_files_to_view_and_delete_pagination(page)
+
+
+def viewing_csv_file(csv_id: int):
+    """
+    View the csv file.
+    """
+    return to_view_selected_csv_file(csv_id)
+
+
+def deleting_csv_file(csv_id: int):
+    """
+    Delete the csv file.
+    """
+    return to_delete_selected_csv_file(csv_id)
+
+
+def downloading_csv_file(csv_id: int):
+    """
+    Download the csv file.
+    """
+    return to_download_selected_csv_file(csv_id)
