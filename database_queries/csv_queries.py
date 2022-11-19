@@ -1023,7 +1023,8 @@ def to_delete_selected_csv_file(csv_id: int):
         db.session.delete(department_file)
         db.session.commit()
 
-        return jsonify({"status": "success", "message": "Successfully deleted the selected csv file."}), 200
+        return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
+                                                        + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
@@ -1108,7 +1109,7 @@ def dashboard_data_overall():
         course_code for course_code_list in department_evaluatee_course_code for course_code in course_code_list]
 
     department_evaluatee_course_code = sum(
-        department_evaluatee_course_code) / len(csv_department_files)
+        department_evaluatee_course_code) / len(csv_department_files) if len(csv_department_files) > 0 else 0
 
     # @desc: Get the total number of department_number_of_sentiments
     department_number_of_sentiments = [
@@ -1121,7 +1122,8 @@ def dashboard_data_overall():
         for number_of_sentiments_list in department_number_of_sentiments
         for number_of_sentiments in number_of_sentiments_list]
 
-    department_number_of_sentiments = sum(department_number_of_sentiments)
+    department_number_of_sentiments = sum(department_number_of_sentiments) if len(
+        department_number_of_sentiments) > 0 else 0
 
     department_positive_sentiments_percentage = sum(
         [pd.read_csv(csv_department_file.csv_file_path)["department_positive_sentiments_percentage"].tolist()
@@ -1134,18 +1136,20 @@ def dashboard_data_overall():
     department_positive_sentiments_percentage = round(
         sum(department_positive_sentiments_percentage) /
         len(actual_department_list), 2
-    )
+    ) if len(actual_department_list) > 0 else 0
     department_negative_sentiments_percentage = round(
         sum(department_negative_sentiments_percentage) /
         len(actual_department_list), 2
-    )
+    ) if len(actual_department_list) > 0 else 0
 
     # @desc: Get the total number of positive sentiments and negative sentiments based on the percentage
     department_positive_sentiments = round(
-        department_number_of_sentiments * (department_positive_sentiments_percentage / 100))
+        department_number_of_sentiments * (department_positive_sentiments_percentage / 100)) \
+        if department_number_of_sentiments and department_positive_sentiments_percentage else 0
 
     department_negative_sentiments = round(
-        department_number_of_sentiments * (department_negative_sentiments_percentage / 100))
+        department_number_of_sentiments * (department_negative_sentiments_percentage / 100)) \
+        if department_number_of_sentiments and department_negative_sentiments_percentage else 0
 
     # @desc: Get the total number of csv files in the database
     csv_files = CsvModel.query.all()
