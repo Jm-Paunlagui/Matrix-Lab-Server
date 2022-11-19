@@ -520,7 +520,6 @@ def count_overall_positive_negative():
     print(f"Negative: {negative_percentage}%")
     print(f"Total: {positive + negative}")
 
-
     return positive, negative, positive_percentage, negative_percentage
 
 
