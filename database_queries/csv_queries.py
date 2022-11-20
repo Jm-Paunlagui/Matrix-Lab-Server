@@ -941,7 +941,7 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
 def list_csv_files_to_view_and_delete_pagination(page: int):
     try:
         csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
-            page=page, per_page=10, error_out=False)
+            page=page, per_page=3, error_out=False)
 
         list_of_csv_files = [
             {
@@ -1060,10 +1060,11 @@ def to_download_selected_csv_file(csv_id: int):
 
         temp_file.seek(0)
         return send_file(
-            temp_file, as_attachment=True,
+            path_or_file=temp_file, as_attachment=True,
             download_name=csv_file.csv_question + "_" +
             csv_file.school_year + "_" + csv_file.school_semester + ".zip",
-            mimetype="application/zip"), 200
+            mimetype="application/zip",
+        ), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
