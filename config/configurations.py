@@ -1,3 +1,4 @@
+from models import user_model, csv_model
 import os
 import socket
 
@@ -51,7 +52,8 @@ if not os.path.exists(app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"]):
 if not os.path.exists(app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"]):
     os.makedirs(app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"])
 if not os.path.exists(app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"]):
-    os.makedirs(app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"])
+    os.makedirs(
+        app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"])
 
 # @desc: Email configuration for the Flask app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
@@ -98,7 +100,6 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
 # from models import user_model, csv_model
-from models import user_model, csv_model
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
