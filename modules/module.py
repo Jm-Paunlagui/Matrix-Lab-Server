@@ -291,13 +291,13 @@ class InputTextValidation:
         """
         return self.user_input.replace("SY", "S.Y. ")
 
-    def to_query_school_semester(self):
+    def to_query_space_under(self):
         """
         Converts the school semester to a query.
 
         :return: The school semester as a query
         """
-        return self.user_input.replace(" ", "_")
+        return self.user_input.replace(" ", "_").replace(",", "")
 
     def to_readable_school_semester(self):
         """
