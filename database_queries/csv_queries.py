@@ -1043,22 +1043,19 @@ def list_csv_files_to_view_and_delete_pagination(page: int):
 
 def to_view_selected_csv_file(csv_id: int):
     try:
-        csv_file = CsvModel.query.filter_by(csv_id=csv_id).first()
         professor_file = CsvProfessorModel.query.filter_by(
             csv_id=csv_id).first()
         department_file = CsvDepartmentModel.query.filter_by(
             csv_id=csv_id).first()
 
-        if csv_file is None and professor_file is None and department_file is None:
+        if professor_file is None and department_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
 
-        csv_file = pd.read_csv(csv_file.csv_file_path)
         professor_file = pd.read_csv(professor_file.csv_file_path)
         department_file = pd.read_csv(department_file.csv_file_path)
 
         return jsonify({
             "status": "success",
-            "csv_file": csv_file.to_dict(orient="records"),
             "professor_file": professor_file.to_dict(orient="records"),
             "department_file": department_file.to_dict(orient="records")
         }), 200
