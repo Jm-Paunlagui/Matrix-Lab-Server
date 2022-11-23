@@ -844,6 +844,9 @@ def read_overall_data_professor_analysis_csv_files():
 
 
 def options_read_single_data():
+    """
+    Options for the read single data route.
+    """
     csv_file = CsvModel.query.all()
 
     # @desc: Do not return duplicate school_year, school_semester, and csv_question
@@ -894,6 +897,13 @@ def options_read_single_data():
 
 
 def read_single_data_department_analysis_csv_files(school_year: str, school_semester: str, csv_question: str):
+    """
+    @desc: Reads a single csv file and returns the data in a json format
+    :param school_year: str
+    :param school_semester: str
+    :param csv_question: str
+    :return: list
+    """
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -949,6 +959,13 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
 
 
 def read_single_data_professor_analysis_csv_files(school_year: str, school_semester: str, csv_question: str):
+    """
+    @desc: Read the csv file
+    :param school_year: str
+    :param school_semester: str
+    :param csv_question: str
+    :return: json
+    """
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -1004,6 +1021,11 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
 
 
 def list_csv_files_to_view_and_delete_pagination(page: int):
+    """
+    @desc: List all csv files to view, download, and delete in pagination.
+    :param page: The page number.
+    :return: A list of csv files.
+    """
     try:
         csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
             page=page, per_page=3, error_out=False)
@@ -1042,6 +1064,11 @@ def list_csv_files_to_view_and_delete_pagination(page: int):
 
 
 def to_view_selected_csv_file(csv_id: int):
+    """
+    @desc: To view the selected csv file
+    :param csv_id: The id of the csv file
+    :return: The csv file
+    """
     try:
         professor_file = CsvProfessorModel.query.filter_by(
             csv_id=csv_id).first()
@@ -1070,6 +1097,11 @@ def to_view_selected_csv_file(csv_id: int):
 
 
 def to_delete_selected_csv_file(csv_id: int):
+    """
+    @desc: Delete the selected csv file
+    :param csv_id: The id of the csv file
+    :return: A json response
+    """
     try:
         csv_file = CsvModel.query.filter_by(csv_id=csv_id).first()
         professor_file = CsvProfessorModel.query.filter_by(
@@ -1102,6 +1134,11 @@ def to_delete_selected_csv_file(csv_id: int):
 
 
 def to_download_selected_csv_file(csv_id: int):
+    """
+    This function is used to download the selected csv file.
+    :param csv_id: The id of the csv file to be downloaded.
+    :return: The selected csv file.
+    """
     try:
         csv_file = CsvModel.query.filter_by(csv_id=csv_id).first()
         professor_file = CsvProfessorModel.query.filter_by(
@@ -1135,6 +1172,43 @@ def to_download_selected_csv_file(csv_id: int):
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to download the selected csv file."}), 500
+
+
+def list_csv_file_to_read(csv_id: int, folder_name: str):
+    """
+    This function is used to list the csv file to read.
+    :param csv_id: The id of the csv file.
+    :param folder_name: The name of the folder.
+    :return: The list of the csv file.
+    """
+    try:
+        main_directory = CsvCollectionModel.query.filter_by(
+            csv_id=csv_id).first()
+        file_path = os.path.join(main_directory.csv_file_path, folder_name)
+        file_list = os.listdir(file_path)
+
+        file_list_to_read = [
+            {
+                "id": index,
+                "file_name": file_name,
+                "file_title": file_name.split(".")[0].replace("_", " ").title(),
+                "url_friendly_file_name": file_name.split(".")[0].replace(" ", "_").lower()
+            } for index, file_name in enumerate(file_list)
+        ]
+
+        return jsonify({
+            "status": "success",
+            "file_path": file_path,
+            "file_list": file_list_to_read,
+        }), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to view the directory."}), 500
 
 
 def dashboard_data_overall():
