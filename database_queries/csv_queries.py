@@ -1211,6 +1211,42 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                         "message": "An error occurred while trying to view the directory."}), 500
 
 
+def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
+    """
+    This function is used to read the csv file using pandas.
+    :param csv_id: The id of the csv file.
+    :param folder_name: The name of the folder.
+    :param file_name: The name of the file.
+    :return: The csv file.
+    """
+    try:
+        main_directory = CsvCollectionModel.query.filter_by(
+            csv_id=csv_id).first()
+        file_path = os.path.join(main_directory.csv_file_path, folder_name)
+        file_path = os.path.join(file_path, file_name)
+
+        df = pd.read_csv(file_path)
+
+        sentiments_list = [{
+            "id": index,
+            "sentiment": sentiment,
+            "sentences": sentences,
+        } for index, (sentiment, sentences) in enumerate(zip(df["sentiment"], df["sentence"]))]
+
+        return jsonify({
+            "status": "success",
+            "sentiments_list": sentiments_list,
+        }), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to read the csv file."}), 500
+
+
 def dashboard_data_overall():
     # @desc: Read all the csv file in the database for professor
     csv_professor_files = CsvProfessorModel.query.all()
