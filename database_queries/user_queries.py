@@ -216,7 +216,7 @@ def authenticated_user():
     user_id: int = session.get('user_id')
     if user_id is None:
         return False
-    user_data: User = User.query.filter_by(user_id=user_id).first()    
+    user_data: User = User.query.filter_by(user_id=user_id).first()
     payload = {
         "sub": "user",
         "token": "true", "id": user_data.user_id,
@@ -239,7 +239,8 @@ def password_reset_link(email: str):
     if not check_email_exists(email):
         return False
     full_name: User = User.query.with_entities(User.full_name).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)
+        (User.email == email) | (User.secondary_email == email) | (
+            User.recovery_email == email)
     ).first().full_name.split()[0]
     payload = {
         "iss": "http://127.0.0.1:5000",
