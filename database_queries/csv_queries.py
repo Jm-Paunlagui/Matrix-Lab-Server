@@ -1266,35 +1266,35 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                         "message": "An error occurred while trying to read the csv file."}), 500
 
 
-def list_evaluatees_to_create():
+def list_evaluatees_to_create(page: int):
     """
     This function is used to list the evaluatees to create.
     :return: The list of the evaluatees to create.
     """
     try:
-        expected_users = CsvProfessorModel.query.all()
+        # @desc: Get users where role is user
+        users = User.query.filter_by(role="user").paginate(
+            page=page, per_page=20, error_out=False)
 
-        # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee
-        # column and return a list of evaluatees
-        evaluatees = [pd.read_csv(file.csv_file_path)["evaluatee_list"].tolist() for file in expected_users]
-
-        # @desc: Flatten the list of evaluatees
-        evaluatees = [evaluatee for evaluatees in evaluatees for evaluatee in evaluatees]
-
-        # @desc: Remove the duplicates
-        evaluatees = list(set(evaluatees))
-
-        # @desc: Sort the list of evaluatees
-        evaluatees.sort()
-
-        evaluatee_list = [{
-            "id": index,
-            "evaluatee": evaluatee,
-        } for index, evaluatee in enumerate(evaluatees)]
+        # @desc: Get users where role is user and is not in the evaluatee table
+        evaluatees_to_create = [
+            {
+                "id": user.user_id,
+                "full_name": user.full_name,
+                "role": user.role,
+            } for user in users
+        ]
 
         return jsonify({
             "status": "success",
-            "evaluatee_list": evaluatee_list,
+            "evaluatees_to_create": evaluatees_to_create,
+            "total_pages": users.pages,
+            "current_page": users.page,
+            "has_next": users.has_next,
+            "has_prev": users.has_prev,
+            "next_page": users.next_num,
+            "prev_page": users.prev_num,
+            "total_items": users.total,
         }), 200
 
     except Exception as e:

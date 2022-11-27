@@ -172,8 +172,8 @@ def reading_csv_file(csv_id: int, folder_name: str, file_name: str):
     return to_read_csv_file(csv_id, folder_name, file_name)
 
 
-def getting_list_of_evaluatees():
+def getting_list_of_evaluatees(page: int):
     """
     Get the list of evaluatees.
     """
-    return list_evaluatees_to_create()
+    return list_evaluatees_to_create(page)

@@ -62,7 +62,7 @@ app.add_url_rule("/data/get-list-of-taught-courses/<int:csv_id>/<string:folder_n
 app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>",
                  view_func=reading_csv_file, methods=["GET"])
 # @desc: User Management routes
-app.add_url_rule("/data/user-list",
+app.add_url_rule("/data/list-of-users-to-view/<int:page>",
                  view_func=getting_list_of_evaluatees, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
@@ -77,7 +77,7 @@ app.add_url_rule("/user/get_user",
                  view_func=get_authenticated_user, methods=["GET"])
 app.add_url_rule("/user/remove-email-from-account",
                  view_func=remove_email_from_account, methods=["POST"])
-app.add_url_rule("/user/reset-password/<token>",
+app.add_url_rule("/user/reset-password/<string:token>",
                  view_func=reset_password, methods=["POST"])
 app.add_url_rule("/user/sign-out",
                  view_func=signout, methods=["POST"])
@@ -93,9 +93,9 @@ app.add_url_rule("/user/update-username",
                  view_func=update_user_username, methods=["PUT"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
-app.add_url_rule("/user/verify-remove-account-token/<token>",
+app.add_url_rule("/user/verify-remove-account-token/<string:token>",
                  view_func=verify_remove_account_token, methods=["GET"])
-app.add_url_rule("/user/verify-reset-password-token/<token>",
+app.add_url_rule("/user/verify-reset-password-token/<string:token>",
                  view_func=verify_reset_password_token, methods=["GET"])
 
 # Press the green button in the gutter to run the script.
