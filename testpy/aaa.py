@@ -15,10 +15,8 @@
 #
 # professor_analysis(file_name, csv_question,
 #                    csv_file_path, school_year, school_semester)
-import inspect
+from modules.module import PasswordBcrypt
 
-print(f"1 {inspect.stack()[0][1]}")
-print(f"2 {inspect.stack()[0][2]}")
-print(f"3 {inspect.stack()[0][3]}")
-print(f"4 {inspect.stack()[0][4]}")
-print(f"5 {inspect.stack()[0][4][0].strip()}")
+password = PasswordBcrypt().password_generator
+
+print(password)

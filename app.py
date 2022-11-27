@@ -6,7 +6,8 @@ from controllers.csv_routes import (
     getting_top_department_overall,
     getting_top_professor_overall,
     getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
-    viewing_csv_file, deleting_csv_file, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file
+    viewing_csv_file, deleting_csv_file, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
+    getting_list_of_evaluatees
 )
 from controllers.user_routes import (
     authenticate,
@@ -60,6 +61,9 @@ app.add_url_rule("/data/get-list-of-taught-courses/<int:csv_id>/<string:folder_n
                  view_func=list_of_csv_files_to_view, methods=["GET"])
 app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>",
                  view_func=reading_csv_file, methods=["GET"])
+# @desc: User Management routes
+app.add_url_rule("/data/user-list",
+                 view_func=getting_list_of_evaluatees, methods=["GET"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

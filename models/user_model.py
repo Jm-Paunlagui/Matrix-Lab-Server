@@ -41,5 +41,5 @@ class User(db.Model):
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.secondary_email}', '{self.recovery_email}', " \
-               f"'{self.first_name}', '{self.last_name}', '{self.username}', '{self.password}', '{self.role}', " \
-               f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
+               f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', " \
+               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
