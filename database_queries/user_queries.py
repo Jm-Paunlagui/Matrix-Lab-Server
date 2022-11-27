@@ -2,10 +2,11 @@ import uuid
 from datetime import datetime, timedelta
 
 import jwt
-from config.configurations import app, db, mail
-from flask import session, jsonify
+from flask import jsonify, session
 from flask_mail import Message
 from flask_session import Session
+
+from config.configurations import app, db, mail
 from models.user_model import User
 from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
                             ToptCode, get_os_browser_versions)
@@ -77,12 +78,12 @@ def check_email_exists_by_username(username: str):
     return False
 
 
-def create_user(email: str, first_name: str, last_name: str, username: str, password: str, role: str):
+def create_user(email: str, full_name: str, username: str, password: str, role: str):
     """Creates a new user in the database."""
     if check_email_exists(email):
         return False
     hashed_password = PasswordBcrypt(password=password).password_hasher()
-    new_user = User(email=email, first_name=first_name, last_name=last_name, username=username,
+    new_user = User(email=email, full_name=full_name, username=username,
                     password=hashed_password, role=role)
     db.session.add(new_user)
     db.session.commit()
@@ -215,13 +216,13 @@ def authenticated_user():
     user_id: int = session.get('user_id')
     if user_id is None:
         return False
-    user_data: User = User.query.filter_by(user_id=user_id).first()
+    user_data: User = User.query.filter_by(user_id=user_id).first()    
     payload = {
         "sub": "user",
         "token": "true", "id": user_data.user_id,
         "email": user_data.email, "secondary_email": user_data.secondary_email,
-        "recovery_email": user_data.recovery_email, "first_name": user_data.first_name,
-        "last_name": user_data.last_name, "username": user_data.username, "role": user_data.role, "path": redirect_to(),
+        "recovery_email": user_data.recovery_email, "full_name": user_data.full_name,
+        "username": user_data.username, "role": user_data.role, "path": redirect_to(),
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=24)),
         "jti": str(uuid.uuid4())
@@ -237,8 +238,9 @@ def password_reset_link(email: str):
     """
     if not check_email_exists(email):
         return False
-    first_name: User = User.query.with_entities(User.first_name).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first().first_name
+    full_name: User = User.query.with_entities(User.full_name).filter(
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)
+    ).first().full_name.split()[0]
     payload = {
         "iss": "http://127.0.0.1:5000",
         "sub": email,
@@ -266,7 +268,7 @@ def password_reset_link(email: str):
     cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff; border-radius:3px;
     text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,
     .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1
-    style="color:#5d6068;font-weight:700;text-align:left">Hi {first_name},</h1> <p style="color:#878a92;margin:.4em 0
+    style="color:#5d6068;font-weight:700;text-align:left">Hi {full_name},</h1> <p style="color:#878a92;margin:.4em 0
     2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password
     for your Matrix account. Use the button below to reset it. <strong>This password reset is only valid for the next
     24 hours.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
@@ -307,7 +309,7 @@ def password_reset(password_reset_token: str, password: str):
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
                 User.recovery_email == email["sub"])
         ).first()
-        email_name = intoken.first_name
+        email_name = intoken.full_name
         if intoken.password_reset_token == password_reset_token:
             intoken.password = hashed_password
             intoken.password_reset_token = None
@@ -383,9 +385,9 @@ def redirect_to():
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
-            return "/admin/dashboard"
+            return "/admin/analytics"
         case 'user':
-            return "/user/dashboard"
+            return "/user/analytics"
     return "/"
 
 
@@ -495,10 +497,10 @@ def update_password(old_password: str, new_password: str):
     return False
 
 
-def update_personal_info(email: str, first_name: str, last_name: str):
+def update_personal_info(email: str, full_name: str, last_name: str):
     """Updates the personal information of the user"""
     user_id: int = session.get("user_id")
-    user: User = User.query.with_entities(User.email, User.first_name, User.last_name) \
+    user: User = User.query.with_entities(User.email, User.full_name, User.last_name) \
         .filter(User.user_id == user_id).first()
     if user_id is None and user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
@@ -506,8 +508,7 @@ def update_personal_info(email: str, first_name: str, last_name: str):
         return jsonify({"status": "warn", "message": "Email already exists"}), 409
     User.query.filter_by(user_id=user_id).update({
         User.email: email,
-        User.first_name: first_name,
-        User.last_name: last_name
+        User.full_name: full_name,
     })
     db.session.commit()
     return jsonify({"status": "success",

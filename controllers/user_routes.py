@@ -1,3 +1,5 @@
+from flask import jsonify, request
+
 from database_queries.user_queries import (authenticate_user,
                                            authenticated_user,
                                            check_email_exists,
@@ -7,11 +9,13 @@ from database_queries.user_queries import (authenticate_user,
                                            has_emails, password_reset,
                                            password_reset_link, redirect_to,
                                            remove_email, remove_session,
-                                           send_tfa, verify_remove_token, verify_authenticated_token,
-                                           verify_tfa, update_password, update_personal_info,
-                                           update_security_info, update_username, verify_reset_token
-                                           )
-from flask import jsonify, request
+                                           send_tfa, update_password,
+                                           update_personal_info,
+                                           update_security_info,
+                                           update_username,
+                                           verify_authenticated_token,
+                                           verify_remove_token,
+                                           verify_reset_token, verify_tfa)
 from modules.module import InputTextValidation
 
 
@@ -156,13 +160,12 @@ def signup():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     email = request.json['email']
-    first_name = request.json['first_name']
-    last_name = request.json['last_name']
+    full_name = request.json['full_name']
     username = request.json['username']
     password = request.json['password']
     role = request.json['role']
 
-    if not InputTextValidation().validate_empty_fields(email, first_name, last_name, username, password, role):
+    if not InputTextValidation().validate_empty_fields(email, full_name, username, password, role):
         return jsonify({"status": "error", "message": "Please fill in all the fields!"}), 400
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
@@ -170,13 +173,11 @@ def signup():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
     if not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Follow the password rules below!"}), 400
-    if not InputTextValidation(first_name).validate_text():
+    if not InputTextValidation(full_name).validate_text():
         return jsonify({"status": "error", "message": "Invalid first name!"}), 400
-    if not InputTextValidation(last_name).validate_text():
-        return jsonify({"status": "error", "message": "Invalid last name!"}), 400
     if not InputTextValidation(role).validate_text():
         return jsonify({"status": "error", "message": "Invalid role!"}), 400
-    if not create_user(email, first_name, last_name, username, password, role):
+    if not create_user(email, full_name, username, password, role):
         return jsonify({"status": "warn", "message": "Email already exists!"}), 409
     return jsonify({"status": "success", "message": "User account created successfully."}), 201
 
@@ -205,16 +206,13 @@ def update_user_personal_info():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     email = request.json["email"]
-    first_name = request.json["first_name"]
-    last_name = request.json["last_name"]
+    full_name = request.json["full_name"]
 
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not InputTextValidation(first_name).validate_text():
+    if not InputTextValidation(full_name).validate_text():
         return jsonify({"status": "error", "message": "Invalid first name!"}), 400
-    if not InputTextValidation(last_name).validate_text():
-        return jsonify({"status": "error", "message": "Invalid last name!"}), 400
-    return update_personal_info(email, first_name, last_name)
+    return update_personal_info(email, full_name, )
 
 
 def update_user_security_info():

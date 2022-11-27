@@ -10,8 +10,7 @@ class User(db.Model):
     email: User email address (unique) varchar(255)
     secondary_email: User secondary email address (unique) varchar(255) default "Secondary Email"
     recovery_email: User recovery email address (unique) varchar(255) default "Recovery Email"
-    first_name: User first name varchar(255)
-    last_name: User last name varchar(255)
+    full_name: User full name (unique) varchar(255)
     username: User username (unique) varchar(255)
     password: User password varchar(255)
     role: User role (default: user) varchar(255)
@@ -28,8 +27,7 @@ class User(db.Model):
     secondary_email: str = db.Column(
         db.String(255), unique=True, nullable=True)
     recovery_email: str = db.Column(db.String(255), unique=True, nullable=True)
-    first_name: str = db.Column(db.String(255), nullable=False)
-    last_name: str = db.Column(db.String(255), nullable=False)
+    full_name: str = db.Column(db.String(255), unique=True, nullable=True)
     username: str = db.Column(db.String(255), unique=True, nullable=False)
     password: str = db.Column(db.String(255), nullable=False)
     role: str = db.Column(db.String(255), nullable=False, default="user")
