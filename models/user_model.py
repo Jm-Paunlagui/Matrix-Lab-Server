@@ -29,7 +29,7 @@ class User(db.Model):
     recovery_email: str = db.Column(db.String(255), unique=True, nullable=True)
     full_name: str = db.Column(db.String(255), unique=True, nullable=True)
     username: str = db.Column(db.String(255), unique=True, nullable=False)
-    password: str = db.Column(db.String(255), nullable=False)
+    password: str = db.Column(db.String(255), nullable=True)
     role: str = db.Column(db.String(255), nullable=False, default="user")
     created_at: str = db.Column(db.DateTime, nullable=False,
                                 default=Timezone("Asia/Manila").get_timezone_current_time())
