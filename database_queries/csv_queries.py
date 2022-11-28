@@ -1305,6 +1305,8 @@ def list_evaluatees_to_create(page: int):
             {
                 "id": user.user_id,
                 "full_name": user.full_name,
+                "email": user.email,
+                "username": user.username,
                 "role": user.role,
             } for user in users
         ]
@@ -1444,6 +1446,99 @@ def dashboard_data_overall():
          "year": starting_year + " - " + ending_year, "icon": "fas fa-face-frown"}
     ]
 
+    # @desc: Get the total number of sentiments each department has every year
+    # department_sentiments = [
+    #     {
+    #         "school_year": school_year,
+    #         "departments": [
+    #             {
+    #                 "index": index,
+    #                 "department": department,
+    #                 "sentiments": sentiments
+    #             }
+    #             for index, (department, sentiments) in enumerate(
+    #                 zip(
+    #                     pd.read_csv(csv_department_files.csv_file_path)["department_list"].tolist(),
+    #                     pd.read_csv(csv_department_files.csv_file_path)["department_number_of_sentiments"].tolist()
+    #                 )
+    #             )
+    #         ]
+    #     }
+    # ]
+
+    # # @desc: Get the total number of sentiments each department has every year
+    # department_sentiments_percentage = [
+    #     {
+    #         "school_year": school_year,
+    #         "departments": [
+    #             {
+    #                 "index": index,
+    #                 "department": department,
+    #                 "sentiments": sentiments
+    #             }
+    #             for index, (department, sentiments) in enumerate(
+    #                 zip(
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_number_of_sentiments_percentage"].tolist()
+    #                 )
+    #             )
+    #         ]
+    #     }
+    #     for school_year, csv_department_file in zip(
+    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
+    #         csv_department_files
+    #     )
+    # ]
+    #
+    # # @desc: Get the total number of sentiments each department has every year
+    # department_positive_sentiments_percentage = [
+    #     {
+    #         "school_year": school_year,
+    #         "departments": [
+    #             {
+    #                 "index": index,
+    #                 "department": department,
+    #                 "sentiments": sentiments
+    #             }
+    #             for index, (department, sentiments) in enumerate(
+    #                 zip(
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_positive_sentiments_percentage"].tolist()
+    #                 )
+    #             )
+    #         ]
+    #     }
+    #     for school_year, csv_department_file in zip(
+    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
+    #         csv_department_files
+    #     )
+    # ]
+    #
+    # # @desc: Get the total number of sentiments each department has every year
+    # department_negative_sentiments_percentage = [
+    #     {
+    #         "school_year": school_year,
+    #         "departments": [
+    #             {
+    #                 "index": index,
+    #                 "department": department,
+    #                 "sentiments": sentiments
+    #             }
+    #             for index, (department, sentiments) in enumerate(
+    #                 zip(
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
+    #                     pd.read_csv(csv_department_file.csv_file_path)["department_number_of_sentiments"].tolist()
+    #                 )
+    #             )
+    #         ]
+    #     }
+    #     for school_year, csv_department_file in zip(
+    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
+    #         csv_department_files
+    #     )
+    # ]
+
     return jsonify({
-        "status": "success", "details": four_top_details, "overall_sentiments": sentiment_details
+        "status": "success", "details": four_top_details, "overall_sentiments": sentiment_details,
+        # "department_sentiments": department_sentiments
     }), 200
