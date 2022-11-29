@@ -18,6 +18,8 @@ class User(db.Model):
     created_at: User created date timestamp
     updated_at: User updated date timestamp
     flag_deleted: User deleted flag (default: 0) tinyint
+    flag_locked: User locked flag (default: 0) tinyint
+    flag_active: User active flag (default: 0) tinyint
     password_reset_token: User password reset token text
     security_code: User security code varchar(255)
     """
@@ -37,11 +39,14 @@ class User(db.Model):
                                 default=Timezone("Asia/Manila").get_timezone_current_time())
     updated_at: str = db.Column(db.DateTime, nullable=False,
                                 default=Timezone("Asia/Manila").get_timezone_current_time())
-    flag_deleted = db.Column(db.Boolean, nullable=False, default=False)
-    password_reset_token = db.Column(db.Text, nullable=True)
+    flag_deleted: bool = db.Column(db.Boolean, nullable=False, default=False)
+    flag_locked: bool = db.Column(db.Boolean, nullable=False, default=False)
+    flag_active: bool = db.Column(db.Boolean, nullable=False, default=False)
+    password_reset_token: str = db.Column(db.Text, nullable=True)
 
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.secondary_email}', '{self.recovery_email}', " \
                f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.department}', " \
-               f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
+               f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.flag_locked}', " \
+               f"'{self.flag_active}', '{self.password_reset_token}')"

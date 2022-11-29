@@ -24,8 +24,10 @@ from controllers.user_routes import (
     update_user_security_info,
     update_user_username,
     verify_remove_account_token,
-    verify_security_code, verify_reset_password_token,
+    verify_security_code, verify_reset_password_token, one_click_create, lock_user_account_by_id,
+    unlock_user_account_by_id,
 )
+from database_queries.user_queries import lock_user_account
 from testpy.analyze import get_top_professors_by_file
 
 # @desc: CSV routes for uploading csv files
@@ -64,6 +66,13 @@ app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<st
 # @desc: User Management routes
 app.add_url_rule("/data/list-of-users-to-view/<int:page>",
                  view_func=getting_list_of_evaluatees, methods=["GET"])
+
+app.add_url_rule("/user/on-click-create/<int:user_id>",
+                 view_func=one_click_create, methods=["POST"])
+app.add_url_rule("/user/lock-account/<int:user_id>",
+                 view_func=lock_user_account_by_id, methods=["POST"])
+app.add_url_rule("/user/unlock-account/<int:user_id>",
+                 view_func=unlock_user_account_by_id, methods=["POST"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

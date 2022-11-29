@@ -379,10 +379,11 @@ def professor_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_p
         email = str(evaluatee_email[index]).replace(
             "[", "").replace("]", "").replace("'", "")
         full_name = evaluatee.replace(",", " ").title()
+        department_of_each_professor = evaluatee_department[index]
         if not User.query.filter_by(email=email).first():
             username = email.split("@")[0]
             new_user = User(username=username, email=email,
-                            full_name=full_name, role="user")
+                            full_name=full_name, role="user", department=department_of_each_professor)
             db.session.add(new_user)
 
     # @desc: Create a dataframe
@@ -1308,6 +1309,12 @@ def list_evaluatees_to_create(page: int):
                 "email": user.email,
                 "username": user.username,
                 "role": user.role,
+                "department_name": user.department,
+                "is_locked": user.flag_locked,
+                "is_active": user.flag_active,
+                "is_deleted": user.flag_deleted,
+                "created_at": user.created_at,
+                "updated_at": user.updated_at,
             } for user in users
         ]
 

@@ -15,7 +15,8 @@ from database_queries.user_queries import (authenticate_user,
                                            update_username,
                                            verify_authenticated_token,
                                            verify_remove_token,
-                                           verify_reset_token, verify_tfa)
+                                           verify_reset_token, verify_tfa, create_user_auto_generated_password,
+                                           lock_user_account, unlock_user_account)
 from modules.module import InputTextValidation
 
 
@@ -180,6 +181,27 @@ def signup():
     if not create_user(email, full_name, username, password, role):
         return jsonify({"status": "warn", "message": "Email already exists!"}), 409
     return jsonify({"status": "success", "message": "User account created successfully."}), 201
+
+
+def one_click_create(user_id: int):
+    """Creates a new user account by one-click registration."""
+    if not create_user_auto_generated_password(user_id):
+        return jsonify({"status": "error", "message": "User account already exists!"}), 409
+    return jsonify({"status": "success", "message": "User account created successfully."}), 201
+
+
+def lock_user_account_by_id(user_id: int):
+    """Locks the user account by id."""
+    if not lock_user_account(user_id):
+        return jsonify({"status": "error", "message": "Account already locked!"}), 409
+    return jsonify({"status": "success", "message": "User account locked successfully."}), 200
+
+
+def unlock_user_account_by_id(user_id: int):
+    """Unlocks the user account by id."""
+    if not unlock_user_account(user_id):
+        return jsonify({"status": "error", "message": "Account already unlocked!"}), 409
+    return jsonify({"status": "success", "message": "User account unlocked successfully."}), 200
 
 
 def update_user_password():
