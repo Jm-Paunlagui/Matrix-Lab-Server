@@ -14,6 +14,7 @@ class User(db.Model):
     username: User username (unique) varchar(255)
     password: User password varchar(255)
     role: User role (default: user) varchar(255)
+    department: User department (default: None) varchar(255)
     created_at: User created date timestamp
     updated_at: User updated date timestamp
     flag_deleted: User deleted flag (default: 0) tinyint
@@ -31,6 +32,7 @@ class User(db.Model):
     username: str = db.Column(db.String(255), unique=True, nullable=False)
     password: str = db.Column(db.String(255), nullable=True)
     role: str = db.Column(db.String(255), nullable=False, default="user")
+    department: str = db.Column(db.String(255), nullable=True, default=None)
     created_at: str = db.Column(db.DateTime, nullable=False,
                                 default=Timezone("Asia/Manila").get_timezone_current_time())
     updated_at: str = db.Column(db.DateTime, nullable=False,
@@ -41,5 +43,5 @@ class User(db.Model):
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.secondary_email}', '{self.recovery_email}', " \
-               f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.created_at}', " \
-               f"'{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
+               f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.department}', " \
+               f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.password_reset_token}')"
