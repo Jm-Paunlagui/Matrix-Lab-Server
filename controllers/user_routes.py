@@ -16,7 +16,8 @@ from database_queries.user_queries import (authenticate_user,
                                            verify_authenticated_token,
                                            verify_remove_token,
                                            verify_reset_token, verify_tfa, create_user_auto_generated_password,
-                                           lock_user_account, unlock_user_account)
+                                           lock_user_account, unlock_user_account, delete_user_account,
+                                           restore_user_account)
 from modules.module import InputTextValidation
 
 
@@ -202,6 +203,20 @@ def unlock_user_account_by_id(user_id: int):
     if not unlock_user_account(user_id):
         return jsonify({"status": "error", "message": "Account already unlocked!"}), 409
     return jsonify({"status": "success", "message": "User account unlocked successfully."}), 200
+
+
+def delete_user_account_by_id(user_id: int):
+    """Deletes the user account by id."""
+    if not delete_user_account(user_id):
+        return jsonify({"status": "error", "message": "User account not found!"}), 404
+    return jsonify({"status": "success", "message": "User account deleted successfully."}), 200
+
+
+def restore_user_account_by_id(user_id: int):
+    """Restores the user account by id."""
+    if not restore_user_account(user_id):
+        return jsonify({"status": "error", "message": "User account not found!"}), 404
+    return jsonify({"status": "success", "message": "User account restored successfully."}), 200
 
 
 def update_user_password():

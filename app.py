@@ -25,10 +25,8 @@ from controllers.user_routes import (
     update_user_username,
     verify_remove_account_token,
     verify_security_code, verify_reset_password_token, one_click_create, lock_user_account_by_id,
-    unlock_user_account_by_id,
+    unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id,
 )
-from database_queries.user_queries import lock_user_account
-from testpy.analyze import get_top_professors_by_file
 
 # @desc: CSV routes for uploading csv files
 app.add_url_rule("/data/view-columns",
@@ -73,6 +71,10 @@ app.add_url_rule("/user/lock-account/<int:user_id>",
                  view_func=lock_user_account_by_id, methods=["POST"])
 app.add_url_rule("/user/unlock-account/<int:user_id>",
                  view_func=unlock_user_account_by_id, methods=["POST"])
+app.add_url_rule("/user/delete-account/<int:user_id>",
+                 view_func=delete_user_account_by_id, methods=["DELETE"])
+app.add_url_rule("/user/restore-account/<int:user_id>",
+                 view_func=restore_user_account_by_id, methods=["POST"])
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])

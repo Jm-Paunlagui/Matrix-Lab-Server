@@ -103,6 +103,7 @@ def create_user_auto_generated_password(user_id: int):
         name = user.full_name.split()[0]
         email = user.email
         user.password = hashed_password
+        user.flag_active = True
 
         # Send the Welcome Email
         msg = Message('Welcome to Matrix Lab',
@@ -146,7 +147,7 @@ def create_user_auto_generated_password(user_id: int):
 
         mail.send(msg)
         db.session.commit()
-        return new_password
+        return True
     return False
 
 
@@ -246,6 +247,102 @@ def unlock_user_account(user_id: int):
     return False
 
 
+def delete_user_account(user_id: int):
+    """Deletes the user's account by flagging the user's account as deleted."""
+
+    user = User.query.filter_by(user_id=user_id).first()
+
+    if check_user_id_exists(user_id) and user.flag_deleted is False:
+        name = user.full_name.split()[0]
+        email = user.email
+        user.flag_deleted = True
+        # Send the Delete Account Email
+        msg = Message('Matrix Lab Account Deleted',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
+
+        msg.html = f""" <!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+        http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+        style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" 
+        width="100%" bgcolor="#f2f3f8" style="@import url(
+        'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap
+        ');font-family:Montserrat,sans-serif"><tr><td><table style="background-color:#f2f3f8;max-width:670px;margin:0 
+        auto;padding:auto" width="100%" border="0" align="center" cellpadding="0" cellspacing="0"><tr><td 
+        style="height:30px">&nbsp;</td></tr><tr><td style="text-align:center"><a href="https://rakeshmandal.com" 
+        title="logo" target="_blank"><img width="60" 
+        src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+        alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" 
+        align="center" cellpadding="0" cellspacing="0" 
+        style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
+        rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
+        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        Matrix account has been deleted. You can no longer login and view your sentiment analysis results. If you 
+        wish to continue using Matrix, please contact your administrator to restore your account.</p><p 
+        style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
+        auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+        2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact technical 
+        support by email:<b><a style="text-decoration:none;color:#878a92" 
+        href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+        style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+        <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+        style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 
+        0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+        Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
+        """
+        
+        mail.send(msg)
+        db.session.commit()
+        return True
+    return False
+
+
+def restore_user_account(user_id: int):
+    """Restores the user's account by unflagging the user's account as deleted."""
+
+    user = User.query.filter_by(user_id=user_id).first()
+    if check_user_id_exists(user_id) and user.flag_deleted is True:
+        name = user.full_name.split()[0]
+        email = user.email
+        user.flag_deleted = False
+        # Send the Unlock Account Email
+        msg = Message('Matrix Lab Account Unlocked',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
+
+        msg.html = f""" <!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+        http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+        style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" 
+        width="100%" bgcolor="#f2f3f8" style="@import url(
+        'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap
+        ');font-family:Montserrat,sans-serif"><tr><td><table style="background-color:#f2f3f8;max-width:670px;margin:0 
+        auto;padding:auto" width="100%" border="0" align="center" cellpadding="0" cellspacing="0"><tr><td 
+        style="height:30px">&nbsp;</td></tr><tr><td style="text-align:center"><a href="https://rakeshmandal.com" 
+        title="logo" target="_blank"><img width="60" 
+        src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+        alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" 
+        align="center" cellpadding="0" cellspacing="0" 
+        style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
+        rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
+        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        Matrix account has been restored. You can now login and view your sentiment analysis results.</p><p 
+        style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
+        auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+        2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact technical 
+        support by email:<b><a style="text-decoration:none;color:#878a92" 
+        href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+        style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+        <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+        style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 
+        0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+        Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
+        """
+
+        mail.send(msg)
+        db.session.commit()
+        return True
+    return False
+
+
 def delete_user_permanently(user_id: int):
     """Deletes the user's account permanently."""
     if check_user_id_exists(user_id):
@@ -261,16 +358,6 @@ def list_flag_deleted_users():
     """Lists all the users that have been flagged as deleted."""
     flag_deleted_users: User = User.query.filter_by(flag_deleted=True).all()
     return flag_deleted_users
-
-
-def restore_user(user_id: int):
-    """Restores the user's account by unflagging the user's account as deleted."""
-    if check_user_id_exists(user_id):
-        restore_user_id: User = User.query.filter_by(user_id=user_id).first()
-        restore_user_id.flag_deleted = False
-        db.session.commit()
-        return True
-    return False
 
 
 def authenticate_user(username: str, password: str):
