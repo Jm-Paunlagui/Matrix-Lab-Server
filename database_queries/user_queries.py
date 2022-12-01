@@ -731,10 +731,10 @@ def update_password(old_password: str, new_password: str):
     return False
 
 
-def update_personal_info(email: str, full_name: str, last_name: str):
+def update_personal_info(email: str, full_name: str):
     """Updates the personal information of the user"""
     user_id: int = session.get("user_id")
-    user: User = User.query.with_entities(User.email, User.full_name, User.last_name) \
+    user: User = User.query.with_entities(User.email, User.full_name) \
         .filter(User.user_id == user_id).first()
     if user_id is None and user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
