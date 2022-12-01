@@ -25,7 +25,9 @@ from controllers.user_routes import (
     update_user_username,
     verify_remove_account_token,
     verify_security_code, verify_reset_password_token, one_click_create, lock_user_account_by_id,
-    unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id,
+    unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id, one_click_create_all,
+    lock_all_user_account, unlock_all_user_account, delete_all_user_account,
+    restore_all_user_account,
 )
 
 # @desc: CSV routes for uploading csv files
@@ -75,6 +77,19 @@ app.add_url_rule("/user/delete-account/<int:user_id>",
                  view_func=delete_user_account_by_id, methods=["DELETE"])
 app.add_url_rule("/user/restore-account/<int:user_id>",
                  view_func=restore_user_account_by_id, methods=["POST"])
+# @desc: Mass user management
+app.add_url_rule("/user/mass-create-all",
+                 view_func=one_click_create_all, methods=["POST"])
+app.add_url_rule("/user/mass-lock-account",
+                 view_func=lock_all_user_account, methods=["POST"])
+app.add_url_rule("/user/mass-unlock-account",
+                 view_func=unlock_all_user_account, methods=["POST"])
+app.add_url_rule("/user/mass-delete-account",
+                 view_func=delete_all_user_account, methods=["DELETE"])
+app.add_url_rule("/user/mass-restore-account",
+                 view_func=restore_all_user_account, methods=["POST"])
+
+
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",
                  view_func=authenticate, methods=["POST"])
