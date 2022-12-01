@@ -289,7 +289,7 @@ def delete_user_account(user_id: int):
         0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
         Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
         """
-        
+
         mail.send(msg)
         db.session.commit()
         return True
