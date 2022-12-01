@@ -17,7 +17,9 @@ from database_queries.user_queries import (authenticate_user,
                                            verify_remove_token,
                                            verify_reset_token, verify_tfa, create_user_auto_generated_password,
                                            lock_user_account, unlock_user_account, delete_user_account,
-                                           restore_user_account)
+                                           restore_user_account, create_all_users_auto_generated_password,
+                                           lock_all_user_accounts, unlock_all_user_accounts, delete_all_user_accounts,
+                                           restore_all_user_accounts)
 from modules.module import InputTextValidation
 
 
@@ -191,11 +193,25 @@ def one_click_create(user_id: int):
     return jsonify({"status": "success", "message": "User account created successfully."}), 201
 
 
+def one_click_create_all():
+    """Creates new user accounts by one-click registration."""
+    if not create_all_users_auto_generated_password():
+        return jsonify({"status": "error", "message": "All user accounts already set up!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts created successfully."}), 201
+
+
 def lock_user_account_by_id(user_id: int):
     """Locks the user account by id."""
     if not lock_user_account(user_id):
         return jsonify({"status": "error", "message": "Account already locked!"}), 409
     return jsonify({"status": "success", "message": "User account locked successfully."}), 200
+
+
+def lock_all_user_account():
+    """Locks all user accounts."""
+    if not lock_all_user_accounts():
+        return jsonify({"status": "error", "message": "All user accounts already locked!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts locked successfully."}), 200
 
 
 def unlock_user_account_by_id(user_id: int):
@@ -205,6 +221,13 @@ def unlock_user_account_by_id(user_id: int):
     return jsonify({"status": "success", "message": "User account unlocked successfully."}), 200
 
 
+def unlock_all_user_account():
+    """Unlocks all user accounts."""
+    if not unlock_all_user_accounts():
+        return jsonify({"status": "error", "message": "All user accounts already unlocked!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts unlocked successfully."}), 200
+
+
 def delete_user_account_by_id(user_id: int):
     """Deletes the user account by id."""
     if not delete_user_account(user_id):
@@ -212,11 +235,25 @@ def delete_user_account_by_id(user_id: int):
     return jsonify({"status": "success", "message": "User account deleted successfully."}), 200
 
 
+def delete_all_user_account():
+    """Deletes all user accounts."""
+    if not delete_all_user_accounts():
+        return jsonify({"status": "error", "message": "All user accounts already deleted temporarily!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts successfully deleted temporarily."}), 200
+
+
 def restore_user_account_by_id(user_id: int):
     """Restores the user account by id."""
     if not restore_user_account(user_id):
         return jsonify({"status": "error", "message": "User account not found!"}), 404
     return jsonify({"status": "success", "message": "User account restored successfully."}), 200
+
+
+def restore_all_user_account():
+    """Restores all user accounts."""
+    if not restore_all_user_accounts():
+        return jsonify({"status": "error", "message": "All user accounts already restored!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts restored successfully."}), 200
 
 
 def update_user_password():

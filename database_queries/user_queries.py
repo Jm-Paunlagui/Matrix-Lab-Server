@@ -1,3 +1,5 @@
+import inspect
+import sys
 import uuid
 from datetime import datetime, timedelta
 
@@ -7,9 +9,10 @@ from flask_mail import Message
 from flask_session import Session
 
 from config.configurations import app, db, mail
+from database_queries.csv_queries import error_handler
 from models.user_model import User
 from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
-                            ToptCode, get_os_browser_versions)
+                            ToptCode, get_os_browser_versions, error_message)
 
 # desc: Session configuration
 server_session = Session(app)
@@ -151,6 +154,26 @@ def create_user_auto_generated_password(user_id: int):
     return False
 
 
+def create_all_users_auto_generated_password():
+    """Creates a new user in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            create_user_auto_generated_password(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
+
+
 def lock_user_account(user_id: int):
     """Deletes the user's account by flagging the user's account as deleted."""
 
@@ -199,6 +222,26 @@ def lock_user_account(user_id: int):
     return False
 
 
+def lock_all_user_accounts():
+    """Locks all user accounts in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            lock_user_account(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
+
+
 def unlock_user_account(user_id: int):
     """Deletes the user's account by flagging the user's account as deleted."""
 
@@ -245,6 +288,26 @@ def unlock_user_account(user_id: int):
         db.session.commit()
         return True
     return False
+
+
+def unlock_all_user_accounts():
+    """Unlocks all user accounts in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            unlock_user_account(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
 
 
 def delete_user_account(user_id: int):
@@ -296,6 +359,26 @@ def delete_user_account(user_id: int):
     return False
 
 
+def delete_all_user_accounts():
+    """Deletes all user accounts in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            delete_user_account(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
+
+
 def restore_user_account(user_id: int):
     """Restores the user's account by unflagging the user's account as deleted."""
 
@@ -341,6 +424,26 @@ def restore_user_account(user_id: int):
         db.session.commit()
         return True
     return False
+
+
+def restore_all_user_accounts():
+    """Restores all user accounts in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            restore_user_account(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
 
 
 def delete_user_permanently(user_id: int):
