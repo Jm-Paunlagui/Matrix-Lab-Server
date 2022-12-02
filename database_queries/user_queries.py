@@ -589,6 +589,11 @@ def authenticate_user(username: str, password: str):
         if is_user.flag_locked:
             return jsonify({"status": "error",
                             "message": "Your account has been locked. Please contact the administrator."}), 401
+        if is_user.flag_active:
+            return jsonify({
+                "status": "error",
+                "message": "Your account has been deactivated. Please contact the administrator."}), 401
+
     if not PasswordBcrypt(password=password).password_hash_check(is_user.password):
         is_user.login_attempts += 1
         db.session.commit()
@@ -638,10 +643,12 @@ def authenticate_user(username: str, password: str):
             return jsonify({"status": "error", "message": "Account Locked due to multiple failed login attempts. "
                                                           "Please contact your administrator to unlock your account."})
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    session['user_id'] = is_user.user_id
-    # Reset the number of failed login attempts to 0 if the user successfully logs in.
-    is_user.login_attempts = 0
-    return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
+    else:
+        session['user_id'] = is_user.user_id
+        # Reset the number of failed login attempts to 0 if the user successfully logs in.
+        is_user.login_attempts = 0
+        return jsonify(
+            {"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
 def send_tfa(email: str):
