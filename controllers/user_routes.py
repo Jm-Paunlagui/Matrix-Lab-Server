@@ -19,7 +19,7 @@ from database_queries.user_queries import (authenticate_user,
                                            lock_user_account, unlock_user_account, delete_user_account,
                                            restore_user_account, create_all_users_auto_generated_password,
                                            lock_all_user_accounts, unlock_all_user_accounts, delete_all_user_accounts,
-                                           restore_all_user_accounts)
+                                           restore_all_user_accounts, deactivate_user, deactivate_all_users)
 from modules.module import InputTextValidation
 
 
@@ -35,9 +35,9 @@ def authenticate():
         return jsonify({"status": "error", "message": "All fields are required!"}), 400
     if not InputTextValidation(username).validate_username() or not InputTextValidation(password).validate_password():
         return jsonify({"status": "error", "message": "Not a valid username or password!"}), 400
-    if not authenticate_user(username, password):
-        return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
+    return authenticate_user(username, password)
+    #     return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
+    # return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
 def check_email():
@@ -189,15 +189,29 @@ def signup():
 def one_click_create(user_id: int):
     """Creates a new user account by one-click registration."""
     if not create_user_auto_generated_password(user_id):
-        return jsonify({"status": "error", "message": "User account already exists!"}), 409
-    return jsonify({"status": "success", "message": "User account created successfully."}), 201
+        return jsonify({"status": "error", "message": "User account already activated!"}), 409
+    return jsonify({"status": "success", "message": "User account successfully activated."}), 201
 
 
 def one_click_create_all():
     """Creates new user accounts by one-click registration."""
     if not create_all_users_auto_generated_password():
-        return jsonify({"status": "error", "message": "All user accounts already set up!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts created successfully."}), 201
+        return jsonify({"status": "error", "message": "All user accounts already activated!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts successfully activated."}), 201
+
+
+def one_click_deactivate(user_id: int):
+    """Deactivates a user account by one-click deactivation."""
+    if not deactivate_user(user_id):
+        return jsonify({"status": "error", "message": "User account already deactivated!"}), 409
+    return jsonify({"status": "success", "message": "User account deactivated successfully."}), 200
+
+
+def one_click_deactivate_all():
+    """Deactivates all user accounts by one-click deactivation."""
+    if not deactivate_all_users():
+        return jsonify({"status": "error", "message": "All user accounts already deactivated!"}), 409
+    return jsonify({"status": "success", "message": "All user accounts deactivated successfully."}), 200
 
 
 def lock_user_account_by_id(user_id: int):

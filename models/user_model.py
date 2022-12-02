@@ -21,7 +21,7 @@ class User(db.Model):
     flag_locked: User locked flag (default: 0) tinyint
     flag_active: User active flag (default: 0) tinyint
     password_reset_token: User password reset token text
-    security_code: User security code varchar(255)
+    login_attempts: User login attempts (default: 0) tinyint
     """
 
     __tablename__ = 'users'
@@ -43,10 +43,11 @@ class User(db.Model):
     flag_locked: bool = db.Column(db.Boolean, nullable=False, default=False)
     flag_active: bool = db.Column(db.Boolean, nullable=False, default=False)
     password_reset_token: str = db.Column(db.Text, nullable=True)
+    login_attempts: int = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.secondary_email}', '{self.recovery_email}', " \
                f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.department}', " \
                f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.flag_locked}', " \
-               f"'{self.flag_active}', '{self.password_reset_token}')"
+               f"'{self.flag_active}', '{self.password_reset_token}', '{self.login_attempts}')"

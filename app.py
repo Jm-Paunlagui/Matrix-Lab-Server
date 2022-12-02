@@ -27,7 +27,7 @@ from controllers.user_routes import (
     verify_security_code, verify_reset_password_token, one_click_create, lock_user_account_by_id,
     unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id, one_click_create_all,
     lock_all_user_account, unlock_all_user_account, delete_all_user_account,
-    restore_all_user_account,
+    restore_all_user_account, one_click_deactivate_all, one_click_deactivate,
 )
 
 # @desc: CSV routes for uploading csv files
@@ -69,6 +69,8 @@ app.add_url_rule("/data/list-of-users-to-view/<int:page>",
 
 app.add_url_rule("/user/on-click-create/<int:user_id>",
                  view_func=one_click_create, methods=["POST"])
+app.add_url_rule("/user/on-click-deactivate/<int:user_id>",
+                 view_func=one_click_deactivate, methods=["POST"])
 app.add_url_rule("/user/lock-account/<int:user_id>",
                  view_func=lock_user_account_by_id, methods=["POST"])
 app.add_url_rule("/user/unlock-account/<int:user_id>",
@@ -80,6 +82,8 @@ app.add_url_rule("/user/restore-account/<int:user_id>",
 # @desc: Mass user management
 app.add_url_rule("/user/mass-create-all",
                  view_func=one_click_create_all, methods=["POST"])
+app.add_url_rule("/user/mass-deactivate-all",
+                 view_func=one_click_deactivate_all, methods=["POST"])
 app.add_url_rule("/user/mass-lock-account",
                  view_func=lock_all_user_account, methods=["POST"])
 app.add_url_rule("/user/mass-unlock-account",

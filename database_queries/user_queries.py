@@ -151,6 +151,46 @@ def create_user_auto_generated_password(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    elif check_user_id_exists(user_id) and user.password is not None and user.flag_active is False:
+        name = user.full_name.split()[0]
+        email = user.email
+        user.flag_active = True
+
+        msg = Message('Matrix Lab Account Re-Activated',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
+
+        msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+        http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+        style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" 
+        width="100%" bgcolor="#f2f3f8" style="@import url(
+        'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap
+        ');font-family:Montserrat,sans-serif"><tr><td><table style="background-color:#f2f3f8;max-width:670px;margin:0 
+        auto;padding:auto" width="100%" border="0" align="center" cellpadding="0" cellspacing="0"><tr><td 
+        style="height:30px">&nbsp;</td></tr><tr><td style="text-align:center"><a href="https://rakeshmandal.com" 
+        title="logo" target="_blank"><img width="60" 
+        src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+        alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" 
+        align="center" cellpadding="0" cellspacing="0" 
+        style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
+        rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
+        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        Matrix account has been Re-Activated by the admin. You can now view your sentiment scores.</p><p 
+        style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
+        auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+        2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact technical 
+        support by email:<b><a style="text-decoration:none;color:#878a92" 
+        href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+        style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+        <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+        style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 
+        0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+        Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
+        """
+
+        mail.send(msg)
+        db.session.commit()
+        return True
     return False
 
 
@@ -164,6 +204,74 @@ def create_all_users_auto_generated_password():
         for user in users:
             user = user[0]
             create_user_auto_generated_password(user)
+        return True
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return False
+
+
+def deactivate_user(user_id: int):
+    """Deactivates a user in the database."""
+
+    user = User.query.filter_by(user_id=user_id).first()
+
+    if check_user_id_exists(user_id) and user.flag_active is not False:
+        name = user.full_name.split()[0]
+        email = user.email
+        user.flag_active = False
+        # Send the Lock Account Email
+        msg = Message('Matrix Lab Account Deactivated',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
+
+        msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+        http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+        style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" 
+        width="100%" bgcolor="#f2f3f8" style="@import url(
+        'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap
+        ');font-family:Montserrat,sans-serif"><tr><td><table style="background-color:#f2f3f8;max-width:670px;margin:0 
+        auto;padding:auto" width="100%" border="0" align="center" cellpadding="0" cellspacing="0"><tr><td 
+        style="height:30px">&nbsp;</td></tr><tr><td style="text-align:center"><a href="https://rakeshmandal.com" 
+        title="logo" target="_blank"><img width="60" 
+        src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+        alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" 
+        align="center" cellpadding="0" cellspacing="0" 
+        style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
+        rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
+        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        Matrix account has been Deactivated by the admin. Please contact the admin for more details.</p><p 
+        style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
+        auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+        2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact technical 
+        support by email:<b><a style="text-decoration:none;color:#878a92" 
+        href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+        style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+        <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+        style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 
+        0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+        Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
+        """
+
+        mail.send(msg)
+        db.session.commit()
+        return True
+    return False
+
+
+def deactivate_all_users():
+    """Deactivates a user in the database."""
+
+    # Get all users with a role of 'user'
+    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
+
+    try:
+        for user in users:
+            user = user[0]
+            deactivate_user(user)
         return True
     except Exception as e:
         error_handler(
@@ -251,6 +359,7 @@ def unlock_user_account(user_id: int):
         name = user.full_name.split()[0]
         email = user.email
         user.flag_locked = False
+        user.login_attempts = 0
         # Send the Unlock Account Email
         msg = Message('Matrix Lab Account Unlocked',
                       sender="service.matrix.ai@gmail.com", recipients=[email])
@@ -466,15 +575,73 @@ def list_flag_deleted_users():
 def authenticate_user(username: str, password: str):
     """
     Authenticates the user's credentials by checking if the username and password exists in the database
-    and if the user's account is not flagged as deleted.
+    and if the user's account is not flagged as deleted and is not locked.
     """
     is_user: User = User.query.filter_by(username=username).first()
-    if is_user is None:
-        return False
-    if not PasswordBcrypt(password=password).password_hash_check(is_user.password) or is_user.flag_deleted:
-        return False
+
+    # Count the number of failed login attempts of the user and lock the account if the number of failed login attempts
+    # is greater than or equal to 5.
+
+    if is_user:
+        if is_user.flag_deleted:
+            return jsonify({"status": "error",
+                            "message": "Your account has been deleted. Please contact the administrator."}), 401
+        if is_user.flag_locked:
+            return jsonify({"status": "error",
+                            "message": "Your account has been locked. Please contact the administrator."}), 401
+    if not PasswordBcrypt(password=password).password_hash_check(is_user.password):
+        is_user.login_attempts += 1
+        db.session.commit()
+        if is_user.login_attempts >= 5:
+            name = is_user.full_name.split()[0]
+            email = is_user.email
+            is_user.flag_locked = True
+            source = get_os_browser_versions()
+            msg = Message('Matrix Lab Account Locked',
+                          sender="service.matrix.ai@gmail.com", recipients=[email])
+
+            msg.html = f"""<!doctype html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+            http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+            style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
+            cellpadding="0" width="100%" bgcolor="#f2f3f8" style="@import url(
+            'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display
+            =swap');font-family:Montserrat,sans-serif"><tr><td><table 
+            style="background-color:#f2f3f8;max-width:670px;margin:0 auto;padding:auto" width="100%" border="0" 
+            align="center" cellpadding="0" cellspacing="0"><tr><td style="height:30px">&nbsp;</td></tr><tr><td 
+            style="text-align:center"><a href="https://rakeshmandal.com" title="logo" target="_blank"><img width="60" 
+            src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+            alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" 
+            border="0" align="center" cellpadding="0" cellspacing="0" 
+            style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 
+            0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
+            .06)"><tr><td style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+            </h2><p style="color:#878a92;margin:.4em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple attempts to login to your 
+            account, we decided to lock your account for security reasons. Please contact your administrator to 
+            unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
+            .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this login attempt was received 
+            from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b
+            >.</p><p style="color:#878a92;margin:.4em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did not attempt to login to your 
+            account, please change your password immediately. or contact technical support by email:<b><a 
+            style="text-decoration:none;color:#878a92" 
+            href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p 
+            style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks, 
+            <br>The Matrix Lab team</p><hr style="margin-top:12px;margin-bottom:12px"></td></tr></table></td><tr><td 
+            style="height:20px">&nbsp;</td></tr><tr><td style="text-align:center"><p 
+            style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 0">Group 14 - Matrix 
+            Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 Philippines</p></td></tr><tr><td 
+            style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> """
+
+            mail.send(msg)
+            db.session.commit()
+            return jsonify({"status": "error", "message": "Account Locked due to multiple failed login attempts. "
+                                                          "Please contact your administrator to unlock your account."})
+        return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
     session['user_id'] = is_user.user_id
-    return True
+    # Reset the number of failed login attempts to 0 if the user successfully logs in.
+    is_user.login_attempts = 0
+    return jsonify({"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
 def send_tfa(email: str):
