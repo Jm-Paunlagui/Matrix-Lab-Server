@@ -28,7 +28,7 @@ from controllers.user_routes import (
     unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id, one_click_create_all,
     lock_all_user_account, unlock_all_user_account, delete_all_user_account,
     restore_all_user_account, one_click_deactivate_all, one_click_deactivate, send_verification_code,
-    unlock_admin_account,
+    unlock_admin_account, verify_unlock_token,
 )
 
 # @desc: CSV routes for uploading csv files
@@ -132,6 +132,8 @@ app.add_url_rule("/user/verify-remove-account-token/<string:token>",
                  view_func=verify_remove_account_token, methods=["GET"])
 app.add_url_rule("/user/verify-reset-password-token/<string:token>",
                  view_func=verify_reset_password_token, methods=["GET"])
+app.add_url_rule("/user/verify-unlock-token/<string:token>",
+                 view_func=verify_unlock_token, methods=["GET"])
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':

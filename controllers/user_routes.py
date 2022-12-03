@@ -15,12 +15,12 @@ from database_queries.user_queries import (authenticate_user,
                                            update_username,
                                            verify_authenticated_token,
                                            verify_remove_token,
-                                           verify_reset_token, verify_tfa, create_user_auto_generated_password,
+                                           verify_tfa, create_user_auto_generated_password,
                                            lock_user_account, unlock_user_account, delete_user_account,
                                            restore_user_account, create_all_users_auto_generated_password,
                                            lock_all_user_accounts, unlock_all_user_accounts, delete_all_user_accounts,
                                            restore_all_user_accounts, deactivate_user, deactivate_all_users,
-                                           send_email_verification, verify_verification_code_to_unlock)
+                                           send_email_verification, verify_verification_code_to_unlock, verify_token)
 from modules.module import InputTextValidation
 
 
@@ -402,8 +402,17 @@ def verify_remove_account_token(token: str):
 
 def verify_reset_password_token(token: str):
     """Verifies the reset password token that was sent to the user's email address."""
-    user_data = verify_reset_token(token)
+    user_data = verify_token(token)
     if not user_data:
         return jsonify({"status": "error", "message": "Invalid token!"}), 498
     return jsonify({"status": "success", "message": "Token verified successfully",
                     "user_data": {"email": user_data["sub"]}}), 200
+
+
+def verify_unlock_token(token: str):
+    """Verifies the unlock token that was sent to the user's email address."""
+    user_data = verify_token(token)
+    if not user_data:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 498
+    return jsonify({"status": "success", "message": "Token verified successfully",
+                    "user_data": {"name": user_data["sub"]}}), 200

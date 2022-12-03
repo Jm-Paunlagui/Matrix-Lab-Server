@@ -102,8 +102,7 @@ def create_user_auto_generated_password(user_id: int):
         new_password = PasswordBcrypt().password_generator()
         hashed_password = PasswordBcrypt(
             password=new_password).password_hasher()
-        # Get only the fist name of the user
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.password = hashed_password
         user.flag_active = True
@@ -152,7 +151,7 @@ def create_user_auto_generated_password(user_id: int):
         db.session.commit()
         return True
     elif check_user_id_exists(user_id) and user.password is not None and user.flag_active is False:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_active = True
 
@@ -220,7 +219,7 @@ def deactivate_user(user_id: int):
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_active is not False:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_active = False
         # Send the Lock Account Email
@@ -288,7 +287,7 @@ def lock_user_account(user_id: int):
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_locked is not True:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_locked = True
         # Send the Lock Account Email
@@ -356,7 +355,7 @@ def unlock_user_account(user_id: int):
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_locked is True:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_locked = False
         user.login_attempts = 0
@@ -425,7 +424,7 @@ def delete_user_account(user_id: int):
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_deleted is False:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_deleted = True
         # Send the Delete Account Email
@@ -493,7 +492,7 @@ def restore_user_account(user_id: int):
 
     user = User.query.filter_by(user_id=user_id).first()
     if check_user_id_exists(user_id) and user.flag_deleted is True:
-        name = user.full_name.split()[0]
+        name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_deleted = False
         # Send the Unlock Account Email
@@ -602,7 +601,7 @@ def authenticate_user(username: str, password: str):
         is_user.login_attempts += 1
         db.session.commit()
         if is_user.login_attempts >= 5:
-            name = is_user.full_name.split()[0]
+            name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
@@ -625,8 +624,8 @@ def authenticate_user(username: str, password: str):
             0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
             .06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
             </h1><p style="color:#878a92;margin:.4em 0 
-            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple attempts to login to your 
-            account, we decided to lock your account for security reasons. Please contact your administrator to 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple failed attempts to login to 
+            your account, we decided to lock your account for security reasons. Please contact your administrator to 
             unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
             .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this login attempt was received 
             from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b
@@ -652,14 +651,23 @@ def authenticate_user(username: str, password: str):
         is_user.login_attempts += 1
         db.session.commit()
         if is_user.login_attempts >= 5:
-            name = is_user.full_name.split()[0]
+            name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
+            payload = {
+                "iss": "http://127.0.0.1:5000",
+                "sub": name,
+                "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+                "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
+                "jti": str(uuid.uuid4())
+            }
+
+            unlock_token = PayloadSignature(payload=payload).encode_payload()
             msg = Message('Matrix Lab Admin Account Locked',
                           sender="service.matrix.ai@gmail.com", recipients=[email])
 
-            msg.html = f"""<!doctype html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+            msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
             http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
             style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
             cellpadding="0" width="100%" bgcolor="#f2f3f8" style="@import url(
@@ -675,18 +683,26 @@ def authenticate_user(username: str, password: str):
             0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
             .06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
             </h1><p style="color:#878a92;margin:.4em 0 
-            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple attempts to login to your 
-            account, we decided to lock your account for security reasons. Please contact your administrator to 
-            unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple failed attempts to login to 
+            your account, we decided to lock your account for security reasons. Please click on the button below to 
+            unlock your account.</p><a href="{"http://localhost:3000/admin-unlock/" + unlock_token}" 
+            style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform
+            :uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,
+            0,0,.16)">Unlock Account</a><p style="color:#878a92;margin:2.1875em 0 
             .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this login attempt was received 
-            from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b
-            >.</p><p style="color:#878a92;margin:.4em 0 
-            2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did not attempt to login to your 
-            account, please change your password immediately. or contact technical support by email:<b><a 
-            style="text-decoration:none;color:#878a92" 
-            href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p 
-            style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks, 
-            <br>The Matrix Lab team</p><hr style="margin-top:12px;margin-bottom:12px"></td></tr></table></td><tr><td 
+            from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b>{source[4]}</b>.</p>
+            <p style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is 
+            an auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact 
+            technical support by email:<b><a style="text-decoration:none;color:#878a92" 
+            href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 
+            style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+            <br>The Matrix Lab team.</p><hr style="margin-top:12px;margin-bottom:12px"><p 
+            style="color:#878a92;margin:.4em 0 1.1875em;font-size:13px;line-height:1.625;text-align:left">If 
+            you&#39;re having trouble with the button above, copy and paste the URL below into your web 
+            browser.</p><p style="color:#878a92;margin:.4em 0 
+            1.1875em;font-size:13px;line-height:1.625;text-align:left">
+            {"http://localhost:3000/admin-unlock/" + unlock_token}</p></td></tr></table></td></tr><tr><td 
             style="height:20px">&nbsp;</td></tr><tr><td style="text-align:center"><p 
             style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 0">Group 14 - Matrix 
             Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 Philippines</p></td></tr><tr><td 
@@ -853,7 +869,7 @@ def verify_verification_code_to_unlock(code: str, email: str):
             hashed_password = PasswordBcrypt(
                 password=new_password).password_hasher()
             # Get only the fist name of the user
-            name = is_email.full_name.split()[0]
+            name = is_email.full_name.split()[0] + " " + is_email.full_name.split()[1][0]
             is_email.password = hashed_password
             is_email.flag_locked = False
             msg = Message('Your account has been unlocked - Matrix Lab',
@@ -931,10 +947,11 @@ def password_reset_link(email: str):
     """
     if not check_email_exists(email):
         return False
-    full_name: User = User.query.with_entities(User.full_name).filter(
+    is_user: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
                 User.recovery_email == email)
-    ).first().full_name.split()[0]
+    ).first()
+    name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
     payload = {
         "iss": "http://127.0.0.1:5000",
         "sub": email,
@@ -962,7 +979,7 @@ def password_reset_link(email: str):
     cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff; border-radius:3px;
     text-align:center;-webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,
     .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1
-    style="color:#5d6068;font-weight:700;text-align:left">Hi {full_name},</h1> <p style="color:#878a92;margin:.4em 0
+    style="color:#5d6068;font-weight:700;text-align:left">Hi {name},</h1> <p style="color:#878a92;margin:.4em 0
     2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password
     for your Matrix account. Use the button below to reset it. <strong>This password reset is only valid for the next
     24 hours.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
@@ -1003,7 +1020,7 @@ def password_reset(password_reset_token: str, password: str):
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
                     User.recovery_email == email["sub"])
         ).first()
-        email_name = intoken.full_name
+        email_name = intoken.full_name.split()[0] + " " + intoken.full_name.split()[1]
         if intoken.password_reset_token == password_reset_token:
             intoken.password = hashed_password
             intoken.password_reset_token = None
@@ -1104,7 +1121,7 @@ def verify_remove_token(token: str):
         return False
 
 
-def verify_reset_token(token: str):
+def verify_token(token: str):
     """Verifies the token for the user to reset their password."""
     try:
         user_info: dict = PayloadSignature(encoded=token).decode_payload()
