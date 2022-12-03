@@ -933,7 +933,7 @@ def password_reset_link(email: str):
         return False
     full_name: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
-                User.recovery_email == email)
+            User.recovery_email == email)
     ).first().full_name.split()[0]
     payload = {
         "iss": "http://127.0.0.1:5000",
@@ -1001,7 +1001,7 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         intoken: User = User.query.filter(
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
-                    User.recovery_email == email["sub"])
+                User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.full_name
         if intoken.password_reset_token == password_reset_token:
