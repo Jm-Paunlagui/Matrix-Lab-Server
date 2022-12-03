@@ -601,7 +601,8 @@ def authenticate_user(username: str, password: str):
         is_user.login_attempts += 1
         db.session.commit()
         if is_user.login_attempts >= 5:
-            name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
+            name = is_user.full_name.split(
+            )[0] + " " + is_user.full_name.split()[1]
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
@@ -651,7 +652,8 @@ def authenticate_user(username: str, password: str):
         is_user.login_attempts += 1
         db.session.commit()
         if is_user.login_attempts >= 5:
-            name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
+            name = is_user.full_name.split(
+            )[0] + " " + is_user.full_name.split()[1]
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
@@ -869,7 +871,8 @@ def verify_verification_code_to_unlock(code: str, email: str):
             hashed_password = PasswordBcrypt(
                 password=new_password).password_hasher()
             # Get only the fist name of the user
-            name = is_email.full_name.split()[0] + " " + is_email.full_name.split()[1][0]
+            name = is_email.full_name.split(
+            )[0] + " " + is_email.full_name.split()[1][0]
             is_email.password = hashed_password
             is_email.flag_locked = False
             msg = Message('Your account has been unlocked - Matrix Lab',
@@ -949,7 +952,7 @@ def password_reset_link(email: str):
         return False
     is_user: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
-                User.recovery_email == email)
+            User.recovery_email == email)
     ).first()
     name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
     payload = {
@@ -1018,9 +1021,10 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         intoken: User = User.query.filter(
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
-                    User.recovery_email == email["sub"])
+                User.recovery_email == email["sub"])
         ).first()
-        email_name = intoken.full_name.split()[0] + " " + intoken.full_name.split()[1]
+        email_name = intoken.full_name.split(
+        )[0] + " " + intoken.full_name.split()[1]
         if intoken.password_reset_token == password_reset_token:
             intoken.password = hashed_password
             intoken.password_reset_token = None
