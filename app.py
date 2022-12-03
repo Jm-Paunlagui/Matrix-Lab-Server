@@ -27,7 +27,8 @@ from controllers.user_routes import (
     verify_security_code, verify_reset_password_token, one_click_create, lock_user_account_by_id,
     unlock_user_account_by_id, delete_user_account_by_id, restore_user_account_by_id, one_click_create_all,
     lock_all_user_account, unlock_all_user_account, delete_all_user_account,
-    restore_all_user_account, one_click_deactivate_all, one_click_deactivate,
+    restore_all_user_account, one_click_deactivate_all, one_click_deactivate, send_verification_code,
+    unlock_admin_account,
 )
 
 # @desc: CSV routes for uploading csv files
@@ -58,7 +59,7 @@ app.add_url_rule("/data/delete-csv-file/<int:csv_id>",
 # @desc: Download csv file
 app.add_url_rule("/data/download-csv-file/<int:csv_id>",
                  view_func=downloading_csv_file, methods=["GET"])
-# desc: To there directory to view the csv file
+# desc: To their directory to view the csv file
 app.add_url_rule("/data/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>",
                  view_func=list_of_csv_files_to_view, methods=["GET"])
 app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>",
@@ -103,6 +104,8 @@ app.add_url_rule("/user/checkpoint-2fa",
                  view_func=send_security_code, methods=["POST"])
 app.add_url_rule("/user/forgot-password",
                  view_func=forgot_password, methods=["POST"])
+app.add_url_rule("/user/send-verification-code",
+                 view_func=send_verification_code, methods=["POST"])
 app.add_url_rule("/user/get_user",
                  view_func=get_authenticated_user, methods=["GET"])
 app.add_url_rule("/user/remove-email-from-account",
@@ -123,6 +126,8 @@ app.add_url_rule("/user/update-username",
                  view_func=update_user_username, methods=["PUT"])
 app.add_url_rule("/user/verify-2fa",
                  view_func=verify_security_code, methods=["POST"])
+app.add_url_rule("/user/verify-verification-code-to-unlock",
+                 view_func=unlock_admin_account, methods=["POST"])
 app.add_url_rule("/user/verify-remove-account-token/<string:token>",
                  view_func=verify_remove_account_token, methods=["GET"])
 app.add_url_rule("/user/verify-reset-password-token/<string:token>",

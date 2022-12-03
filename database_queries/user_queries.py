@@ -126,13 +126,13 @@ def create_user_auto_generated_password(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">You 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">You 
         are now able to login to your account and view your Sentiment analysis report with Matrix Lab. Please use the 
-        following credentials to login to your account.</p><p 
+        following credentials to login to your account.</p><h2 
         style="color:#5d6068;font-weight:600;text-align:left">Username: <span style="color:#878a92;font-weight:400">
-        {user.username}</span></p><p style="color:#5d6068;font-weight:600;text-align:left">Password: <span 
-        style="color:#878a92;font-weight:400">{new_password}</span></p><a href="http://localhost:3000/auth" 
+        {user.username}</span></h2><h2 style="color:#5d6068;font-weight:600;text-align:left">Password: <span 
+        style="color:#878a92;font-weight:400">{new_password}</span></h2><a href="http://localhost:3000/auth" 
         style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform:uppercase
         ;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,
         .16)">Login</a><p style="color:#878a92;margin:2.1875em 0 
@@ -173,8 +173,8 @@ def create_user_auto_generated_password(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been Re-Activated by the admin. You can now view your sentiment scores.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
         auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -241,8 +241,8 @@ def deactivate_user(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been Deactivated by the admin. Please contact the admin for more details.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
         auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -309,8 +309,8 @@ def lock_user_account(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been locked by the admin. Please contact the admin for more details.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
         auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -378,8 +378,8 @@ def unlock_user_account(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been restored. You can now login and view your sentiment analysis results.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
         auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -446,8 +446,8 @@ def delete_user_account(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been deleted. You can no longer login and view your sentiment analysis results. If you 
         wish to continue using Matrix, please contact your administrator to restore your account.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
@@ -514,8 +514,8 @@ def restore_user_account(user_id: int):
         align="center" cellpadding="0" cellspacing="0" 
         style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
         rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
-        style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-        </h2><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+        </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
         Matrix account has been restored. You can now login and view your sentiment analysis results.</p><p 
         style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
         auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -623,8 +623,8 @@ def authenticate_user(username: str, password: str):
             border="0" align="center" cellpadding="0" cellspacing="0" 
             style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 
             0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
-            .06)"><tr><td style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-            </h2><p style="color:#878a92;margin:.4em 0 
+            .06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+            </h1><p style="color:#878a92;margin:.4em 0 
             2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple attempts to login to your 
             account, we decided to lock your account for security reasons. Please contact your administrator to 
             unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
@@ -673,8 +673,8 @@ def authenticate_user(username: str, password: str):
             border="0" align="center" cellpadding="0" cellspacing="0" 
             style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 
             0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
-            .06)"><tr><td style="padding:35px"><h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
-            </h2><p style="color:#878a92;margin:.4em 0 
+            .06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+            </h1><p style="color:#878a92;margin:.4em 0 
             2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple attempts to login to your 
             account, we decided to lock your account for security reasons. Please contact your administrator to 
             unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
@@ -768,12 +768,140 @@ def send_tfa(email: str):
     return False
 
 
+def send_email_verification(email: str):
+    """Sends a verification to the email that is provided by the user. either primary email or recovery email"""
+    # Check if the email is primary or recovery
+    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+                                              User.username).filter(
+        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
+
+    if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
+        # Generate a link for removing the user's email if not recognized by the user using jwt
+        payload = {
+            "iss": "http://127.0.0.1:5000",
+            "sub": email,
+            "username": is_email[3],
+            "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+            "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
+            "jti": str(uuid.uuid4())
+        }
+        link = PayloadSignature(payload=payload).encode_payload()
+
+        username = is_email[3]
+        source = get_os_browser_versions()
+
+        totp = ToptCode.topt_code()
+
+        # Send the security code to the email
+        msg = Message('Let&#39;s get you back in - Matrix Lab',
+                      sender="service.matrix.ai@gmail.com", recipients=[email])
+
+        msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+        http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+        style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" 
+        width="100%" bgcolor="#f2f3f8" style="@import url(
+        'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display=swap
+        ');font-family:Montserrat,sans-serif"><tr><td><table style="background-color:#f2f3f8;max-width:670px;margin:0 
+        auto;padding:auto" width="100%" border="0" align="center" cellpadding="0" cellspacing="0"><tr><td 
+        style="height:30px">&nbsp;</td></tr><tr><td style="text-align:center"><a href="https://rakeshmandal.com" 
+        title="logo" target="_blank"><img width="60" 
+        src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+        alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" 
+        align="center" cellpadding="0" cellspacing="0" 
+        style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 0 
+        rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
+        style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Let&#39;s get you back 
+        in</h1><p style="color:#878a92;margin:.4em 0 
+        2.1875em;font-size:16px;line-height:1.625;text-align:justify">Please use the verification code for the Matrix 
+        account {username}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Verification code: <span 
+        style="color:#878a92;font-weight:400">{totp}</span></h2><p style="color:#878a92;margin:2.1875em 0 
+        .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this request was received from a <b>
+        {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b>.</p><p 
+        style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did 
+        not recognize this email to your {username}'s email address, you can <a href="{
+        "http://localhost:3000/remove-email-from-account/" + link}" 
+        style="color:#44578b;text-decoration:none;font-weight:700">click here</a> to remove the email address from 
+        that account.</p><p style="color:#878a92;margin:1.1875em 0 
+        .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,<br>The Matrix Lab 
+        team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+        style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 
+        0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+        Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
+        """
+        mail.send(msg)
+        return True
+    return False
+
+
 def verify_tfa(code: str):
     """Verifies the security code that is provided by the user"""
     topt = ToptCode.verify_code(code=code)
     if topt:
         return True
     return False
+
+
+def verify_verification_code_to_unlock(code: str, email: str):
+    """Verifies the verification code that is provided by the user"""
+    topt = ToptCode.verify_code(code=code)
+
+    if topt:
+        is_email = User.query.filter_by(email=email).first()
+        if is_email and is_email.role == "admin":
+            username = is_email.username
+            new_password = PasswordBcrypt().password_generator()
+            hashed_password = PasswordBcrypt(
+                password=new_password).password_hasher()
+            # Get only the fist name of the user
+            name = is_email.full_name.split()[0]
+            is_email.password = hashed_password
+            is_email.flag_locked = False
+            msg = Message('Your account has been unlocked - Matrix Lab',
+                          sender="service.matrix.ai@gmail.com", recipients=[email])
+            msg.html = f""" <!doctype html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+            http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
+            style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
+            cellpadding="0" width="100%" bgcolor="#f2f3f8" style="@import url(
+            'https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&display
+            =swap');font-family:Montserrat,sans-serif"><tr><td><table 
+            style="background-color:#f2f3f8;max-width:670px;margin:0 auto;padding:auto" width="100%" border="0" 
+            align="center" cellpadding="0" cellspacing="0"><tr><td style="height:30px">&nbsp;</td></tr><tr><td 
+            style="text-align:center"><a href="https://rakeshmandal.com" title="logo" target="_blank"><img width="60" 
+            src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" 
+            alt="logo"></a></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" 
+            border="0" align="center" cellpadding="0" cellspacing="0" 
+            style="max-width:670px;background:#fff;border-radius:3px;text-align:center;-webkit-box-shadow:0 6px 18px 
+            0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,
+            .06)"><tr><td style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
+            </h1><p style="color:#878a92;margin:.4em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your account has been successfully unlocked 
+            by verifying your email address and with the help of the verification code sent to your email address 
+            {email}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Username: <span 
+            style="color:#878a92;font-weight:400">{username}</span></h2><h2 
+            style="color:#5d6068;font-weight:600;text-align:left">Password: <span 
+            style="color:#878a92;font-weight:400">{new_password}</span></h2><a href="http://localhost:3000/auth" 
+            style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform
+            :uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,
+            0,0,.16)">Login</a><p style="color:#878a92;margin:2.1875em 0 
+            .4em;font-size:16px;line-height:1.625;text-align:justify">By unlocking your account, we decided to reset 
+            your password for security reasons. You can change your password after logging in.</p><p 
+            style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is 
+            an auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
+            2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, Please email or 
+            contact technical support by email:<b><a style="text-decoration:none;color:#878a92" 
+            href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p 
+            style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
+            <br>The Matrix Lab team</p><hr style="margin-top:12px;margin-bottom:12px"></td></tr></table></td><tr><td 
+            style="height:20px">&nbsp;</td></tr><tr><td style="text-align:center"><p 
+            style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;margin:0 0 0">Group 12 - Matrix 
+            Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 Philippines</p></td></tr><tr><td 
+            style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> """
+
+            mail.send(msg)
+            db.session.commit()
+            return jsonify({"status": "success", "message": "Account unlocked successfully."}), 200
+        return jsonify({"status": "error", "message": "Account not found."}), 404
+    return jsonify({"status": "error", "message": "Invalid verification code."}), 400
 
 
 def authenticated_user():
@@ -805,7 +933,7 @@ def password_reset_link(email: str):
         return False
     full_name: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
-            User.recovery_email == email)
+                User.recovery_email == email)
     ).first().full_name.split()[0]
     payload = {
         "iss": "http://127.0.0.1:5000",
@@ -873,7 +1001,7 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         intoken: User = User.query.filter(
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
-                User.recovery_email == email["sub"])
+                    User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.full_name
         if intoken.password_reset_token == password_reset_token:

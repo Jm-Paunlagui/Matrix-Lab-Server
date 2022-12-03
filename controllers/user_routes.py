@@ -19,7 +19,8 @@ from database_queries.user_queries import (authenticate_user,
                                            lock_user_account, unlock_user_account, delete_user_account,
                                            restore_user_account, create_all_users_auto_generated_password,
                                            lock_all_user_accounts, unlock_all_user_accounts, delete_all_user_accounts,
-                                           restore_all_user_accounts, deactivate_user, deactivate_all_users)
+                                           restore_all_user_accounts, deactivate_user, deactivate_all_users,
+                                           send_email_verification, verify_verification_code_to_unlock)
 from modules.module import InputTextValidation
 
 
@@ -71,6 +72,27 @@ def send_security_code():
     if not send_tfa(email):
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
     return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+
+
+def send_verification_code():
+    """Sends a verification code to the user's email address."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    email = request.json["email"]
+    confirm_email = request.json["confirm_email"]
+
+    if not InputTextValidation().validate_empty_fields(email, confirm_email):
+        return jsonify({"status": "error", "message": "Email address is required!"}), 400
+    if not InputTextValidation(email).validate_email() or not InputTextValidation(confirm_email).validate_email():
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if email != confirm_email:
+        return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
+    if not check_email_exists(email):
+        return jsonify({"status": "warn", "message": "Email address does not exist!"}), 404
+    if not send_email_verification(email):
+        return jsonify({"status": "error", "message": "Verification code not sent!"}), 500
+    return jsonify({"status": "success", "message": "Verification code sent successfully."}), 200
 
 
 def forgot_password():
@@ -350,6 +372,23 @@ def verify_security_code():
                     "path": redirect_to(),
                     "token": authenticated_user(),
                     }), 200
+
+
+def unlock_admin_account():
+    """Unlocks the admin account by inputting the admin's username and password."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    code = request.json["code"]
+    email = request.json["email"]
+
+    if not InputTextValidation().validate_empty_fields(code):
+        return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
+    if not InputTextValidation().validate_empty_fields(email):
+        return jsonify({"status": "error", "message": "Email is required!"}), 400
+    if not InputTextValidation(code).validate_number() and len(code) != 7:
+        return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
+    return verify_verification_code_to_unlock(code, email)
 
 
 def verify_remove_account_token(token: str):
