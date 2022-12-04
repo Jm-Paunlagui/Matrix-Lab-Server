@@ -1067,7 +1067,7 @@ def list_csv_files_to_view_and_delete_pagination(page: int):
     """
     try:
         csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
-            page=page, per_page=3, error_out=False)
+            page=page, per_page=20, error_out=False)
 
         list_of_csv_files = [
             {
