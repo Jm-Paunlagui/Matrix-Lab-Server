@@ -5,6 +5,7 @@ import pickle
 import shutil
 import sys
 import tempfile
+import time
 import zipfile
 from io import BytesIO
 from zipfile import ZipFile
@@ -583,20 +584,24 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     # If any error occurs, delete the file
     try:
         # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
+        # @desc: Get the time of the formatting of the csv file to the required format in seconds and milliseconds
+        start_time = time.time()
+        start_time_pre_formatter = time.time()
         csv_formatter_to_evaluate(file_name, sentence_index)
+        end_time_pre_formatter = time.time()
 
         # @desc: Read the reformatted csv file and return a pandas dataframe object
         csv_to_pred = pd.read_csv(
             app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name)
 
         # remove the rows that have empty values in the sentence column
+        start_time_post_formatter = time.time()
         csv_to_pred = csv_to_pred.dropna(subset=["sentence"])
+        end_time_post_formatter = time.time()
 
+        start_time_tokenizer = time.time()
         tokenizer = pickle.load(open(
             app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/tokenizer.pickle", "rb"))
-
-        model = load_model(
-            app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/model.h5")
 
         # @desc: Get the sentences from the csv file
         sentences = csv_to_pred["sentence"].to_list()
@@ -606,18 +611,33 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Tokenize the sentences
         tokenized_sentences = tokenizer.texts_to_sequences(sentences)
+        end_time_tokenizer = time.time()
 
         # @desc: Pad the tokenized sentences
+        start_time_padding = time.time()
         padded_sentences = pad_sequences(
             tokenized_sentences, maxlen=300, padding='post')
+        end_time_padding = time.time()
+
+        # @desc: Load the model
+        start_time_model = time.time()
+        model = load_model(
+            app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/model.h5")
+        end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences
+        start_time_prediction = time.time()
         predictions = model.predict(padded_sentences)
+        end_time_prediction = time.time()
 
+        # @desc: Get the sentiment of the sentences
+        start_time_sentiment = time.time()
         predictions = [round(round(prediction[0], 4) * 100, 2)
                        for prediction in predictions]
+        end_time_sentiment = time.time()
 
         # @desc: Add the predictions to the csv file
+        start_time_adding_predictions = time.time()
         csv_to_pred["sentiment"] = predictions
 
         # @desc: Path to the csv file
@@ -625,6 +645,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             school_semester + ".csv"
         # @desc: Save the csv file to the folder
         csv_to_pred.to_csv(path, index=False)
+        end_time_adding_predictions = time.time()
 
         # @desc: Delete the reformatted csv file from the reformatted folder
         os.remove(os.path.join(
@@ -637,16 +658,62 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         db.session.commit()
 
         # @desc: For analysis purposes
+        start_time_analysis_user = time.time()
         professor_analysis(csv_file.csv_id, file_name, csv_question,
                            csv_file.csv_file_path, school_year, school_semester)
+        end_time_analysis_user = time.time()
+
+        start_time_analysis_department = time.time()
         department_analysis(csv_file.csv_id, file_name, csv_question,
                             csv_file.csv_file_path, school_year, school_semester)
+        end_time_analysis_department = time.time()
+
+        start_time_analysis_collection = time.time()
         collection_provider_analysis(csv_file.csv_id, file_name, csv_question,
                                      csv_file.csv_file_path, school_year, school_semester)
+        end_time_analysis_collection = time.time()
+        end_time = time.time()
+        # @desc: Get the overall time taken to evaluate the csv file
+        overall_time = end_time - start_time
+        # @desc: Get the time taken to format the csv file to the required format
+        pre_formatter_time = end_time_pre_formatter - start_time_pre_formatter
+        # @desc: Get the time taken to remove the rows that have empty values in the sentence column
+        post_formatter_time = end_time_post_formatter - start_time_post_formatter
+        # @desc: Get the time taken to tokenize the sentences
+        tokenizer_time = end_time_tokenizer - start_time_tokenizer
+        # @desc: Get the time taken to pad the tokenized sentences
+        padding_time = end_time_padding - start_time_padding
+        # @desc: Get the time taken to load the model
+        model_time = end_time_model - start_time_model
+        # @desc: Get the time taken to predict the sentiment of the sentences
+        prediction_time = end_time_prediction - start_time_prediction
+        # @desc: Get the time taken to get the sentiment of the sentences
+        sentiment_time = end_time_sentiment - start_time_sentiment
+        # @desc: Get the time taken to add the predictions to the csv file
+        adding_predictions_time = end_time_adding_predictions - start_time_adding_predictions
+        # @desc: Get the time taken to analyze the csv file for the user
+        analysis_user_time = end_time_analysis_user - start_time_analysis_user
+        # @desc: Get the time taken to analyze the csv file for the department
+        analysis_department_time = end_time_analysis_department - start_time_analysis_department
+        # @desc: Get the time taken to analyze the csv file for the collection provider
+        analysis_collection_time = end_time_analysis_collection - start_time_analysis_collection
 
         return jsonify({"status": "success",
                         "message": "CSV file evaluated successfully",
-                        "csv_file": "Analyzed_" + csv_question + "_" + school_year + ".csv"}), 200
+                        "csv_file": "Analyzed_" + csv_question + "_" + school_year + ".csv",
+                        "overall_time": overall_time,
+                        "pre_formatter_time": pre_formatter_time,
+                        "post_formatter_time": post_formatter_time,
+                        "tokenizer_time": tokenizer_time,
+                        "padding_time": padding_time,
+                        "model_time": model_time,
+                        "prediction_time": prediction_time,
+                        "sentiment_time": sentiment_time,
+                        "adding_predictions_time": adding_predictions_time,
+                        "analysis_user_time": analysis_user_time,
+                        "analysis_department_time": analysis_department_time,
+                        "analysis_collection_time": analysis_collection_time
+                        }), 200
     except Exception as e:
         # @desc: Path to the csv file
         path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
