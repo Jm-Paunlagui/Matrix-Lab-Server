@@ -3,7 +3,7 @@ from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
     options_read_single_data, dashboard_data_overall, list_csv_files_to_view_and_delete_pagination, \
     to_view_selected_csv_file, to_delete_selected_csv_file, to_download_selected_csv_file, list_csv_file_to_read, \
-    to_read_csv_file, list_evaluatees_to_create
+    to_read_csv_file, list_evaluatees_to_create, done_in_csv_evaluation
 from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
@@ -56,6 +56,18 @@ def analyze_save_csv():
     if not InputTextValidation(school_semester).validate_school_semester():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
     return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
+
+
+def delete_uploaded_csv_file():
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    csv_file: str = request.json["file_name"]
+
+    if not InputTextValidation(csv_file).validate_empty_fields():
+        return jsonify({"status": "error", "message": "Invalid file name"}), 400
+
+    return done_in_csv_evaluation(csv_file)
 
 
 def options_for_file_data():

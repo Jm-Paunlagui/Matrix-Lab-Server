@@ -260,7 +260,30 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
         app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
-    os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+    # os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+
+
+def done_in_csv_evaluation(file_name: str):
+    """
+    Delete the uploaded csv file after evaluation.
+
+    :param file_name: The csv file name
+    :return: None
+    """
+    try:
+        # @desc: Delete the csv file from the uploaded folder
+        os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+        return jsonify({
+            "status": "success",
+            "message": f"Analysis completed successfully and {file_name} deleted successfully from the server"
+        })
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__))
+        return jsonify({"status": "error",
+                        "message": "Error in the process of deleting the csv file with the error: " + str(e)}), 500
 
 
 def professor_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_path: str, school_year: str,

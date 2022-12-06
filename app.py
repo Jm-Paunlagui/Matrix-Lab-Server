@@ -7,7 +7,7 @@ from controllers.csv_routes import (
     getting_top_professor_overall,
     getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
     viewing_csv_file, deleting_csv_file, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
-    getting_list_of_evaluatees
+    getting_list_of_evaluatees, delete_uploaded_csv_file
 )
 from controllers.user_routes import (
     authenticate,
@@ -36,6 +36,8 @@ app.add_url_rule("/data/view-columns",
                  view_func=view_columns, methods=["POST"])
 app.add_url_rule("/data/analyze-save-csv",
                  view_func=analyze_save_csv, methods=["POST"])
+app.add_url_rule("/data/delete-uploaded-csv-file",
+                 view_func=delete_uploaded_csv_file, methods=["POST"])
 # @desc: Dashboard data
 app.add_url_rule("/data/get-all-data-from-csv",
                  view_func=getting_all_data_from_csv, methods=["GET"])
