@@ -694,9 +694,11 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # @desc: Get the time taken to analyze the csv file for the user
         analysis_user_time = end_time_analysis_user - start_time_analysis_user
         # @desc: Get the time taken to analyze the csv file for the department
-        analysis_department_time = end_time_analysis_department - start_time_analysis_department
+        analysis_department_time = end_time_analysis_department - \
+            start_time_analysis_department
         # @desc: Get the time taken to analyze the csv file for the collection provider
-        analysis_collection_time = end_time_analysis_collection - start_time_analysis_collection
+        analysis_collection_time = end_time_analysis_collection - \
+            start_time_analysis_collection
 
         return jsonify({"status": "success",
                         "message": "CSV file evaluated successfully",
