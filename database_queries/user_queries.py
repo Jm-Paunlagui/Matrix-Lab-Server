@@ -350,7 +350,7 @@ def lock_all_user_accounts():
 
 
 def unlock_user_account(user_id: int):
-    """Deletes the user's account by flagging the user's account as deleted."""
+    """Unlocks the user's account by flagging the user's account as not deleted."""
 
     user = User.query.filter_by(user_id=user_id).first()
 
@@ -875,6 +875,7 @@ def verify_verification_code_to_unlock(code: str, email: str):
             )[0] + " " + is_email.full_name.split()[1][0]
             is_email.password = hashed_password
             is_email.flag_locked = False
+            is_email.login_attempts = 0
             msg = Message('Your account has been unlocked - Matrix Lab',
                           sender="service.matrix.ai@gmail.com", recipients=[email])
             msg.html = f""" <!doctype html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
@@ -946,7 +947,7 @@ def authenticated_user():
 def password_reset_link(email: str):
     """
     Sends the password reset link to the user's email and stores the token in the database that expires in
-    24 hours.
+    5 minutes.
     """
     if not check_email_exists(email):
         return False
@@ -959,7 +960,7 @@ def password_reset_link(email: str):
         "iss": "http://127.0.0.1:5000",
         "sub": email,
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
-        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
+        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(minutes=5)),
         "jti": str(uuid.uuid4())
     }
     password_reset_token = PayloadSignature(payload=payload).encode_payload()
@@ -984,8 +985,8 @@ def password_reset_link(email: str):
     .06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06);"> <tr> <td style="padding:35px;"> <h1
     style="color:#5d6068;font-weight:700;text-align:left">Hi {name},</h1> <p style="color:#878a92;margin:.4em 0
     2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password
-    for your Matrix account. Use the button below to reset it. <strong>This password reset is only valid for the next
-    24 hours.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
+    for your Matrix account. Use the button below to reset it. <strong>This password reset link is only valid for only 5
+     minutes.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
     style="background:#22bc66;text-decoration:none !important; font-weight:500; color:#fff;text-transform:uppercase;
     font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,.16);">Reset
     Password</a> <p style="color:#878a92;margin: 2.1875em 0 .4em;font-size:16px;line-height:1.625; text-align:
