@@ -4,7 +4,6 @@ from database_queries.user_queries import (authenticate_user,
                                            authenticated_user,
                                            check_email_exists,
                                            check_email_exists_by_username,
-                                           check_password_reset_token_exists,
                                            check_username_exists, create_user,
                                            has_emails, password_reset,
                                            password_reset_link, redirect_to,
@@ -111,9 +110,8 @@ def forgot_password():
         return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
     if not check_email_exists(email):
         return jsonify({"status": "warn", "message": "Email address does not exist!"}), 404
-    if check_password_reset_token_exists(email):
-        return jsonify({"status": "warn", "message": "Password reset link already sent!"}), 409
-    password_reset_link(email)
+    if not password_reset_link(email):
+        return jsonify({"status": "error", "message": "Password reset link not sent!"}), 500
     return jsonify({"status": "success", "message": "Password reset link sent successfully."}), 200
 
 

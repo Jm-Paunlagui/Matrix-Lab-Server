@@ -42,7 +42,6 @@ class User(db.Model):
     flag_deleted: bool = db.Column(db.Boolean, nullable=False, default=False)
     flag_locked: bool = db.Column(db.Boolean, nullable=False, default=False)
     flag_active: bool = db.Column(db.Boolean, nullable=False, default=False)
-    password_reset_token: str = db.Column(db.Text, nullable=True)
     login_attempts: int = db.Column(db.Integer, nullable=False, default=0)
 
     def __repr__(self):
@@ -50,4 +49,4 @@ class User(db.Model):
         return f"User('{self.user_id}', '{self.email}', '{self.secondary_email}', '{self.recovery_email}', " \
                f"'{self.full_name}', '{self.username}', '{self.password}', '{self.role}', '{self.department}', " \
                f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.flag_locked}', " \
-               f"'{self.flag_active}', '{self.password_reset_token}', '{self.login_attempts}')"
+               f"'{self.flag_active}', '{self.login_attempts}')"

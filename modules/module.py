@@ -14,6 +14,7 @@ from flask import request
 from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
 from werkzeug.utils import cached_property
+from urllib.request import urlopen
 
 # @desc: The bcrypt instance
 bcrypt = Bcrypt(app)
@@ -483,6 +484,17 @@ def get_os_browser_versions():
     user_agent = ParsedUserAgent(request.headers.get('User-Agent'))
     return user_agent.platform, user_agent.os_version, user_agent.browser, user_agent.version, \
         datetime.now().strftime("%A, %I:%M:%S %p")
+
+
+def get_ip_address():
+    """
+    Get the User's IP address from the request header.
+
+    :return: The User's IP address
+    """
+    source = urlopen("http://checkip.dyndns.com")
+    data = str(source.read())
+    return re.search(r"\d+\.\d+\.\d+\.\d+", data).group(0)
 
 
 def error_message(error_class: BaseException | BaseException | TracebackType,

@@ -12,7 +12,7 @@ from config.configurations import app, db, mail
 from database_queries.csv_queries import error_handler
 from models.user_model import User
 from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
-                            ToptCode, get_os_browser_versions, error_message)
+                            ToptCode, get_os_browser_versions, error_message, get_ip_address)
 
 # desc: Session configuration
 server_session = Session(app)
@@ -606,6 +606,7 @@ def authenticate_user(username: str, password: str):
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
+            ip_address = get_ip_address()
             msg = Message('Matrix Lab Account Locked',
                           sender="service.matrix.ai@gmail.com", recipients=[email])
 
@@ -629,8 +630,8 @@ def authenticate_user(username: str, password: str):
             your account, we decided to lock your account for security reasons. Please contact your administrator to 
             unlock your account.</p><p style="color:#878a92;margin:2.1875em 0 
             .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this login attempt was received 
-            from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b
-            >.</p><p style="color:#878a92;margin:.4em 0 
+            from a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> with the IP address of 
+            <b>{ip_address}</b> on <b> {source[4]} </b>.</p><p style="color:#878a92;margin:.4em 0 
             2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did not attempt to login to your 
             account, please change your password immediately. or contact technical support by email:<b><a 
             style="text-decoration:none;color:#878a92" 
@@ -657,6 +658,7 @@ def authenticate_user(username: str, password: str):
             email = is_user.email
             is_user.flag_locked = True
             source = get_os_browser_versions()
+            ip_address = get_ip_address()
             payload = {
                 "iss": "http://127.0.0.1:5000",
                 "sub": name,
@@ -692,7 +694,8 @@ def authenticate_user(username: str, password: str):
             :uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,
             0,0,.16)">Unlock Account</a><p style="color:#878a92;margin:2.1875em 0 
             .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this login attempt was received 
-            from a<b> {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b>{source[4]}</b>.</p>
+            from a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> with the IP address of 
+            <b>{ip_address}</b> on <b>{source[4]}</b>.</p>
             <p style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is 
             an auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
             2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact 
@@ -745,7 +748,7 @@ def send_tfa(email: str):
 
         username = is_email[3]
         source = get_os_browser_versions()
-
+        ip_address = get_ip_address()
         totp = ToptCode.topt_code()
 
         # Send the security code to the email
@@ -770,7 +773,8 @@ def send_tfa(email: str):
         account {username}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Security code: <span 
         style="color:#878a92;font-weight:400;">{totp}</span></h2><p style="color:#878a92;margin: 2.1875em 0 
         .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from a <b>
-        {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
+        {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b>  with the IP address of <b>{ip_address}
+        </b> on  <b>{source[4]}</b>.</p><p 
         style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did 
         not recognize this email to your {username}'s email address, you can 
         <a href="{"http://localhost:3000/remove-email-from-account/" + link}" 
@@ -807,7 +811,7 @@ def send_email_verification(email: str):
 
         username = is_email[3]
         source = get_os_browser_versions()
-
+        ip_address = get_ip_address()
         totp = ToptCode.topt_code()
 
         # Send the security code to the email
@@ -834,7 +838,8 @@ def send_email_verification(email: str):
         account {username}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Verification code: <span 
         style="color:#878a92;font-weight:400">{totp}</span></h2><p style="color:#878a92;margin:2.1875em 0 
         .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this request was received from a <b>
-        {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>on<b> {source[4]} </b>.</p><p 
+        {source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> with the IP address of <b>{ip_address}
+        </b> on <b> {source[4]} </b>.</p><p 
         style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did 
         not recognize this email to your {username}'s email address, you can <a href="{
         "http://localhost:3000/remove-email-from-account/" + link}" 
@@ -965,9 +970,7 @@ def password_reset_link(email: str):
     }
     password_reset_token = PayloadSignature(payload=payload).encode_payload()
     source = get_os_browser_versions()
-    User.query.filter((User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).update(
-        {"password_reset_token": password_reset_token})
-    db.session.commit()
+    ip_address = get_ip_address()
     msg = Message('Password Reset Link - Matrix Lab',
                   sender="service.matrix.ai@gmail.com", recipients=[email])
     msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8"
@@ -991,7 +994,8 @@ def password_reset_link(email: str):
     font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,.16);">Reset
     Password</a> <p style="color:#878a92;margin: 2.1875em 0 .4em;font-size:16px;line-height:1.625; text-align:
     justify;">For security, this request was received from a <b>{source[0]} {source[1]}</b> device using <b>
-    {source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p style="color:#878a92;margin: .4em 0
+    {source[2]} {source[3]}</b> with the IP address of <b>{ip_address}</b> on <b>{source[4]}</b>.</p>
+    <p style="color:#878a92;margin: .4em 0
     2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not request a password reset,
     please ignore this email or contact technical support by email: <b> <a
     style="text-decoration:none;color:#878a92;"
@@ -1031,6 +1035,7 @@ def password_reset(password_reset_token: str, password: str):
             intoken.password_reset_token = None
             db.session.commit()
             source = get_os_browser_versions()
+            ip_address = get_ip_address()
             msg = Message("Password Reset Successful",
                           sender="service.matrix.ai@gmail.com", recipients=[email["sub"]])
             msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
@@ -1051,7 +1056,8 @@ def password_reset(password_reset_token: str, password: str):
             style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">Your 
             password has been changed successfully.</p><p style="color:#878a92;margin: 2.1875em 0 
             .4em;font-size:16px;line-height:1.625; text-align: justify;">For security, this request was received from 
-            a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>{source[4]}</b>.</p><p 
+            a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> with the IP address of 
+            <b>{ip_address}</b> on <b>{source[4]}</b>.</p><p 
             style="color:#878a92;margin: .4em 0 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If 
             you did not change your password on this time period, please contact us immediately by email: <b><a 
             style="text-decoration:none;color:#878a92;" 
@@ -1157,6 +1163,7 @@ def remove_email(option: str, email: str, username: str):
             User.query.filter_by(username=username).update(
                 {type_of_email: None})
             source = get_os_browser_versions()
+            ip_address = get_ip_address()
             msg = Message(subject="Email Removed",
                           sender="service.matrix.ai@gmail.com", recipients=[remove.email])
             msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
@@ -1179,8 +1186,8 @@ def remove_email(option: str, email: str, username: str):
                 style="text-decoration:none;color:#878a92">{email}</a></b> has been removed from your Matrix account 
                 {username}.</p><p style="color:#878a92;margin:2.1875em 0 
                 .4em;font-size:16px;line-height:1.625;text-align:justify">For security, this request was received 
-                from a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> on <b>
-                {source[4]}</b>.</p><p style="color:#878a92;margin:.4em 0 
+                from a <b>{source[0]} {source[1]}</b> device using <b>{source[2]} {source[3]}</b> with the IP address of 
+                <b>{ip_address}</b> on <b>{source[4]}</b>.</p><p style="color:#878a92;margin:.4em 0 
                 2.1875em;font-size:16px;line-height:1.625;text-align:justify">If this was not you, please contact 
                 technical support by email:<b><a style="text-decoration:none;color:#878a92" 
                 href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></b></p><p 

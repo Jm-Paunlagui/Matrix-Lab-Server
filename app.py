@@ -30,6 +30,9 @@ from controllers.user_routes import (
     restore_all_user_account, one_click_deactivate_all, one_click_deactivate, send_verification_code,
     unlock_admin_account, verify_unlock_token,
 )
+from modules.module import get_ip_address
+
+app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
 
 # @desc: CSV routes for uploading csv files
 app.add_url_rule("/data/view-columns",
