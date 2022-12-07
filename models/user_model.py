@@ -20,7 +20,6 @@ class User(db.Model):
     flag_deleted: User deleted flag (default: 0) tinyint
     flag_locked: User locked flag (default: 0) tinyint
     flag_active: User active flag (default: 0) tinyint
-    password_reset_token: User password reset token text
     login_attempts: User login attempts (default: 0) tinyint
     """
 
