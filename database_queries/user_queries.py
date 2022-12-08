@@ -1104,7 +1104,7 @@ def redirect_to():
         case 'admin':
             return "/admin/dashboard/analytics"
         case 'user':
-            return "/user/analytics"
+            return "/user/dashboard/analytics"
     return "/"
 
 

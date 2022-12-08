@@ -3,7 +3,8 @@ from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
     options_read_single_data, dashboard_data_overall, list_csv_files_to_view_and_delete_pagination, \
     to_view_selected_csv_file, to_delete_selected_csv_file, to_download_selected_csv_file, list_csv_file_to_read, \
-    to_read_csv_file, list_evaluatees_to_create, done_in_csv_evaluation
+    to_read_csv_file, list_evaluatees_to_create, done_in_csv_evaluation, \
+    list_user_collection_of_sentiment_per_evaluatee_csv_files
 from testpy.analyze import get_all_the_details_from_csv, \
     get_top_department_overall, get_top_professors_overall, get_top_professors_by_file, get_top_department_by_file
 from flask import jsonify, request
@@ -147,6 +148,13 @@ def getting_list_of_csv_files(page: int):
     Get the list of csv files.
     """
     return list_csv_files_to_view_and_delete_pagination(page)
+
+
+def getting_collection_of_csv_files(page: int):
+    """
+    Get the collection of csv files.
+    """
+    return list_user_collection_of_sentiment_per_evaluatee_csv_files(page)
 
 
 def viewing_csv_file(csv_id: int):
