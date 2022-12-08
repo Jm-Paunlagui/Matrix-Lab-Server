@@ -1380,6 +1380,9 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                 "status": "success",
                 "file_path": file_path,
                 "file_list": file_list_to_read,
+                "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
+                "school_year": main_directory.school_year,
+                "school_semester": main_directory.school_semester,
             }), 200
         elif user_data.role == "user" and user_fullname == folder_name:
             file_list_to_read = [
@@ -1395,6 +1398,9 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                 "status": "success",
                 "file_path": file_path,
                 "file_list": file_list_to_read,
+                "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
+                "school_year": main_directory.school_year,
+                "school_semester": main_directory.school_semester,
             }), 200
         else:
             return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
