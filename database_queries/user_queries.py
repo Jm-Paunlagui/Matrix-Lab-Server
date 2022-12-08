@@ -958,7 +958,7 @@ def password_reset_link(email: str):
         return False
     is_user: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
-            User.recovery_email == email)
+                User.recovery_email == email)
     ).first()
     name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
     payload = {
@@ -1026,19 +1026,19 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         intoken: User = User.query.filter(
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
-                User.recovery_email == email["sub"])
+                    User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.full_name.split(
         )[0] + " " + intoken.full_name.split()[1]
-        if intoken.password_reset_token == password_reset_token:
-            intoken.password = hashed_password
-            intoken.password_reset_token = None
-            db.session.commit()
-            source = get_os_browser_versions()
-            ip_address = get_ip_address()
-            msg = Message("Password Reset Successful",
-                          sender="service.matrix.ai@gmail.com", recipients=[email["sub"]])
-            msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
+
+        intoken.password = hashed_password
+        intoken.password_reset_token = None
+        db.session.commit()
+        source = get_os_browser_versions()
+        ip_address = get_ip_address()
+        msg = Message("Password Reset Successful",
+                      sender="service.matrix.ai@gmail.com", recipients=[email["sub"]])
+        msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
             http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
             0px; background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" 
             width="100%" bgcolor="#f2f3f8" style="@import url(
@@ -1068,14 +1068,9 @@ def password_reset(password_reset_token: str, password: str):
             0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba 
             City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
             </td></tr></table></body></html> """
-            mail.send(msg)
-            return True
-        return False
+        mail.send(msg)
+        return True
     except jwt.exceptions.InvalidTokenError:
-        token: User = User.query.filter_by(
-            password_reset_token=password_reset_token).first()
-        token.password_reset_token = None
-        db.session.commit()
         return False
 
 
