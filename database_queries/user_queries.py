@@ -958,7 +958,7 @@ def password_reset_link(email: str):
         return False
     is_user: User = User.query.with_entities(User.full_name).filter(
         (User.email == email) | (User.secondary_email == email) | (
-                User.recovery_email == email)
+            User.recovery_email == email)
     ).first()
     name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
     payload = {
@@ -1026,7 +1026,7 @@ def password_reset(password_reset_token: str, password: str):
             password=password).password_hasher()
         intoken: User = User.query.filter(
             (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
-                    User.recovery_email == email["sub"])
+                User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.full_name.split(
         )[0] + " " + intoken.full_name.split()[1]
