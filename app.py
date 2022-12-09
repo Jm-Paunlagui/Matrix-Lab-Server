@@ -54,7 +54,7 @@ app.add_url_rule("/data/get-top-department-by-file",
                  view_func=getting_top_department_by_file, methods=["POST"])
 app.add_url_rule("/data/get-top-professors-by-file",
                  view_func=getting_top_professor_by_file, methods=["POST"])
-app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>",
+app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>/<int:per_page>",
                  view_func=getting_list_of_csv_files, methods=["GET"])
 app.add_url_rule("/data/view-csv-file/<int:csv_id>",
                  view_func=viewing_csv_file, methods=["GET"])
@@ -72,7 +72,7 @@ app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<st
 app.add_url_rule("/data/list-of-csv-files-to-view-collections/<int:page>",
                  view_func=getting_collection_of_csv_files, methods=["GET"])
 # @desc: User Management routes
-app.add_url_rule("/data/list-of-users-to-view/<int:page>",
+app.add_url_rule("/data/list-of-users-to-view/<int:page>/<int:per_page>",
                  view_func=getting_list_of_evaluatees, methods=["GET"])
 
 app.add_url_rule("/user/on-click-create/<int:user_id>",

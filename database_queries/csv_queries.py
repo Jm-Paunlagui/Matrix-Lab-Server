@@ -1151,39 +1151,51 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
         ]}), 200
 
 
-def list_csv_files_to_view_and_delete_pagination(page: int):
+def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
     """
     @desc: List all csv files to view, download, and delete in pagination.
     :param page: The page number.
+    :param per_page: The number of items per page.
     :return: A list of csv files.
     """
+    # @desc: Get the Session to verify if the user is logged in.
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
     try:
-        csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
-            page=page, per_page=20, error_out=False)
+        if user_data.role == "admin":
+            csv_files = CsvModel.query.order_by(CsvModel.csv_id.desc()).paginate(
+                page=page, per_page=per_page, error_out=False)
 
-        list_of_csv_files = [
-            {
-                "id": csv_file.csv_id,
-                "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
-                "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
-                "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
-                "csv_file_path": csv_file.csv_file_path,
-                "csv_file_name": csv_file.csv_name,
-                "csv_file_date_created": csv_file.date_uploaded.strftime("%B %d, %Y %I:%M %p")
-            } for csv_file in csv_files.items
-        ]
+            list_of_csv_files = [
+                {
+                    "id": csv_file.csv_id,
+                    "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
+                    "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
+                    "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
+                    "csv_file_path": csv_file.csv_file_path,
+                    "csv_file_name": csv_file.csv_name,
+                    "csv_file_date_created": csv_file.date_uploaded.strftime("%B %d, %Y %I:%M %p")
+                } for csv_file in csv_files.items
+            ]
 
-        return jsonify({
-            "status": "success",
-            "csv_files": list_of_csv_files,
-            "total_pages": csv_files.pages,
-            "current_page": csv_files.page,
-            "has_next": csv_files.has_next,
-            "has_prev": csv_files.has_prev,
-            "next_page": csv_files.next_num,
-            "prev_page": csv_files.prev_num,
-            "total_items": csv_files.total,
-        }), 200
+            return jsonify({
+                "status": "success",
+                "csv_files": list_of_csv_files,
+                "total_pages": csv_files.pages,
+                "current_page": csv_files.page,
+                "has_next": csv_files.has_next,
+                "has_prev": csv_files.has_prev,
+                "next_page": csv_files.next_num,
+                "prev_page": csv_files.prev_num,
+                "total_items": csv_files.total,
+            }), 200
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 403
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
@@ -1479,45 +1491,55 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                         "message": "An error occurred while trying to read the csv file."}), 500
 
 
-def list_evaluatees_to_create(page: int):
+def list_evaluatees_to_create(page: int, per_page: int):
     """
     This function is used to list the evaluatees to create.
     :return: The list of the evaluatees to create.
     """
+    # @desc: Get the Session to verify if the user is logged in.
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
     try:
-        # @desc: Get users where role is user
-        users = User.query.filter_by(role="user").paginate(
-            page=page, per_page=20, error_out=False)
+        if user_data.role == "admin":
+            # @desc: Get users where role is user
+            users = User.query.filter_by(role="user").paginate(
+                page=page, per_page=per_page, error_out=False)
 
-        # @desc: Get users where role is user and is not in the evaluatee table
-        evaluatees_to_create = [
-            {
-                "id": user.user_id,
-                "full_name": user.full_name,
-                "email": user.email,
-                "username": user.username,
-                "role": user.role,
-                "department_name": user.department,
-                "is_locked": user.flag_locked,
-                "is_active": user.flag_active,
-                "is_deleted": user.flag_deleted,
-                "created_at": user.created_at,
-                "updated_at": user.updated_at,
-            } for user in users
-        ]
+            # @desc: Get users where role is user and is not in the evaluatee table
+            evaluatees_to_create = [
+                {
+                    "id": user.user_id,
+                    "full_name": user.full_name,
+                    "email": user.email,
+                    "username": user.username,
+                    "role": user.role,
+                    "department_name": user.department,
+                    "is_locked": user.flag_locked,
+                    "is_active": user.flag_active,
+                    "is_deleted": user.flag_deleted,
+                    "created_at": user.created_at,
+                    "updated_at": user.updated_at,
+                } for user in users
+            ]
 
-        return jsonify({
-            "status": "success",
-            "evaluatees_to_create": evaluatees_to_create,
-            "total_pages": users.pages,
-            "current_page": users.page,
-            "has_next": users.has_next,
-            "has_prev": users.has_prev,
-            "next_page": users.next_num,
-            "prev_page": users.prev_num,
-            "total_items": users.total,
-        }), 200
-
+            return jsonify({
+                "status": "success",
+                "evaluatees_to_create": evaluatees_to_create,
+                "total_pages": users.pages,
+                "current_page": users.page,
+                "has_next": users.has_next,
+                "has_prev": users.has_prev,
+                "next_page": users.next_num,
+                "prev_page": users.prev_num,
+                "total_items": users.total,
+            }), 200
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",

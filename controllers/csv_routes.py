@@ -143,11 +143,11 @@ def getting_top_professor_by_file():
     return read_single_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
 
 
-def getting_list_of_csv_files(page: int):
+def getting_list_of_csv_files(page: int, per_page: int):
     """
     Get the list of csv files.
     """
-    return list_csv_files_to_view_and_delete_pagination(page)
+    return list_csv_files_to_view_and_delete_pagination(page, per_page)
 
 
 def getting_collection_of_csv_files(page: int):
@@ -192,8 +192,8 @@ def reading_csv_file(csv_id: int, folder_name: str, file_name: str):
     return to_read_csv_file(csv_id, folder_name, file_name)
 
 
-def getting_list_of_evaluatees(page: int):
+def getting_list_of_evaluatees(page: int, per_page: int):
     """
     Get the list of evaluatees.
     """
-    return list_evaluatees_to_create(page)
+    return list_evaluatees_to_create(page, per_page)
