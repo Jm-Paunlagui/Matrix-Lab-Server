@@ -167,6 +167,8 @@ class CsvCollectionModel(db.Model):
     school_semester: School semester varchar(255)
     date_uploaded: Csv date uploaded timestamp
     date_processed: Csv date processed timestamp
+    flag_deleted: Flag deleted boolean
+    flag_release: Flag release boolean
     """
 
     __tablename__ = 'csvs_collection'
@@ -180,13 +182,16 @@ class CsvCollectionModel(db.Model):
                                    default=Timezone("Asia/Manila").get_timezone_current_time())
     date_processed: str = db.Column(db.DateTime, nullable=False,
                                     default=Timezone("Asia/Manila").get_timezone_current_time())
+    flag_deleted: bool = db.Column(db.Boolean, nullable=False, default=False)
+    flag_release: bool = db.Column(db.Boolean, nullable=False, default=False)
 
     def __repr__(self):
         """Csv Collection Model class representation."""
         return f"CsvCollectionModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
                f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
                f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
-               f"date_processed={self.date_processed})"
+               f"date_processed={self.date_processed}, flag_deleted={self.flag_deleted}, " \
+               f"flag_release={self.flag_release})"
 
     # @desc: For Descending Order (newest to oldest) in the csvs table
     def __lt__(self, other):
