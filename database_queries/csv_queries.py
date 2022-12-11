@@ -1405,7 +1405,8 @@ def to_delete_all_csv_files_flag():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_deleted).all()
+        csv_files = db.session.query(CsvModel).with_entities(
+            CsvModel.csv_id, CsvModel.flag_deleted).all()
 
         if all(csv_file[1] == 1 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Deleted."}), 400
@@ -1431,7 +1432,8 @@ def to_delete_all_csv_files_unflag():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_deleted).all()
+        csv_files = db.session.query(CsvModel).with_entities(
+            CsvModel.csv_id, CsvModel.flag_deleted).all()
 
         if all(csv_file[1] == 0 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Restored."}), 400
@@ -1519,7 +1521,8 @@ def to_publish_all_csv_files():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_release).all()
+        csv_files = db.session.query(CsvModel).with_entities(
+            CsvModel.csv_id, CsvModel.flag_release).all()
 
         if all(csv_file[1] == 1 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Published."}), 400
@@ -1545,7 +1548,8 @@ def to_unpublished_all_csv_files():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_release).all()
+        csv_files = db.session.query(CsvModel).with_entities(
+            CsvModel.csv_id, CsvModel.flag_release).all()
 
         if all(csv_file[1] == 0 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Unpublished."}), 400
