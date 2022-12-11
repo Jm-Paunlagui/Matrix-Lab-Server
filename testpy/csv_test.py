@@ -11,4 +11,3 @@ print(df)
 
 # rewrite the csv file
 df.to_csv('eval_raw.csv', index=False)
-
