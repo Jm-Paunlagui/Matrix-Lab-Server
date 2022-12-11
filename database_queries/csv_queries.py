@@ -1851,10 +1851,11 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
     """
     try:
         user_collection_of_sentiment_per_evaluatee_csv_files = db.session.query(
-            CsvModel, CsvCollectionModel).filter(CsvModel.csv_id == CsvCollectionModel.csv_id).filter(
-            CsvModel.flag_deleted == 0).filter(CsvModel.flag_release == 1).with_entities(
+            CsvModel, CsvCollectionModel).filter(CsvModel.csv_id == CsvCollectionModel.csv_id).with_entities(
             CsvModel.csv_id, CsvModel.school_year, CsvModel.school_semester, CsvModel.csv_question,
-            CsvModel.csv_file_path, CsvModel.csv_name).paginate(page=page, per_page=10, error_out=False)
+            CsvModel.csv_file_path, CsvModel.csv_name, CsvModel.flag_deleted, CsvModel.flag_release).order_by(
+                CsvModel.csv_id.desc()).paginate(
+            page=page, per_page=10, error_out=False)
 
         user_collection_of_sentiment_per_evaluatee_csv_files_to_read = [{
             "id": csv_file.csv_id,
@@ -1863,6 +1864,8 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
             "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
             "csv_file_path": csv_file.csv_file_path,
             "csv_file_name": csv_file.csv_name,
+            "flag_deleted": csv_file.flag_deleted,
+            "flag_release": csv_file.flag_release,
         } for csv_file in user_collection_of_sentiment_per_evaluatee_csv_files.items]
 
         return jsonify({
