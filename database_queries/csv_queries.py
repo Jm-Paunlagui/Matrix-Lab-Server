@@ -1295,7 +1295,7 @@ def to_view_selected_csv_file(csv_id: int):
                         "message": "An error occurred while trying to view the selected csv file."}), 500
 
 
-def to_delete_selected_csv_file(csv_id: int):
+def to_delete_selected_csv_file_permanent(csv_id: int):
     """
     @desc: Delete the selected csv file
     :param csv_id: The id of the csv file
@@ -1335,6 +1335,234 @@ def to_delete_selected_csv_file(csv_id: int):
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to delete the selected csv file."}), 500
+
+
+def to_delete_selected_csv_file_flagged(csv_id: int):
+    """
+    @desc: Flag the selected csv file
+    :param csv_id: The id of the csv file
+    :return: A json response
+    """
+    try:
+        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+
+        if csv_file is None:
+            return jsonify({"status": "error", "message": "No csv file found."}), 400
+
+        if csv_file.flag_deleted == 1:
+            return jsonify({"status": "error", "message": "File already Deleted."}), 400
+
+        csv_file.flag_deleted = True
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
+                                                        + str(csv_id) + ". and its related files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to flag the selected csv file."}), 500
+
+
+def to_delete_selected_csv_file_unflagged(csv_id: int):
+    """
+    @desc: Unflag the selected csv file
+    :param csv_id: The id of the csv file
+    :return: A json response
+    """
+    try:
+        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+
+        if csv_file is None:
+            return jsonify({"status": "error", "message": "No csv file found."}), 400
+
+        if csv_file.flag_deleted == 0:
+            return jsonify({"status": "error", "message": "File already Restored."}), 400
+
+        csv_file.flag_deleted = False
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "message": "Successfully restored the selected csv file with id: "
+                                                        + str(csv_id) + ". and its related files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to unflag the selected csv file."}), 500
+
+
+def to_delete_all_csv_files_flag():
+    """
+    @desc: Flag all csv files
+    :return: A json response
+    """
+    try:
+        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_deleted).all()
+
+        if all(csv_file[1] == 1 for csv_file in csv_files):
+            return jsonify({"status": "error", "message": "All files already Deleted."}), 400
+
+        for csv_file in csv_files:
+            csv_file = csv_file[0]
+            to_delete_selected_csv_file_flagged(csv_file)
+
+        return jsonify({"status": "success", "message": "Successfully flagged all csv files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to flag all csv files."}), 500
+
+
+def to_delete_all_csv_files_unflag():
+    """
+    @desc: Unflag all csv files
+    :return: A json response
+    """
+    try:
+        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_deleted).all()
+
+        if all(csv_file[1] == 0 for csv_file in csv_files):
+            return jsonify({"status": "error", "message": "All files already Restored."}), 400
+
+        for csv_file in csv_files:
+            csv_file = csv_file[0]
+            to_delete_selected_csv_file_unflagged(csv_file)
+
+        return jsonify({"status": "success", "message": "Successfully unflagged all csv files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to unflag all csv files."}), 500
+
+
+def to_publish_selected_csv_file(csv_id: int):
+    """
+    @desc: Publish the selected csv file
+    :param csv_id: The id of the csv file
+    :return: A json response
+    """
+    try:
+        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+
+        if csv_file is None:
+            return jsonify({"status": "error", "message": "No csv file found."}), 400
+
+        if csv_file.flag_release == 1:
+            return jsonify({"status": "error", "message": "File already Published."}), 400
+
+        csv_file.flag_release = True
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "message": "Successfully published the selected csv file with id: "
+                                                        + str(csv_id) + "."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to publish the selected csv file."}), 500
+
+
+def to_unpublished_selected_csv_file(csv_id: int):
+    """
+    @desc: Unpublished the selected csv file
+    :param csv_id: The id of the csv file
+    :return: A json response
+    """
+    try:
+        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+
+        if csv_file is None:
+            return jsonify({"status": "error", "message": "No csv file found."}), 400
+
+        if csv_file.flag_release == 0:
+            return jsonify({"status": "error", "message": "File already Unpublished."}), 400
+
+        csv_file.flag_release = False
+
+        db.session.commit()
+
+        return jsonify({"status": "success", "message": "Successfully unpublished the selected csv file with id: "
+                                                        + str(csv_id) + "."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to unpublished the selected csv file."}), 500
+
+
+def to_publish_all_csv_files():
+    """
+    @desc: Publish all csv files
+    :return: A json response
+    """
+    try:
+        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_release).all()
+
+        if all(csv_file[1] == 1 for csv_file in csv_files):
+            return jsonify({"status": "error", "message": "All files already Published."}), 400
+
+        for csv_file in csv_files:
+            csv_file = csv_file[0]
+            to_publish_selected_csv_file(csv_file)
+
+        return jsonify({"status": "success", "message": "Successfully published all csv files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to publish all csv files."}), 500
+
+
+def to_unpublished_all_csv_files():
+    """
+    @desc: Unpublished all csv files
+    :return: A json response
+    """
+    try:
+        csv_files = db.session.query(CsvModel).with_entities(CsvModel.csv_id, CsvModel.flag_release).all()
+
+        if all(csv_file[1] == 0 for csv_file in csv_files):
+            return jsonify({"status": "error", "message": "All files already Unpublished."}), 400
+
+        for csv_file in csv_files:
+            csv_file = csv_file[0]
+            to_unpublished_selected_csv_file(csv_file)
+
+        return jsonify({"status": "success", "message": "Successfully unpublished all csv files."}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to unpublished all csv files."}), 500
 
 
 def to_download_selected_csv_file(csv_id: int):

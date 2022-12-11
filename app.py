@@ -6,8 +6,10 @@ from controllers.csv_routes import (
     getting_top_department_overall,
     getting_top_professor_overall,
     getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
-    viewing_csv_file, deleting_csv_file, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
-    getting_list_of_evaluatees, delete_uploaded_csv_file, getting_collection_of_csv_files
+    viewing_csv_file, deleting_csv_file_permanent, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
+    getting_list_of_evaluatees, delete_uploaded_csv_file, getting_collection_of_csv_files, deleting_csv_file_temporary,
+    deleting_all_csv_file_temporary, unflagging_csv_file_deleted, unflagging_all_csv_file_deleted,
+    publish_selected_csv_file, unpublished_selected_csv_file
 )
 from controllers.user_routes import (
     authenticate,
@@ -30,6 +32,7 @@ from controllers.user_routes import (
     restore_all_user_account, one_click_deactivate_all, one_click_deactivate, send_verification_code,
     unlock_admin_account, verify_unlock_token,
 )
+from database_queries.csv_queries import to_publish_all_csv_files, to_unpublished_all_csv_files
 from modules.module import get_ip_address
 
 app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
@@ -59,8 +62,24 @@ app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>/<int:per_page>",
 app.add_url_rule("/data/view-csv-file/<int:csv_id>",
                  view_func=viewing_csv_file, methods=["GET"])
 # @desc: Delete csv file
+app.add_url_rule("/data/delete-csv-file-permanent/<int:csv_id>",
+                 view_func=deleting_csv_file_permanent, methods=["DELETE"])
 app.add_url_rule("/data/delete-csv-file/<int:csv_id>",
-                 view_func=deleting_csv_file, methods=["DELETE"])
+                 view_func=deleting_csv_file_temporary, methods=["PUT"])
+app.add_url_rule("/data/unflag-delete-csv-file/<int:csv_id>",
+                 view_func=unflagging_csv_file_deleted, methods=["PUT"])
+app.add_url_rule("/data/delete-csv-file-all",
+                 view_func=deleting_all_csv_file_temporary, methods=["PUT"])
+app.add_url_rule("/data/unflag-all-delete-csv-file",
+                 view_func=unflagging_all_csv_file_deleted, methods=["PUT"])
+app.add_url_rule("/data/publish-selected-csv-file/<int:csv_id>",
+                 view_func=publish_selected_csv_file, methods=["PUT"])
+app.add_url_rule("/data/unpublished-selected-csv-file/<int:csv_id>",
+                 view_func=unpublished_selected_csv_file, methods=["PUT"])
+app.add_url_rule("/data/publish-all-csv-file",
+                 view_func=to_publish_all_csv_files, methods=["PUT"])
+app.add_url_rule("/data/unpublished-all-csv-file",
+                 view_func=to_unpublished_all_csv_files, methods=["PUT"])
 # @desc: Download csv file
 app.add_url_rule("/data/download-csv-file/<int:csv_id>",
                  view_func=downloading_csv_file, methods=["GET"])
@@ -100,7 +119,6 @@ app.add_url_rule("/user/mass-delete-account",
                  view_func=delete_all_user_account, methods=["DELETE"])
 app.add_url_rule("/user/mass-restore-account",
                  view_func=restore_all_user_account, methods=["POST"])
-
 
 # @desc: User routes for authentication
 app.add_url_rule("/user/authenticate",

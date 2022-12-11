@@ -2,9 +2,13 @@ from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
     read_overall_data_department_analysis_csv_files, read_overall_data_professor_analysis_csv_files, \
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
     options_read_single_data, dashboard_data_overall, list_csv_files_to_view_and_delete_pagination, \
-    to_view_selected_csv_file, to_delete_selected_csv_file, to_download_selected_csv_file, list_csv_file_to_read, \
+    to_view_selected_csv_file, to_delete_selected_csv_file_flagged, to_download_selected_csv_file, \
+    list_csv_file_to_read, \
     to_read_csv_file, list_evaluatees_to_create, done_in_csv_evaluation, \
-    list_user_collection_of_sentiment_per_evaluatee_csv_files
+    list_user_collection_of_sentiment_per_evaluatee_csv_files, to_delete_selected_csv_file_permanent, \
+    to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, to_delete_all_csv_files_unflag, \
+    to_publish_selected_csv_file, to_publish_all_csv_files, to_unpublished_selected_csv_file, \
+    to_unpublished_all_csv_files
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -162,11 +166,67 @@ def viewing_csv_file(csv_id: int):
     return to_view_selected_csv_file(csv_id)
 
 
-def deleting_csv_file(csv_id: int):
+def deleting_csv_file_permanent(csv_id: int):
     """
     Delete the csv file.
     """
-    return to_delete_selected_csv_file(csv_id)
+    return to_delete_selected_csv_file_permanent(csv_id)
+
+
+def deleting_csv_file_temporary(csv_id: int):
+    """
+    Delete the csv file.
+    """
+    return to_delete_selected_csv_file_flagged(csv_id)
+
+
+def unflagging_csv_file_deleted(csv_id: int):
+    """
+    Unflag the csv file.
+    """
+    return to_delete_selected_csv_file_unflagged(csv_id)
+
+
+def deleting_all_csv_file_temporary():
+    """
+    Delete all the csv file.
+    """
+    return to_delete_all_csv_files_flag()
+
+
+def unflagging_all_csv_file_deleted():
+    """
+    Unflag all the csv file.
+    """
+    return to_delete_all_csv_files_unflag()
+
+
+def publish_selected_csv_file(csv_id: int):
+    """
+    Publish the results.
+    """
+    return to_publish_selected_csv_file(csv_id)
+
+
+def unpublished_selected_csv_file(csv_id: int):
+    """
+    Unpublished the results.
+    """
+    return to_unpublished_selected_csv_file(csv_id)
+
+
+def publish_all_csv_file():
+    """
+    Publish all the results.
+    """
+    return to_publish_all_csv_files()
+
+
+def unpublished_all_csv_file():
+    """
+    Unpublished all the results.
+    """
+    return to_unpublished_all_csv_files()
 
 
 def downloading_csv_file(csv_id: int):
