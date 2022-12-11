@@ -250,4 +250,3 @@ class CsvTimeElapsed(db.Model):
     # @desc: For Ascending Order (oldest to newest) in the csvs_time_elapsed table
     def __gt__(self, other):
         return self.csv_id > other.csv_id
-
