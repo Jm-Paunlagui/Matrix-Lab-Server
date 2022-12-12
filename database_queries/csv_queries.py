@@ -595,7 +595,8 @@ def get_next_csv_id():
         return csv_id.csv_id + 1
 
 
-def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
+def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str,
+                  process_by: int):
     """
     Evaluate the csv file.
 
@@ -604,6 +605,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     :param school_semester: The school semester
     :param school_year: The school year
     :param csv_question: The csv question
+    :param process_by: The process by
     :return: The evaluated csv file
     """
 
@@ -690,7 +692,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
         csv_file = CsvModel(csv_name=file_name, csv_question=csv_question, csv_file_path=path,
-                            school_year=school_year, school_semester=school_semester)
+                            school_year=school_year, school_semester=school_semester, process_by=process_by)
         db.session.add(csv_file)
         db.session.commit()
 
@@ -1968,6 +1970,19 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
 
 
 def dashboard_data_overall():
+
+    # @desc: Get the Session to verify if the user is logged in.
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
     # @desc: Read all the csv file in the database for professor
     csv_professor_files = CsvProfessorModel.query.all()
 

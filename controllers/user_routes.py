@@ -1,4 +1,4 @@
-from flask import jsonify, request
+from flask import jsonify, request, session
 
 from database_queries.user_queries import (authenticate_user,
                                            authenticated_user,
@@ -118,8 +118,14 @@ def forgot_password():
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
     token: str = request.headers["Authorization"]
+
+    user_id: int = session.get('user_id')
+
     if not token:
         return jsonify({"status": "error", "message": "Invalid request!"}), 400
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 401
 
     verified_token: dict = verify_authenticated_token(token)
     if not verified_token:
