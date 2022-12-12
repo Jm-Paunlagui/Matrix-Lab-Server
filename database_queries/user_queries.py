@@ -198,7 +198,8 @@ def create_all_users_auto_generated_password():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.password).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.password).filter_by(role='user').all()
 
         if all(users[1] is not None for users in users):
             return jsonify({"status": "error", "message": "All users already have a password."}), 400
@@ -271,7 +272,8 @@ def deactivate_all_users():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.flag_active).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.flag_active).filter_by(role='user').all()
 
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
@@ -345,7 +347,8 @@ def lock_all_user_accounts():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.flag_locked).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.flag_locked).filter_by(role='user').all()
 
         if all(user[1] == 1 for user in users):
             return jsonify({"status": "success",
@@ -420,7 +423,8 @@ def unlock_all_user_accounts():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.flag_locked).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.flag_locked).filter_by(role='user').all()
 
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
@@ -495,7 +499,8 @@ def delete_all_user_accounts():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.flag_deleted).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.flag_deleted).filter_by(role='user').all()
 
         if all(user[1] == 1 for user in users):
             return jsonify({"status": "success",
@@ -568,7 +573,8 @@ def restore_all_user_accounts():
 
     try:
         # Get all users with a role of 'user'
-        users = User.query.with_entities(User.user_id, User.flag_deleted).filter_by(role='user').all()
+        users = User.query.with_entities(
+            User.user_id, User.flag_deleted).filter_by(role='user').all()
 
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
