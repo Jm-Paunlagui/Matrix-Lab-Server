@@ -9,7 +9,7 @@ from controllers.csv_routes import (
     viewing_csv_file, deleting_csv_file_permanent, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
     getting_list_of_evaluatees, delete_uploaded_csv_file, getting_collection_of_csv_files, deleting_csv_file_temporary,
     deleting_all_csv_file_temporary, unflagging_csv_file_deleted, unflagging_all_csv_file_deleted,
-    publish_selected_csv_file, unpublished_selected_csv_file
+    publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files
 )
 from controllers.user_routes import (
     authenticate,
@@ -90,6 +90,8 @@ app.add_url_rule("/data/read-data-response/<int:csv_id>/<string:folder_name>/<st
                  view_func=reading_csv_file, methods=["GET"])
 app.add_url_rule("/data/list-of-csv-files-to-view-collections/<int:page>",
                  view_func=getting_collection_of_csv_files, methods=["GET"])
+app.add_url_rule("/data/getting-list-of-temporarily-deleted-csv-files/<int:page>/<int:per_page>",
+                 view_func=getting_list_of_temporarily_deleted_csv_files, methods=["GET"])
 # @desc: User Management routes
 app.add_url_rule("/data/list-of-users-to-view/<int:page>/<int:per_page>",
                  view_func=getting_list_of_evaluatees, methods=["GET"])

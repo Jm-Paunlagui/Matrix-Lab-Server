@@ -1238,6 +1238,60 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
                         "message": "An error occurred while trying to list the csv files."}), 500
 
 
+def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
+    """
+    @desc: List all csv files to permanently delete in pagination.
+    :param page: The page number.
+    :param per_page: The number of items per page.
+    :return: A list of csv files.
+    """
+    # @desc: Get the Session to verify if the user is logged in.
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
+    try:
+        if user_data.role == "admin":
+            csv_files = db.session.query(CsvModel).filter_by(flag_deleted=True).order_by(
+                CsvModel.csv_id.desc()).paginate(page=page, per_page=per_page)
+
+            list_of_csv_files = [
+                {
+                    "id": csv_file.csv_id,
+                    "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
+                    "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
+                    "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
+                    "csv_file_path": csv_file.csv_file_path,
+                    "csv_file_name": csv_file.csv_name,
+                    "flag_deleted": csv_file.flag_deleted,
+                    "flag_release": csv_file.flag_release,
+                } for csv_file in csv_files.items
+            ]
+
+            return jsonify({
+                "status": "success",
+                "csv_files": list_of_csv_files,
+                "total_pages": csv_files.pages,
+                "current_page": csv_files.page,
+                "has_next": csv_files.has_next,
+                "has_prev": csv_files.has_prev,
+                "next_page": csv_files.next_num,
+                "prev_page": csv_files.prev_num,
+                "total_items": csv_files.total,
+            }), 200
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 403
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+
+
 def to_view_selected_csv_file(csv_id: int):
     """
     @desc: To view the selected csv file
