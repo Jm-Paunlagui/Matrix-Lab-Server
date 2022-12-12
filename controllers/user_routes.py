@@ -215,9 +215,7 @@ def one_click_create(user_id: int):
 
 def one_click_create_all():
     """Creates new user accounts by one-click registration."""
-    if not create_all_users_auto_generated_password():
-        return jsonify({"status": "error", "message": "All user accounts already activated!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts successfully activated."}), 201
+    return create_all_users_auto_generated_password()
 
 
 def one_click_deactivate(user_id: int):
@@ -229,9 +227,7 @@ def one_click_deactivate(user_id: int):
 
 def one_click_deactivate_all():
     """Deactivates all user accounts by one-click deactivation."""
-    if not deactivate_all_users():
-        return jsonify({"status": "error", "message": "All user accounts already deactivated!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts deactivated successfully."}), 200
+    return deactivate_all_users()
 
 
 def lock_user_account_by_id(user_id: int):
@@ -243,9 +239,7 @@ def lock_user_account_by_id(user_id: int):
 
 def lock_all_user_account():
     """Locks all user accounts."""
-    if not lock_all_user_accounts():
-        return jsonify({"status": "error", "message": "All user accounts already locked!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts locked successfully."}), 200
+    return lock_all_user_accounts()
 
 
 def unlock_user_account_by_id(user_id: int):
@@ -257,9 +251,7 @@ def unlock_user_account_by_id(user_id: int):
 
 def unlock_all_user_account():
     """Unlocks all user accounts."""
-    if not unlock_all_user_accounts():
-        return jsonify({"status": "error", "message": "All user accounts already unlocked!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts unlocked successfully."}), 200
+    return unlock_all_user_accounts()
 
 
 def delete_user_account_by_id(user_id: int):
@@ -271,9 +263,7 @@ def delete_user_account_by_id(user_id: int):
 
 def delete_all_user_account():
     """Deletes all user accounts."""
-    if not delete_all_user_accounts():
-        return jsonify({"status": "error", "message": "All user accounts already deleted temporarily!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts successfully deleted temporarily."}), 200
+    return delete_all_user_accounts()
 
 
 def restore_user_account_by_id(user_id: int):
@@ -285,9 +275,7 @@ def restore_user_account_by_id(user_id: int):
 
 def restore_all_user_account():
     """Restores all user accounts."""
-    if not restore_all_user_accounts():
-        return jsonify({"status": "error", "message": "All user accounts already restored!"}), 409
-    return jsonify({"status": "success", "message": "All user accounts restored successfully."}), 200
+    return restore_all_user_accounts()
 
 
 def update_user_password():

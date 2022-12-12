@@ -196,21 +196,26 @@ def create_user_auto_generated_password(user_id: int):
 def create_all_users_auto_generated_password():
     """Creates a new user in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.password).filter_by(role='user').all()
+
+        if all(users[1] is not None for users in users):
+            return jsonify({"status": "error", "message": "All users already have a password."}), 400
+
         for user in users:
             user = user[0]
             create_user_auto_generated_password(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All users have been created with auto-generated password."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error occurred while creating all users with auto-generated password."}), 500
 
 
 def deactivate_user(user_id: int):
@@ -264,21 +269,27 @@ def deactivate_user(user_id: int):
 def deactivate_all_users():
     """Deactivates a user in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.flag_active).filter_by(role='user').all()
+
+        if all(user[1] == 0 for user in users):
+            return jsonify({"status": "success",
+                            "message": "All users are already deactivated."}), 400
+
         for user in users:
             user = user[0]
             deactivate_user(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All users have been deactivated."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error has occurred while deactivating all users."}), 400
 
 
 def lock_user_account(user_id: int):
@@ -332,21 +343,27 @@ def lock_user_account(user_id: int):
 def lock_all_user_accounts():
     """Locks all user accounts in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.flag_locked).filter_by(role='user').all()
+
+        if all(user[1] == 1 for user in users):
+            return jsonify({"status": "success",
+                            "message": "All users are already locked."}), 400
+
         for user in users:
             user = user[0]
             lock_user_account(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All users have been locked."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error occurred while locking all user accounts."}), 400
 
 
 def unlock_user_account(user_id: int):
@@ -401,21 +418,27 @@ def unlock_user_account(user_id: int):
 def unlock_all_user_accounts():
     """Unlocks all user accounts in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.flag_locked).filter_by(role='user').all()
+
+        if all(user[1] == 0 for user in users):
+            return jsonify({"status": "success",
+                            "message": "All user accounts are already unlocked."}), 400
+
         for user in users:
             user = user[0]
             unlock_user_account(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All user accounts have been unlocked."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error occurred while unlocking all user accounts."}), 500
 
 
 def delete_user_account(user_id: int):
@@ -470,21 +493,27 @@ def delete_user_account(user_id: int):
 def delete_all_user_accounts():
     """Deletes all user accounts in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.flag_deleted).filter_by(role='user').all()
+
+        if all(user[1] == 1 for user in users):
+            return jsonify({"status": "success",
+                            "message": "All user accounts have already been deleted."}), 400
+
         for user in users:
             user = user[0]
             delete_user_account(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All user accounts have been deleted."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error occurred while deleting all user accounts."}), 500
 
 
 def restore_user_account(user_id: int):
@@ -537,21 +566,27 @@ def restore_user_account(user_id: int):
 def restore_all_user_accounts():
     """Restores all user accounts in the database."""
 
-    # Get all users with a role of 'user'
-    users = User.query.with_entities(User.user_id).filter_by(role='user').all()
-
     try:
+        # Get all users with a role of 'user'
+        users = User.query.with_entities(User.user_id, User.flag_deleted).filter_by(role='user').all()
+
+        if all(user[1] == 0 for user in users):
+            return jsonify({"status": "success",
+                            "message": "All user accounts are already restored."}), 400
+
         for user in users:
             user = user[0]
             restore_user_account(user)
-        return True
+        return jsonify({"status": "success",
+                        "message": "All user accounts have been restored."}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
-        return False
+        return jsonify({"status": "error",
+                        "message": "An error occurred while restoring all user accounts."}), 500
 
 
 def delete_user_permanently(user_id: int):
