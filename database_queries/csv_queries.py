@@ -1398,7 +1398,7 @@ def to_delete_all_csv_file_permanent():
     """
     try:
         # @desc: Get all csv files that is flagged as deleted.
-        csv_files = CsvModel.query.filter_by(flag_deleted=True).all()
+        csv_files = CsvModel.query.filter_by(CsvModel.flag_deleted == 1).all()
         return jsonify({"status": "success", "message": csv_files}), 200
     except Exception as e:
         error_handler(
