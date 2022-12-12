@@ -1391,6 +1391,25 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
                         "message": "An error occurred while trying to delete the selected csv file."}), 500
 
 
+def to_delete_all_csv_file_permanent():
+    """
+    @desc: Delete all csv files
+    :return: A json response
+    """
+    try:
+        # @desc: Get all csv files that is flagged as deleted.
+        csv_files = CsvModel.query.filter_by(flag_deleted=True).all()
+        return jsonify({"status": "success", "message": csv_files}), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to delete all csv files."}), 500
+
+
 def to_delete_selected_csv_file_flagged(csv_id: int):
     """
     @desc: Flag the selected csv file

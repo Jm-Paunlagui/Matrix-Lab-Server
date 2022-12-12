@@ -8,7 +8,7 @@ from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator
     list_user_collection_of_sentiment_per_evaluatee_csv_files, to_delete_selected_csv_file_permanent, \
     to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, to_delete_all_csv_files_unflag, \
     to_publish_selected_csv_file, to_publish_all_csv_files, to_unpublished_selected_csv_file, \
-    to_unpublished_all_csv_files, list_csv_files_to_permanently_delete_pagination
+    to_unpublished_all_csv_files, list_csv_files_to_permanently_delete_pagination, to_delete_all_csv_file_permanent
 from flask import jsonify, request
 
 from modules.module import AllowedFile, InputTextValidation
@@ -178,6 +178,13 @@ def deleting_csv_file_permanent(csv_id: int):
     Delete the csv file.
     """
     return to_delete_selected_csv_file_permanent(csv_id)
+
+
+def deleting_all_csv_file_permanent():
+    """
+    Delete all the csv files.
+    """
+    return to_delete_all_csv_file_permanent()
 
 
 def deleting_csv_file_temporary(csv_id: int):

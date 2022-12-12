@@ -9,7 +9,8 @@ from controllers.csv_routes import (
     viewing_csv_file, deleting_csv_file_permanent, downloading_csv_file, list_of_csv_files_to_view, reading_csv_file,
     getting_list_of_evaluatees, delete_uploaded_csv_file, getting_collection_of_csv_files, deleting_csv_file_temporary,
     deleting_all_csv_file_temporary, unflagging_csv_file_deleted, unflagging_all_csv_file_deleted,
-    publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files
+    publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files,
+    deleting_all_csv_file_permanent
 )
 from controllers.user_routes import (
     authenticate,
@@ -64,6 +65,8 @@ app.add_url_rule("/data/view-csv-file/<int:csv_id>",
 # @desc: Delete csv file
 app.add_url_rule("/data/delete-csv-file-permanent/<int:csv_id>",
                  view_func=deleting_csv_file_permanent, methods=["DELETE"])
+app.add_url_rule("/data/deleting-all-csv-file-permanent",
+                 view_func=deleting_all_csv_file_permanent, methods=["DELETE"])
 app.add_url_rule("/data/delete-csv-file/<int:csv_id>",
                  view_func=deleting_csv_file_temporary, methods=["PUT"])
 app.add_url_rule("/data/unflag-delete-csv-file/<int:csv_id>",
