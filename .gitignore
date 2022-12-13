@@ -1,7 +1,6 @@
 .idea/workspace.xml
 .env
 test.py
-test1.py
 venv
 /.idea/dataSources.xml
 /.idea/Matrix-Lab-Server.iml
@@ -10,3 +9,9 @@ venv
 /.idea/inspectionProfiles/profiles_settings.xml
 /.idea/inspectionProfiles/Project_Default.xml
 /.idea/vcs.xml
+/csv_files/analyzed_csv_files/*.csv
+/csv_files/department_analysis_csv_files/*.csv
+/csv_files/professor_analysis_csv_files/*.csv
+
+testpy
+test_files
