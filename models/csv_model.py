@@ -13,9 +13,6 @@ class CsvModel(db.Model):
     school_semester: School semester varchar(255)
     flag_deleted: Flag deleted boolean
     flag_release: Flag release boolean
-    process_by: Process by varchar(255)
-    deleted_by: Deleted by varchar(255)
-    released_by: Released by varchar(255)
     """
 
     __tablename__ = 'csvs'
@@ -27,17 +24,13 @@ class CsvModel(db.Model):
     school_semester: str = db.Column(db.String(255), nullable=False)
     flag_deleted: bool = db.Column(db.Boolean, nullable=False, default=False)
     flag_release: bool = db.Column(db.Boolean, nullable=False, default=False)
-    process_by: str = db.Column(db.String(255), nullable=False)
-    deleted_by: str = db.Column(db.String(255), nullable=True)
-    released_by: str = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         """Csv model class representation."""
         return f"CsvModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
                f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
                f"school_semester={self.school_semester}, flag_deleted={self.flag_deleted}, " \
-               f"flag_release={self.flag_release}, process_by={self.process_by}, " \
-               f"deleted_by={self.deleted_by}, released_by={self.released_by})"
+               f"flag_release={self.flag_release})"
 
     # @desc: For Descending Order (newest to oldest) in the csvs table
     def __lt__(self, other):

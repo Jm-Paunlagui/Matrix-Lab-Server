@@ -46,7 +46,6 @@ def analyze_save_csv():
     school_semester: str = request.json["selected_semester"]
     school_year: str = request.json["school_year"]
     csv_question: str = request.json["csv_question"]
-    process_by: str = request.json["process_by"]
 
     if not InputTextValidation().validate_empty_fields(csv_file, sentence_column, school_semester, school_year,
                                                        csv_question):
@@ -59,7 +58,7 @@ def analyze_save_csv():
         return jsonify({"status": "error", "message": "Invalid school year"}), 400
     if not InputTextValidation(school_semester).validate_school_semester():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
-    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question, int(process_by))
+    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
 
 
 def delete_uploaded_csv_file():

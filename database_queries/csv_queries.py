@@ -595,8 +595,7 @@ def get_next_csv_id():
         return csv_id.csv_id + 1
 
 
-def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str,
-                  process_by: int):
+def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
     """
     Evaluate the csv file.
 
@@ -605,7 +604,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     :param school_semester: The school semester
     :param school_year: The school year
     :param csv_question: The csv question
-    :param process_by: The process by
     :return: The evaluated csv file
     """
 
@@ -692,7 +690,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Save the csv file details to the database (csv_name, csv_question, csv_file_path, school_year)
         csv_file = CsvModel(csv_name=file_name, csv_question=csv_question, csv_file_path=path,
-                            school_year=school_year, school_semester=school_semester, process_by=process_by)
+                            school_year=school_year, school_semester=school_semester)
         db.session.add(csv_file)
         db.session.commit()
 
