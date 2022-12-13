@@ -95,7 +95,6 @@ def create_user(email: str, full_name: str, username: str, password: str, role: 
 
 def create_user_auto_generated_password(user_id: int):
     """Creates a new user in the database."""
-
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.password is None:
@@ -150,7 +149,7 @@ def create_user_auto_generated_password(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
-    elif check_user_id_exists(user_id) and user.password is not None and user.flag_active is False:
+    if check_user_id_exists(user_id) and user.password is not None and user.flag_active is False:
         name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
         email = user.email
         user.flag_active = True
@@ -195,7 +194,6 @@ def create_user_auto_generated_password(user_id: int):
 
 def create_all_users_auto_generated_password():
     """Creates a new user in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -221,7 +219,6 @@ def create_all_users_auto_generated_password():
 
 def deactivate_user(user_id: int):
     """Deactivates a user in the database."""
-
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_active is not False:
@@ -269,7 +266,6 @@ def deactivate_user(user_id: int):
 
 def deactivate_all_users():
     """Deactivates a user in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -296,7 +292,6 @@ def deactivate_all_users():
 
 def lock_user_account(user_id: int):
     """Deletes the user's account by flagging the user's account as deleted."""
-
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_locked is not True:
@@ -344,7 +339,6 @@ def lock_user_account(user_id: int):
 
 def lock_all_user_accounts():
     """Locks all user accounts in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -371,7 +365,6 @@ def lock_all_user_accounts():
 
 def unlock_user_account(user_id: int):
     """Unlocks the user's account by flagging the user's account as not deleted."""
-
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_locked is True:
@@ -420,7 +413,6 @@ def unlock_user_account(user_id: int):
 
 def unlock_all_user_accounts():
     """Unlocks all user accounts in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -447,7 +439,6 @@ def unlock_all_user_accounts():
 
 def delete_user_account(user_id: int):
     """Deletes the user's account by flagging the user's account as deleted."""
-
     user = User.query.filter_by(user_id=user_id).first()
 
     if check_user_id_exists(user_id) and user.flag_deleted is False:
@@ -496,7 +487,6 @@ def delete_user_account(user_id: int):
 
 def delete_all_user_accounts():
     """Deletes all user accounts in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -523,7 +513,6 @@ def delete_all_user_accounts():
 
 def restore_user_account(user_id: int):
     """Restores the user's account by unflagging the user's account as deleted."""
-
     user = User.query.filter_by(user_id=user_id).first()
     if check_user_id_exists(user_id) and user.flag_deleted is True:
         name = user.full_name.split()[0] + ' ' + user.full_name.split()[1]
@@ -570,7 +559,6 @@ def restore_user_account(user_id: int):
 
 def restore_all_user_accounts():
     """Restores all user accounts in the database."""
-
     try:
         # Get all users with a role of 'user'
         users = User.query.with_entities(
@@ -760,12 +748,11 @@ def authenticate_user(username: str, password: str):
                                                           "Please check your email for further instructions on how "
                                                           "to unlock your account."}), 401
         return jsonify({"status": "error", "message": "Invalid username or password!"}), 401
-    else:
-        session['user_id'] = is_user.user_id
-        # Reset the number of failed login attempts to 0 if the user successfully logs in.
-        is_user.login_attempts = 0
-        return jsonify(
-            {"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
+    session['user_id'] = is_user.user_id
+    # Reset the number of failed login attempts to 0 if the user successfully logs in.
+    is_user.login_attempts = 0
+    return jsonify(
+        {"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
 
 def send_tfa(email: str):
@@ -828,7 +815,7 @@ def send_tfa(email: str):
             </td></tr></table></body></html> """
             mail.send(msg)
             return True
-        elif email == is_email.secondary_email or email == is_email.recovery_email:
+        if email == is_email.secondary_email or email == is_email.recovery_email:
             msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
             http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
             0px; background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" 

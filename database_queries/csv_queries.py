@@ -1,12 +1,9 @@
 import inspect
-import math
 import os
 import pickle
 import shutil
 import sys
-import tempfile
 import time
-import zipfile
 from io import BytesIO
 from zipfile import ZipFile
 
@@ -14,7 +11,7 @@ import pandas as pd
 
 from flask import jsonify, Response, send_file, session
 from keras.utils import pad_sequences
-from sqlalchemy import func
+from keras.models import load_model
 from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
@@ -22,19 +19,7 @@ from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel, Cs
     CsvTimeElapsed
 from models.user_model import User
 from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
-    PasswordBcrypt, Timezone
-from keras.models import load_model
-import nltk
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
-
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-from nltk.tokenize import word_tokenize, TweetTokenizer
-from textblob import TextBlob, Word, Blobber
-from sklearn.feature_extraction.text import CountVectorizer
-from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+    Timezone
 
 
 def check_csv_name_exists(csv_question: str, school_year: str, school_semester: str) -> bool:
@@ -48,7 +33,7 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     """
     csv = CsvModel.query.filter_by(csv_question=csv_question,
                                    school_year=school_year, school_semester=school_semester).first()
-    return True if csv else False
+    return bool(csv)
 
 
 def error_handler(error_occurred: str, name_of: str):
@@ -126,7 +111,6 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     :param csv_file_to_view: The csv file to view
     :return: The status and message
     """
-
     csv_file_to_view.save(os.path.join(app.config["CSV_UPLOADED_FOLDER"], AllowedFile(
         csv_file_to_view.filename).secure_filename()))
     csv_file_ = pd.read_csv(
@@ -298,7 +282,6 @@ def professor_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_p
     evaluatee_negative_sentiments_percentage: The negative sentiments percentage of the professor
     evaluatee_share: The share of the professor in the total responses of the students
     """
-
     # @desc: Get the sentiment of each professor
     sentiment_each_professor = {}
 
@@ -445,7 +428,6 @@ def department_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_
     department_negative_sentiments_percentage: The negative sentiments percentage of the professor
     department_share: The share of the professor in the total responses of the students
     """
-
     # @desc: Get the sentiment of each department
     sentiment_each_department = {}
 
@@ -540,7 +522,6 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
     collection_provider_negative_sentiments_percentage: The negative sentiments percentage of the collection provider
     collection_provider_share: The share of the collection provider in the total responses of the students
     """
-
     # @desc: Read the path of the csv file
     csv_file = pd.read_csv(csv_file_path)
 
@@ -585,9 +566,7 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
 
 
 def get_next_csv_id():
-    """
-    @desc: Get the next csv_id
-    """
+    """@desc: Get the next csv_id"""
     csv_id = CsvModel.query.order_by(CsvModel.csv_id.desc()).first()
     if csv_id is None:
         return 1
@@ -606,7 +585,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     :param csv_question: The csv question
     :return: The evaluated csv file
     """
-
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -804,9 +782,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
 
 def read_overall_data_department_analysis_csv_files():
-    """
-    Count the overall data of the department analysis csv files. This is for the analysis purposes.
-    """
+    """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
 
     # @desc: Get the csv files that are department analysis csv files
     csv_files = CsvDepartmentModel.query.all()
@@ -908,9 +884,7 @@ def read_overall_data_department_analysis_csv_files():
 
 
 def read_overall_data_professor_analysis_csv_files():
-    """
-    Count the overall data of the professor analysis csv files. This is for the analysis purposes.
-    """
+    """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
 
     # @desc: Get the csv files that are professor analysis csv files
     csv_files = CsvProfessorModel.query.all()
@@ -1006,9 +980,7 @@ def read_overall_data_professor_analysis_csv_files():
 
 
 def options_read_single_data():
-    """
-    Options for the read single data route.
-    """
+    """Options for the read single data route."""
     csv_file = CsvModel.query.all()
 
     # @desc: Do not return duplicate school_year, school_semester, and csv_question
@@ -1298,7 +1270,6 @@ def to_view_selected_csv_file(csv_id: int):
     :param csv_id: The id of the csv file
     :return: The csv file
     """
-
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 
@@ -1797,7 +1768,6 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
     :param file_name: The name of the file.
     :return: The csv file.
     """
-
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 

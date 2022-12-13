@@ -508,5 +508,4 @@ def error_message(error_class: BaseException | BaseException | TracebackType,
     :param file_name: The file name of the error
     :return: The error message
     """
-
     return f"Error type {error_class} at line {line_error} in function {function_name} in file {file_name}."
