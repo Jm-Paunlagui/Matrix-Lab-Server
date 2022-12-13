@@ -1401,7 +1401,7 @@ def to_delete_all_csv_file_permanent():
         csv_files = CsvModel.query.filter_by(flag_deleted=True).with_entities(
             CsvModel.csv_id, CsvModel.flag_deleted).all()
 
-        if all(csv_files[1] == 1 for csv_files in csv_files):
+        if all(csv_file is None for csv_file in csv_files):
             return jsonify({"status": "error", "message": "No files to be deleted."}), 400
 
         for csv_file in csv_files:
