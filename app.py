@@ -2,7 +2,6 @@ from config.configurations import app, db
 from controllers.csv_routes import (
     view_columns,
     analyze_save_csv,
-    getting_all_data_from_csv,
     getting_top_department_overall,
     getting_top_professor_overall,
     getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
@@ -12,6 +11,7 @@ from controllers.csv_routes import (
     publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files,
     deleting_all_csv_file_permanent
 )
+from controllers.dashboard_routes import getting_all_data_from_csv, for_sentiment_vs_polarity
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -34,6 +34,7 @@ from controllers.user_routes import (
     unlock_admin_account, verify_unlock_token,
 )
 from database_queries.csv_queries import to_publish_all_csv_files, to_unpublished_all_csv_files
+from database_queries.dashboard_queries import sentiment_vs_polarity
 from modules.module import get_ip_address
 
 app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
@@ -62,6 +63,11 @@ app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>/<int:per_page>",
                  view_func=getting_list_of_csv_files, methods=["GET"])
 app.add_url_rule("/data/view-csv-file/<int:csv_id>",
                  view_func=viewing_csv_file, methods=["GET"])
+
+# @desc: Dashboard analysis
+app.add_url_rule("/analysis/sentiment_vs_polarity",
+                 view_func=for_sentiment_vs_polarity, methods=["POST"])
+
 # @desc: Delete csv file
 app.add_url_rule("/data/delete-csv-file-permanent/<int:csv_id>",
                  view_func=deleting_csv_file_permanent, methods=["DELETE"])

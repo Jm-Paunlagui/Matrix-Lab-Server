@@ -1,7 +1,7 @@
 from database_queries.csv_queries import view_columns_with_pandas, csv_evaluator, \
     read_overall_data_department_analysis_csv_files, read_overall_data_professor_analysis_csv_files, \
     read_single_data_department_analysis_csv_files, read_single_data_professor_analysis_csv_files, \
-    options_read_single_data, dashboard_data_overall, list_csv_files_to_view_and_delete_pagination, \
+    options_read_single_data, list_csv_files_to_view_and_delete_pagination, \
     to_view_selected_csv_file, to_delete_selected_csv_file_flagged, to_download_selected_csv_file, \
     list_csv_file_to_read, \
     to_read_csv_file, list_evaluatees_to_create, done_in_csv_evaluation, \
@@ -76,11 +76,6 @@ def delete_uploaded_csv_file():
 def options_for_file_data():
     """Get the options for department."""
     return options_read_single_data()
-
-
-def getting_all_data_from_csv():
-    """Get all the data from the csv file."""
-    return dashboard_data_overall()
 
 
 def getting_top_department_overall():

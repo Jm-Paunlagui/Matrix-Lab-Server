@@ -7,11 +7,14 @@ import time
 from io import BytesIO
 from zipfile import ZipFile
 
+import nltk
 import pandas as pd
 
 from flask import jsonify, Response, send_file, session
 from keras.utils import pad_sequences
 from keras.models import load_model
+from nltk import word_tokenize
+from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
 
 from config.configurations import db, app
@@ -20,6 +23,29 @@ from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel, Cs
 from models.user_model import User
 from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
     Timezone
+
+nltk.download('punkt')
+nltk.download('stopwords')
+
+new_stopwords = [
+    "mo", "wla..", "ako", "sa", "akin", "ko", "aking", "sarili", "kami", "atin", "ang", "aming", "lang",
+    "amin", "ating", "ka", "iyong", "iyo", "inyong", "siya", "kanya", "mismo", "ito", "nito", "kanyang", "sila", "nila",
+    "kanila", "kanilang", "kung", "ano", "alin", "sino", "kanino", "na", "mga", "iyon", "am", "ay", "maging", "naging",
+    "mayroon", "may", "nagkaroon", "pagkakaroon", "gumawa", "ginagawa", "ginawa", "paggawa", "ibig", "dapat", "maaari",
+    "marapat", "kong", "ikaw", "tayo", "namin", "gusto", "nais", "niyang", "nilang", "niya", "huwag", "ginawang",
+    "gagawin", "maaaring", "sabihin", "narito", "kapag", "ni", "nasaan", "bakit", "paano", "kailangan", "walang",
+    "katiyakan", "isang", "at", "pero", "o", "dahil", "bilang", "hanggang", "habang", "ng", "pamamagitan", "para",
+    "tungkol", "laban", "pagitan", "panahon", "bago", "pagkatapos", "itaas", "ibaba", "mula", "pataas", "pababa",
+    "palabas", "ibabaw", "ilalim", "muli", "pa", "minsan", "dito", "doon", "saan", "lahat", "anumang", "kapwa", "bawat",
+    "ilan", "karamihan", "iba", "tulad", "lamang", "pareho", "kaya", "kaysa", "masyado", "napaka", "isa", "bababa",
+    "kulang", "marami", "ngayon", "kailanman", "sabi", "nabanggit", "din", "kumuha", "pumunta", "pumupunta", "ilagay",
+    "makita", "nakita", "katulad", "likod", "kahit", "paraan", "noon", "gayunman", "dalawa", "tatlo", "apat", "lima",
+    "una", "pangalawa", "yung", "po"
+]
+stpwrd = nltk.corpus.stopwords.words('english')
+stpwrd.remove("no")
+stpwrd.remove("t")
+stpwrd.extend(new_stopwords)
 
 
 def check_csv_name_exists(csv_question: str, school_year: str, school_semester: str) -> bool:
@@ -574,6 +600,15 @@ def get_next_csv_id():
         return csv_id.csv_id + 1
 
 
+def remove_stopwords(response):
+    """Remove stopwords from text."""
+    response = response.lower()
+    response = word_tokenize(response)
+    response = [word for word in response if word not in stpwrd]
+    response = " ".join(response)
+    return response
+
+
 def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
     """
     Evaluate the csv file.
@@ -656,6 +691,13 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # @desc: Path to the csv file
         path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
             school_semester + ".csv"
+
+        csv_to_pred['sentence_remove_stopwords'] = csv_to_pred['sentence'].apply(remove_stopwords)
+        csv_to_pred['review_len'] = csv_to_pred['sentence_remove_stopwords'].astype(str).apply(len)
+        csv_to_pred['word_count'] = csv_to_pred['sentence_remove_stopwords'].apply(lambda x: len(str(x).split()))
+        csv_to_pred['polarity'] = csv_to_pred['sentence_remove_stopwords'].\
+            map(lambda response: TextBlob(response).sentiment.polarity)
+
         # @desc: Save the csv file to the folder
         csv_to_pred.to_csv(path, index=False)
         end_time_adding_predictions = time.time()
@@ -1943,226 +1985,3 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to list the user collection of sentiment per "
                                    "evaluatee csv files."}), 500
-
-
-def dashboard_data_overall():
-    # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
-
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 440
-
-    user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
-
-    if user_data.role != "admin":
-        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
-
-    # @desc: Read all the csv file in the database for professor
-    csv_professor_files = CsvProfessorModel.query.all()
-
-    # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
-    # and return a list of evaluatee
-    evaluatee_list = [pd.read_csv(csv_professor_file.csv_file_path)["evaluatee_list"].tolist()
-                      for csv_professor_file in csv_professor_files]
-
-    # @desc: Flatten the list of list
-    evaluatee_list = [
-        evaluatee for evaluatee_list in evaluatee_list for evaluatee in evaluatee_list]
-
-    # @desc: Get the unique evaluatee
-    evaluatee_list = list(set(evaluatee_list))
-
-    # @desc: Read all the csv file in the database for department
-    csv_department_files = CsvDepartmentModel.query.all()
-
-    # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
-    # and return a list of department
-    department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
-                       for csv_department_file in csv_department_files]
-
-    # @desc: Flatten the list of list
-    department_list = [
-        department for department_list in department_list for department in department_list]
-
-    actual_department_list = department_list
-
-    # @desc: Get the unique department
-    department_list = list(set(department_list))
-
-    # @desc: Get the total number of overall_total_course_code and divide it by the total number of files
-    # to get the average number of course code per csv file
-    department_evaluatee_course_code = [
-        pd.read_csv(csv_department_file.csv_file_path)[
-            "department_evaluatee_course_code"].tolist()
-        for csv_department_file in csv_department_files]
-
-    department_evaluatee_course_code = [
-        course_code for course_code_list in department_evaluatee_course_code for course_code in course_code_list]
-
-    department_evaluatee_course_code = sum(
-        department_evaluatee_course_code) / len(csv_department_files) if len(csv_department_files) > 0 else 0
-
-    # @desc: Get the total number of department_number_of_sentiments
-    department_number_of_sentiments = [
-        pd.read_csv(csv_department_file.csv_file_path)[
-            "department_number_of_sentiments"].tolist()
-        for csv_department_file in csv_department_files]
-
-    department_number_of_sentiments = [
-        number_of_sentiments
-        for number_of_sentiments_list in department_number_of_sentiments
-        for number_of_sentiments in number_of_sentiments_list]
-
-    department_number_of_sentiments = sum(department_number_of_sentiments) if len(
-        department_number_of_sentiments) > 0 else 0
-
-    department_positive_sentiments_percentage = sum(
-        [pd.read_csv(csv_department_file.csv_file_path)["department_positive_sentiments_percentage"].tolist()
-         for csv_department_file in csv_department_files], [])
-
-    department_negative_sentiments_percentage = sum(
-        [pd.read_csv(csv_department_file.csv_file_path)["department_negative_sentiments_percentage"].tolist()
-         for csv_department_file in csv_department_files], [])
-
-    department_positive_sentiments_percentage = round(
-        sum(department_positive_sentiments_percentage) /
-        len(actual_department_list), 2
-    ) if len(actual_department_list) > 0 else 0
-    department_negative_sentiments_percentage = round(
-        sum(department_negative_sentiments_percentage) /
-        len(actual_department_list), 2
-    ) if len(actual_department_list) > 0 else 0
-
-    # @desc: Get the total number of positive sentiments and negative sentiments based on the percentage
-    department_positive_sentiments = round(
-        department_number_of_sentiments * (department_positive_sentiments_percentage / 100)) \
-        if department_number_of_sentiments and department_positive_sentiments_percentage else 0
-
-    department_negative_sentiments = round(
-        department_number_of_sentiments * (department_negative_sentiments_percentage / 100)) \
-        if department_number_of_sentiments and department_negative_sentiments_percentage else 0
-
-    # @desc: Get the total number of csv files in the database
-    csv_files = CsvModel.query.all()
-
-    total_csv_files = len(csv_files)
-
-    starting_year, ending_year = get_starting_ending_year()
-
-    four_top_details = [
-        {"id": 1, "title": "No. of Professors",
-         "value": len(evaluatee_list), "icon": "fas fa-user-tie"},
-        {"id": 2, "title": "No. of Departments",
-         "value": len(department_list), "icon": "fas fa-university"},
-        {"id": 3, "title": "No. of Courses",
-         "value": round(department_evaluatee_course_code, 2), "icon": "fas fa-book"},
-        {"id": 4, "title": "No. of CSV Files",
-         "value": total_csv_files, "icon": "fas fa-file-csv"}
-    ]
-
-    sentiment_details = [
-        {"id": 1, "title": "Positive Sentiments",
-         "value": f"{department_positive_sentiments:,}", "percentage": department_positive_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-smile-beam"},
-        {"id": 2, "title": "Negative Sentiments",
-         "value": f"{department_negative_sentiments:,}", "percentage": department_negative_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-frown"}
-    ]
-
-    # @desc: Get the total number of sentiments each department has every year
-    # department_sentiments = [
-    #     {
-    #         "school_year": school_year,
-    #         "departments": [
-    #             {
-    #                 "index": index,
-    #                 "department": department,
-    #                 "sentiments": sentiments
-    #             }
-    #             for index, (department, sentiments) in enumerate(
-    #                 zip(
-    #                     pd.read_csv(csv_department_files.csv_file_path)["department_list"].tolist(),
-    #                     pd.read_csv(csv_department_files.csv_file_path)["department_number_of_sentiments"].tolist()
-    #                 )
-    #             )
-    #         ]
-    #     }
-    # ]
-
-    # # @desc: Get the total number of sentiments each department has every year
-    # department_sentiments_percentage = [
-    #     {
-    #         "school_year": school_year,
-    #         "departments": [
-    #             {
-    #                 "index": index,
-    #                 "department": department,
-    #                 "sentiments": sentiments
-    #             }
-    #             for index, (department, sentiments) in enumerate(
-    #                 zip(
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_number_of_sentiments_percentage"].tolist()
-    #                 )
-    #             )
-    #         ]
-    #     }
-    #     for school_year, csv_department_file in zip(
-    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
-    #         csv_department_files
-    #     )
-    # ]
-    #
-    # # @desc: Get the total number of sentiments each department has every year
-    # department_positive_sentiments_percentage = [
-    #     {
-    #         "school_year": school_year,
-    #         "departments": [
-    #             {
-    #                 "index": index,
-    #                 "department": department,
-    #                 "sentiments": sentiments
-    #             }
-    #             for index, (department, sentiments) in enumerate(
-    #                 zip(
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_positive_sentiments_percentage"].tolist()
-    #                 )
-    #             )
-    #         ]
-    #     }
-    #     for school_year, csv_department_file in zip(
-    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
-    #         csv_department_files
-    #     )
-    # ]
-    #
-    # # @desc: Get the total number of sentiments each department has every year
-    # department_negative_sentiments_percentage = [
-    #     {
-    #         "school_year": school_year,
-    #         "departments": [
-    #             {
-    #                 "index": index,
-    #                 "department": department,
-    #                 "sentiments": sentiments
-    #             }
-    #             for index, (department, sentiments) in enumerate(
-    #                 zip(
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist(),
-    #                     pd.read_csv(csv_department_file.csv_file_path)["department_number_of_sentiments"].tolist()
-    #                 )
-    #             )
-    #         ]
-    #     }
-    #     for school_year, csv_department_file in zip(
-    #         pd.read_csv(csv_department_files[0].csv_file_path)["school_year"].tolist(),
-    #         csv_department_files
-    #     )
-    # ]
-
-    return jsonify({
-        "status": "success", "details": four_top_details, "overall_sentiments": sentiment_details,
-        # "department_sentiments": department_sentiments
-    }), 200
