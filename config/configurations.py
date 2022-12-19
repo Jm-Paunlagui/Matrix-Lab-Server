@@ -38,6 +38,11 @@ app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"] = os.path.jo
     app.config["ROOT_PATH"], "csv_files\\user_collection_of_sentiment_per_evaluatee_csv_files")
 app.config["DEEP_LEARNING_MODEL_FOLDER"] = os.path.join(
     app.config["ROOT_PATH"], "deep_learning_model")
+
+# @desc: SEABORN AND MATPLOTLIB CONFIGURATION FOR IMAGE GENERATION PATH
+app.config["IMAGE_GENERATION_PATH"] = os.path.join(
+    app.config["ROOT_PATH"], "static\\images")
+
 app.config["ALLOWED_EXTENSIONS"] = {"csv"}
 
 # @desc: Creates directories for the CSV files if they do not exist
@@ -54,6 +59,8 @@ if not os.path.exists(app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"]):
 if not os.path.exists(app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"]):
     os.makedirs(
         app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"])
+if not os.path.exists(app.config["IMAGE_GENERATION_PATH"]):
+    os.makedirs(app.config["IMAGE_GENERATION_PATH"])
 
 # @desc: Email configuration for the Flask app
 app.config["MAIL_SERVER"] = 'smtp.gmail.com'
@@ -100,6 +107,7 @@ if not database_exists(app.config['SQLALCHEMY_DATABASE_URI']):
 db = SQLAlchemy(app)
 # noinspection PyUnresolvedReferences
 # from models import user_model, csv_model
+from models import user_model, csv_model
 db.create_all()
 
 # @desc: Config from object method of the Flask app (Should be the last line of the configs)
