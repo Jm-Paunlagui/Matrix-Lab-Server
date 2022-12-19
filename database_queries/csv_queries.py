@@ -693,9 +693,12 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             school_semester + ".csv"
         csv_to_pred['sentiment_converted'] = csv_to_pred['sentiment'].apply(
             lambda x: '1' if x >= 50 else '0')
-        csv_to_pred['sentence_remove_stopwords'] = csv_to_pred['sentence'].apply(remove_stopwords)
-        csv_to_pred['review_len'] = csv_to_pred['sentence_remove_stopwords'].astype(str).apply(len)
-        csv_to_pred['word_count'] = csv_to_pred['sentence_remove_stopwords'].apply(lambda x: len(str(x).split()))
+        csv_to_pred['sentence_remove_stopwords'] = csv_to_pred['sentence'].apply(
+            remove_stopwords)
+        csv_to_pred['review_len'] = csv_to_pred['sentence_remove_stopwords'].astype(
+            str).apply(len)
+        csv_to_pred['word_count'] = csv_to_pred['sentence_remove_stopwords'].apply(
+            lambda x: len(str(x).split()))
         csv_to_pred['polarity'] = csv_to_pred['sentence_remove_stopwords'].\
             map(lambda response: TextBlob(response).sentiment.polarity)
 
