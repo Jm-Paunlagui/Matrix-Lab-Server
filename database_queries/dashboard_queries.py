@@ -239,10 +239,12 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         wordcloud_list_negative = []
 
         for csv_file in csv_files:
-            sentiment_converted_list.append(csv_file["sentiment_converted"].tolist())
+            sentiment_converted_list.append(
+                csv_file["sentiment_converted"].tolist())
             polarity_list.append(csv_file["polarity"].tolist())
             review_length_list.append(csv_file["review_len"].tolist())
-            wordcloud_list.append(csv_file["sentence_remove_stopwords"].tolist())
+            wordcloud_list.append(
+                csv_file["sentence_remove_stopwords"].tolist())
             wordcloud_list_positive.append(csv_file[csv_file["sentiment_converted"] == 1]
                                            ["sentence_remove_stopwords"].tolist())
             wordcloud_list_negative.append(csv_file[csv_file["sentiment_converted"] == 0]
@@ -250,10 +252,12 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
         sentiment_converted_list = [sentiment for sentiment_list in sentiment_converted_list
                                     for sentiment in sentiment_list]
-        polarity_list = [polarity for polarity_list in polarity_list for polarity in polarity_list]
+        polarity_list = [
+            polarity for polarity_list in polarity_list for polarity in polarity_list]
         review_length_list = [review_length for review_length_list in review_length_list
                               for review_length in review_length_list]
-        wordcloud_list = [wordcloud for wordcloud_list in wordcloud_list for wordcloud in wordcloud_list]
+        wordcloud_list = [
+            wordcloud for wordcloud_list in wordcloud_list for wordcloud in wordcloud_list]
         wordcloud_list_positive = [wordcloud for wordcloud_list in wordcloud_list_positive
                                    for wordcloud in wordcloud_list]
         wordcloud_list_negative = [wordcloud for wordcloud_list in wordcloud_list_negative
@@ -274,7 +278,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
         # Encode the figure to a base64-encoded string
         sentiment_polarity = buf_sentiment_polarity.getvalue()
-        sentiment_polarity_encoded = base64.b64encode(sentiment_polarity).decode("utf-8")
+        sentiment_polarity_encoded = base64.b64encode(
+            sentiment_polarity).decode("utf-8")
 
         # `matplotlib.pyplot.close()`. This is necessary to prevent memory leaks.
         plt.close()
@@ -289,12 +294,14 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
         # Save the figure to a BytesIO object
         buf_sentiment_review_length = BytesIO()
-        plt.savefig(buf_sentiment_review_length, format="png", bbox_inches="tight")
+        plt.savefig(buf_sentiment_review_length,
+                    format="png", bbox_inches="tight")
         buf_sentiment_review_length.seek(0)
 
         # Encode the figure to a base64-encoded string
         sentiment_review_length = buf_sentiment_review_length.getvalue()
-        sentiment_review_length_encoded = base64.b64encode(sentiment_review_length).decode("utf-8")
+        sentiment_review_length_encoded = base64.b64encode(
+            sentiment_review_length).decode("utf-8")
 
         # `matplotlib.pyplot.close()`. This is necessary to prevent memory leaks.
         plt.close()
@@ -323,7 +330,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         plt.close()
 
         # @desc: Remove the float found in the wordcloud_list_positive
-        wordcloud_list_positive = [str(wordcloud) for wordcloud in wordcloud_list_positive]
+        wordcloud_list_positive = [str(wordcloud)
+                                   for wordcloud in wordcloud_list_positive]
 
         # @desc: Get the positive word cloud 540 × 338
         wordcloud_positive = WordCloud(width=540, height=338, random_state=21, max_font_size=110,
@@ -340,13 +348,15 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
         # Encode the figure to a base64-encoded string
         wordcloud_positive = buf_wordcloud_positive.getvalue()
-        wordcloud_positive_encoded = base64.b64encode(wordcloud_positive).decode("utf-8")
+        wordcloud_positive_encoded = base64.b64encode(
+            wordcloud_positive).decode("utf-8")
 
         # `matplotlib.pyplot.close()`. This is necessary to prevent memory leaks.
         plt.close()
 
         # @desc: Remove the float found in the wordcloud_list_negative
-        wordcloud_list_negative = [str(wordcloud) for wordcloud in wordcloud_list_negative]
+        wordcloud_list_negative = [str(wordcloud)
+                                   for wordcloud in wordcloud_list_negative]
 
         # @desc: Get the negative word cloud 540 × 338
         wordcloud_negative = WordCloud(width=540, height=338, random_state=21, max_font_size=110,
@@ -363,7 +373,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
         # Encode the figure to a base64-encoded string
         wordcloud_negative = buf_wordcloud_negative.getvalue()
-        wordcloud_negative_encoded = base64.b64encode(wordcloud_negative).decode("utf-8")
+        wordcloud_negative_encoded = base64.b64encode(
+            wordcloud_negative).decode("utf-8")
 
         # `matplotlib.pyplot.close()`. This is necessary to prevent memory leaks.
         plt.close()
@@ -378,7 +389,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
     elif school_year == "All" and school_semester == "All":
         # @desc: Read all the csv file in the database for department
-        csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question).all()
+        csv_department_files = CsvDepartmentModel.query.filter_by(
+            csv_question=csv_question).all()
 
         department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
                            for csv_department_file in csv_department_files]
@@ -446,7 +458,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
     elif school_year == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
-        csv_department_files = CsvDepartmentModel.query.filter_by(school_semester=school_semester).all()
+        csv_department_files = CsvDepartmentModel.query.filter_by(
+            school_semester=school_semester).all()
 
         department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
                            for csv_department_file in csv_department_files]
@@ -514,7 +527,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
 
     elif school_semester == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
-        csv_department_files = CsvDepartmentModel.query.filter_by(school_year=school_year).all()
+        csv_department_files = CsvDepartmentModel.query.filter_by(
+            school_year=school_year).all()
 
         department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
                            for csv_department_file in csv_department_files]
