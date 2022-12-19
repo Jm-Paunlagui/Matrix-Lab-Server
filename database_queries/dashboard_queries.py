@@ -8,6 +8,7 @@ import pandas as pd
 import seaborn as sns
 from flask import session, jsonify
 from matplotlib import pyplot as plt
+from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import STOPWORDS, WordCloud
 
 from config.configurations import app
@@ -149,6 +150,42 @@ def dashboard_data_overall():
         "status": "success", "details": four_top_details, "overall_sentiments": "sentiment_details",
         # "department_sentiments": department_sentiments
     }), 200
+
+
+vec = CountVectorizer()
+
+
+def get_top_n_words(corpus, n=None):
+    vec.fit(corpus)
+    bag_of_words = vec.transform(corpus)
+    sum_words = bag_of_words.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx])
+                  for word, idx in vec.vocabulary_.items()]
+    words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+    return [{"id": index + 1, "word": word, "frequency": f"{str(frequency)} times"}
+            for index, (word, frequency) in enumerate(words_freq[:n])]
+
+
+def get_top_n_bigrams(corpus, n=None):
+    vec.set_params(**{"ngram_range": (2, 2)}).fit(corpus)
+    bag_of_words = vec.transform(corpus)
+    sum_words = bag_of_words.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx])
+                  for word, idx in vec.vocabulary_.items()]
+    words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+    return [{"id": index + 1, "word": word, "frequency": f"{str(frequency)} times"}
+            for index, (word, frequency) in enumerate(words_freq[:n])]
+
+
+def get_top_n_trigrams(corpus, n=None):
+    vec.set_params(**{"ngram_range": (3, 3)}).fit(corpus)
+    bag_of_words = vec.transform(corpus)
+    sum_words = bag_of_words.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx])
+                  for word, idx in vec.vocabulary_.items()]
+    words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
+    return [{"id": index + 1, "word": word, "frequency": f"{str(frequency)} times"}
+            for index, (word, frequency) in enumerate(words_freq[:n])]
 
 
 def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: str):
@@ -384,7 +421,16 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
                         "image_path_wordcloud_positive": wordcloud_positive_encoded,
-                        "image_path_wordcloud_negative": wordcloud_negative_encoded
+                        "image_path_wordcloud_negative": wordcloud_negative_encoded,
+                        "common_word:": get_top_n_words(wordcloud_list, 10),
+                        "common_words:": get_top_n_bigrams(wordcloud_list, 10),
+                        "common_phrase:": get_top_n_trigrams(wordcloud_list, 10),
+                        "common_word_positive:": get_top_n_words(wordcloud_list_positive, 10),
+                        "common_words_positive:": get_top_n_bigrams(wordcloud_list_positive, 10),
+                        "common_phrase_positive:": get_top_n_trigrams(wordcloud_list_positive, 10),
+                        "common_word_negative:": get_top_n_words(wordcloud_list_negative, 10),
+                        "common_words_negative:": get_top_n_bigrams(wordcloud_list_negative, 10),
+                        "common_phrase_negative:": get_top_n_trigrams(wordcloud_list_negative, 10)
                         }), 200
 
     elif school_year == "All" and school_semester == "All":
