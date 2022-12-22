@@ -170,7 +170,8 @@ def get_top_n_words(corpus, n=None):
         sum_words = bag_of_words.sum(axis=0)
 
         # @desc: Get the words from the vectorized text
-        words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
+        words_freq = [(word, sum_words[0, idx])
+                      for word, idx in vec.vocabulary_.items()]
 
         # @desc: Sort the words from the vectorized text
         words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
@@ -206,7 +207,8 @@ def get_top_n_bigrams(corpus, n=None):
         sum_words = bag_of_words.sum(axis=0)
 
         # @desc: Get the words from the vectorized text
-        words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
+        words_freq = [(word, sum_words[0, idx])
+                      for word, idx in vec.vocabulary_.items()]
 
         # @desc: Sort the words from the vectorized text
         words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
@@ -242,7 +244,8 @@ def get_top_n_trigrams(corpus, n=None):
         sum_words = bag_of_words.sum(axis=0)
 
         # @desc: Get the words from the vectorized text
-        words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
+        words_freq = [(word, sum_words[0, idx])
+                      for word, idx in vec.vocabulary_.items()]
 
         # @desc: Sort the words from the vectorized text
         words_freq = sorted(words_freq, key=lambda x: x[1], reverse=True)
@@ -453,7 +456,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.all()
@@ -475,7 +479,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         csv_department_files = CsvDepartmentModel.query.filter_by(
             csv_question=csv_question).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(csv_question=csv_question).all()
@@ -497,10 +502,12 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         csv_department_files = CsvDepartmentModel.query.filter_by(
             school_semester=school_semester).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(school_semester=school_semester).all()
+        csv_files = CsvModel.query.filter_by(
+            school_semester=school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = analysis(csv_files)
@@ -519,7 +526,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         csv_department_files = CsvDepartmentModel.query.filter_by(
             school_year=school_year).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(school_year=school_year).all()
@@ -541,10 +549,12 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
         csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question,
                                                                   school_semester=school_semester).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester).all()
+        csv_files = CsvModel.query.filter_by(
+            csv_question=csv_question, school_semester=school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = analysis(csv_files)
@@ -565,7 +575,8 @@ def sentiment_vs_polarity(school_year: str, school_semester: str, csv_question: 
                                                                   school_semester=school_semester,
                                                                   school_year=school_year).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(csv_department_files)
+        sentiment_details = department_positive_and_negative_sentiment(
+            csv_department_files)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
