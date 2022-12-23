@@ -1,7 +1,7 @@
 from flask import request, jsonify
 
-from database_queries.dashboard_queries import dashboard_data_overall, sentiment_vs_polarity, \
-    options_read_single_data_dashboard
+from database_queries.dashboard_queries import dashboard_data_overall, analysis_options_admin, \
+    options_read_single_data_dashboard, analysis_options_user
 from modules.module import InputTextValidation
 
 
@@ -15,7 +15,13 @@ def getting_all_data_from_csv():
     return dashboard_data_overall()
 
 
-def for_sentiment_vs_polarity(school_year, school_semester, csv_question):
+def for_analysis_options_admin(school_year, school_semester, csv_question):
     """Get the data for sentiment vs polarity."""
     """Get the top professor by file."""
-    return sentiment_vs_polarity(school_year, school_semester, csv_question)
+    return analysis_options_admin(school_year, school_semester, csv_question)
+
+
+def for_analysis_options_user(school_year, school_semester, csv_question):
+    """Get the data for sentiment vs polarity."""
+    """Get the top professor by file."""
+    return analysis_options_user(school_year, school_semester, csv_question)

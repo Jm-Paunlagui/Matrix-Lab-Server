@@ -11,8 +11,8 @@ from controllers.csv_routes import (
     publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files,
     deleting_all_csv_file_permanent
 )
-from controllers.dashboard_routes import getting_all_data_from_csv, for_sentiment_vs_polarity, \
-    options_for_file_data_dashboard
+from controllers.dashboard_routes import getting_all_data_from_csv, for_analysis_options_admin, \
+    options_for_file_data_dashboard, for_analysis_options_user
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -35,7 +35,6 @@ from controllers.user_routes import (
     unlock_admin_account, verify_unlock_token,
 )
 from database_queries.csv_queries import to_publish_all_csv_files, to_unpublished_all_csv_files
-from database_queries.dashboard_queries import sentiment_vs_polarity
 from modules.module import get_ip_address
 
 app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
@@ -69,7 +68,10 @@ app.add_url_rule("/data/view-csv-file/<int:csv_id>",
 app.add_url_rule("/analysis/options-for-file-data-dashboard",
                  view_func=options_for_file_data_dashboard, methods=["GET"])
 app.add_url_rule("/analysis/sentiment_vs_polarity/<string:school_year>/<string:school_semester>/<string:csv_question>",
-                 view_func=for_sentiment_vs_polarity, methods=["GET"])
+                 view_func=for_analysis_options_admin, methods=["GET"])
+app.add_url_rule("/analysis/for_analysis_options_user/<string:school_year>/<string:school_semester>/<string"
+                 ":csv_question>",
+                 view_func=for_analysis_options_user, methods=["GET"])
 
 # @desc: Delete csv file
 app.add_url_rule("/data/delete-csv-file-permanent/<int:csv_id>",
