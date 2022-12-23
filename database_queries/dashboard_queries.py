@@ -466,7 +466,8 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
         evaluatee_number_of_sentiments) > 0 else 0
 
     evaluatee_positive_sentiments_percentage = [
-        professor_analysis_csv_file["evaluatee_positive_sentiments_percentage"].tolist()
+        professor_analysis_csv_file["evaluatee_positive_sentiments_percentage"].tolist(
+        )
         for professor_analysis_csv_file in professor_analysis_csv_files]
 
     evaluatee_positive_sentiments_percentage = [
@@ -479,7 +480,8 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
         if len(evaluatee_positive_sentiments_percentage) > 0 else 0
 
     evaluatee_negative_sentiments_percentage = [
-        professor_analysis_csv_file["evaluatee_negative_sentiments_percentage"].tolist()
+        professor_analysis_csv_file["evaluatee_negative_sentiments_percentage"].tolist(
+        )
         for professor_analysis_csv_file in professor_analysis_csv_files]
 
     evaluatee_negative_sentiments_percentage = [
@@ -790,11 +792,13 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if user_data.role != "user":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
-    converted_full_name = InputTextValidation(user_data.full_name).to_csv_professor_name()
+    converted_full_name = InputTextValidation(
+        user_data.full_name).to_csv_professor_name()
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         csv_files = CsvProfessorModel.query.all()
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         csv_files = CsvModel.query.all()
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
@@ -813,7 +817,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         csv_files = CsvProfessorModel.query.filter_by(
             csv_question=csv_question).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(csv_question=csv_question).all()
@@ -834,7 +839,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         csv_files = CsvProfessorModel.query.filter_by(
             school_semester=school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(
@@ -856,7 +862,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         csv_files = CsvProfessorModel.query.filter_by(
             school_year=school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(school_year=school_year).all()
@@ -874,9 +881,11 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     elif school_year == "All":
         # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_semester=school_semester).all()
+        csv_files = CsvProfessorModel.query.filter_by(
+            csv_question=csv_question, school_semester=school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(
@@ -895,9 +904,11 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     elif school_semester == "All":
         # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_year=school_year).all()
+        csv_files = CsvProfessorModel.query.filter_by(
+            csv_question=csv_question, school_year=school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(
@@ -916,9 +927,11 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     elif csv_question == "All":
         # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(school_year=school_year, school_semester=school_semester).all()
+        csv_files = CsvProfessorModel.query.filter_by(
+            school_year=school_year, school_semester=school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(
@@ -940,7 +953,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
                                                       school_year=school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(csv_files, converted_full_name)
+        sentiment_details = professor_positive_and_negative_sentiment(
+            csv_files, converted_full_name)
 
         # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
         csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
