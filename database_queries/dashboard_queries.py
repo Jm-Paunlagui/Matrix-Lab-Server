@@ -167,11 +167,14 @@ def dashboard_data_csv():
     total_csv_files = len(csv_files)
 
     # @desc: Get the total number of csv files in the database that is being released
-    total_released_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_release == 1])
-    total_unreleased_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_release == 0])
+    total_released_csv_files = len(
+        [csv_file for csv_file in csv_files if csv_file.flag_release == 1])
+    total_unreleased_csv_files = len(
+        [csv_file for csv_file in csv_files if csv_file.flag_release == 0])
 
     # @desc: Get the total number of csv files in the database that is being deleted temporarily
-    total_deleted_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_deleted == 1])
+    total_deleted_csv_files = len(
+        [csv_file for csv_file in csv_files if csv_file.flag_deleted == 1])
 
     data_csv = [
         {"id": 1, "title": "Total CSV Files",
@@ -206,14 +209,21 @@ def dashboard_data_professor():
     # Count the number of users with the role of user
     total_users = User.query.filter_by(role="user").count()
 
-    total_professors_active = User.query.filter_by(role="user", flag_active=1).count()
-    total_professors_inactive = User.query.filter_by(role="user", flag_active=0).count()
-    total_professors_locked = User.query.filter_by(role="user", flag_locked=1).count()
-    total_professors_unlocked = User.query.filter_by(role="user", flag_locked=0).count()
-    total_professors_deleted = User.query.filter_by(role="user", flag_deleted=1).count()
-    total_professors_undeleted = User.query.filter_by(role="user", flag_deleted=0).count()
+    total_professors_active = User.query.filter_by(
+        role="user", flag_active=1).count()
+    total_professors_inactive = User.query.filter_by(
+        role="user", flag_active=0).count()
+    total_professors_locked = User.query.filter_by(
+        role="user", flag_locked=1).count()
+    total_professors_unlocked = User.query.filter_by(
+        role="user", flag_locked=0).count()
+    total_professors_deleted = User.query.filter_by(
+        role="user", flag_deleted=1).count()
+    total_professors_undeleted = User.query.filter_by(
+        role="user", flag_deleted=0).count()
     # Count the number of users that has password in the database
-    total_professors_without_password = User.query.filter_by(role="user", password=None).count()
+    total_professors_without_password = User.query.filter_by(
+        role="user", password=None).count()
 
     data_professor = [
         {"id": 1, "title": "Total Professors",
@@ -237,8 +247,6 @@ def dashboard_data_professor():
     return jsonify({
         "status": "success", "details": data_professor
     }), 200
-
-
 
 
 vec = CountVectorizer()
