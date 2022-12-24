@@ -9,7 +9,6 @@ from matplotlib import pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
-from database_queries.csv_queries import get_starting_ending_year
 from models.csv_model import CsvProfessorModel, CsvDepartmentModel, CsvModel
 from models.user_model import User
 from modules.module import InputTextValidation
@@ -147,6 +146,99 @@ def dashboard_data_overall():
         "status": "success", "details": four_top_details, "overall_sentiments": "sentiment_details",
         # "department_sentiments": department_sentiments
     }), 200
+
+
+def dashboard_data_csv():
+    # @desc: Get the Session to verify if the user is logged in.
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    # @desc: Get the total number of csv files in the database
+    csv_files = CsvModel.query.all()
+
+    total_csv_files = len(csv_files)
+
+    # @desc: Get the total number of csv files in the database that is being released
+    total_released_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_release == 1])
+    total_unreleased_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_release == 0])
+
+    # @desc: Get the total number of csv files in the database that is being deleted temporarily
+    total_deleted_csv_files = len([csv_file for csv_file in csv_files if csv_file.flag_deleted == 1])
+
+    data_csv = [
+        {"id": 1, "title": "Total CSV Files",
+            "value": total_csv_files, "icon": "fas fa-file-csv"},
+        {"id": 2, "title": "Released CSV Files",
+            "value": total_released_csv_files, "icon": "fas fa-file-csv"},
+        {"id": 3, "title": "Unreleased CSV Files",
+            "value": total_unreleased_csv_files, "icon": "fas fa-file-csv"},
+        {"id": 4, "title": "Deleted CSV Files",
+            "value": total_deleted_csv_files, "icon": "fas fa-file-csv"},
+    ]
+
+    return jsonify({
+        "status": "success", "details": data_csv
+    }), 200
+
+
+def dashboard_data_professor():
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=user_id).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    # @desc: Read all the csv file in the database for professor
+
+    # Count the number of users with the role of user
+    total_users = User.query.filter_by(role="user").count()
+
+    total_professors_active = User.query.filter_by(role="user", flag_active=1).count()
+    total_professors_inactive = User.query.filter_by(role="user", flag_active=0).count()
+    total_professors_locked = User.query.filter_by(role="user", flag_locked=1).count()
+    total_professors_unlocked = User.query.filter_by(role="user", flag_locked=0).count()
+    total_professors_deleted = User.query.filter_by(role="user", flag_deleted=1).count()
+    total_professors_undeleted = User.query.filter_by(role="user", flag_deleted=0).count()
+    # Count the number of users that has password in the database
+    total_professors_without_password = User.query.filter_by(role="user", password=None).count()
+
+    data_professor = [
+        {"id": 1, "title": "Total Professors",
+         "value": total_users, "icon": "fas fa-user-tie", "color": "bg-blue-500"},
+        {"id": 2, "title": "Activated Professors",
+         "value": total_professors_active, "icon": "fas fa-bolt", "color": "bg-teal-600"},
+        {"id": 3, "title": "Unlocked Professors",
+         "value": total_professors_unlocked, "icon": "fas fa-unlock", "color": "bg-teal-600"},
+        {"id": 4, "title": "Undeleted Professors",
+         "value": total_professors_undeleted, "icon": "fas fa-rotate", "color": "bg-teal-600"},
+        {"id": 5, "title": "No Password",
+         "value": total_professors_without_password, "icon": "fas fa-shield", "color": "bg-cyan-500"},
+        {"id": 6, "title": "Deactivated Professors",
+         "value": total_professors_inactive, "icon": "fas fa-circle-xmark", "color": "bg-red-600"},
+        {"id": 7, "title": "Locked Professors",
+         "value": total_professors_locked, "icon": "fas fa-lock", "color": "bg-red-600"},
+        {"id": 8, "title": "Deleted Professors",
+         "value": total_professors_deleted, "icon": "fas fa-trash", "color": "bg-red-600"},
+    ]
+
+    return jsonify({
+        "status": "success", "details": data_professor
+    }), 200
+
+
 
 
 vec = CountVectorizer()
@@ -357,6 +449,21 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
+def get_starting_ending_year(csv_files: list):
+    # @desc: Get the year of the csv file based on the list of csv files
+    starting_year = csv_files[0].school_year.split(
+        "-")[0] if len(csv_files) > 0 else "----"
+    ending_year = csv_files[-1].school_year.split(
+        "-")[1] if len(csv_files) > 0 else "----"
+    # desc: remove the SY from the school year
+    starting_year = starting_year.replace(
+        "SY", "") if len(csv_files) > 0 else "----"
+    ending_year = ending_year.replace(
+        "SY", "") if len(csv_files) > 0 else "----"
+
+    return starting_year, ending_year
+
+
 def department_positive_and_negative_sentiment(csv_department_files: list) -> list:
     department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
                        for csv_department_file in csv_department_files]
@@ -407,16 +514,16 @@ def department_positive_and_negative_sentiment(csv_department_files: list) -> li
         department_number_of_sentiments * (department_negative_sentiments_percentage / 100)) \
         if department_number_of_sentiments and department_negative_sentiments_percentage else 0
 
-    starting_year, ending_year = get_starting_ending_year()
+    starting_year, ending_year = get_starting_ending_year(csv_department_files)
 
     sentiment_details = [
         {"id": 1, "title": "Positive Sentiments",
          "value": f"{department_positive_sentiments:,}", "percentage": department_positive_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
          "color500": "bg-green-500"},
         {"id": 2, "title": "Negative Sentiments",
          "value": f"{department_negative_sentiments:,}", "percentage": department_negative_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-frown", "color50": "bg-red-50",
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-frown", "color50": "bg-red-50",
          "color500": "bg-red-500"}
     ]
 
@@ -493,18 +600,18 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
         sum(evaluatee_negative_sentiments_percentage) / len(evaluatee_negative_sentiments_percentage), 2) \
         if len(evaluatee_negative_sentiments_percentage) > 0 else 0
 
-    starting_year, ending_year = get_starting_ending_year()
+    starting_year, ending_year = get_starting_ending_year(csv_professor_files)
 
     sentiment_details = [
         {"id": 1, "title": "Positive Sentiments",
          "value": f"{evaluatee_positive_sentiments_percentage:,}",
          "percentage": evaluatee_positive_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
          "color500": "bg-green-500"},
         {"id": 2, "title": "Negative Sentiments",
          "value": f"{evaluatee_negative_sentiments_percentage:,}",
          "percentage": evaluatee_negative_sentiments_percentage,
-         "year": starting_year + " - " + ending_year, "icon": "fas fa-face-frown", "color50": "bg-red-50",
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-frown", "color50": "bg-red-50",
          "color500": "bg-red-500"}
     ]
 

@@ -35,6 +35,7 @@ from controllers.user_routes import (
     unlock_admin_account, verify_unlock_token,
 )
 from database_queries.csv_queries import to_publish_all_csv_files, to_unpublished_all_csv_files
+from database_queries.dashboard_queries import dashboard_data_csv, dashboard_data_professor
 from modules.module import get_ip_address
 
 app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
@@ -47,8 +48,10 @@ app.add_url_rule("/data/analyze-save-csv",
 app.add_url_rule("/data/delete-uploaded-csv-file",
                  view_func=delete_uploaded_csv_file, methods=["POST"])
 # @desc: Dashboard data
-app.add_url_rule("/data/get-all-data-from-csv",
-                 view_func=getting_all_data_from_csv, methods=["GET"])
+app.add_url_rule("/data/dashboard-data-csv",
+                 view_func=dashboard_data_csv, methods=["GET"])
+app.add_url_rule("/data/dashboard-data-user",
+                 view_func=dashboard_data_professor, methods=["GET"])
 app.add_url_rule("/data/get-top-department-overall",
                  view_func=getting_top_department_overall, methods=["GET"])
 app.add_url_rule("/data/get-top-professors-overall",
