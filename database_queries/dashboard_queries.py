@@ -1,10 +1,11 @@
 import base64
 
 from io import BytesIO
+from typing import Tuple, List
 
 import pandas as pd
 import seaborn as sns
-from flask import session, jsonify
+from flask import session, jsonify, Response
 from matplotlib import pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
@@ -71,6 +72,9 @@ def options_read_single_data_dashboard():
 
 
 def dashboard_data_overall():
+    """
+    @desc: Get the overall data of the csv files in the database.
+    """
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 
@@ -149,6 +153,9 @@ def dashboard_data_overall():
 
 
 def dashboard_data_csv():
+    """
+    @desc: Get the data of the csv files in the database.
+    """
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 
@@ -193,6 +200,9 @@ def dashboard_data_csv():
 
 
 def dashboard_data_professor():
+    """
+    @desc: Get the data of the professors in the database.
+    """
     user_id: int = session.get('user_id')
 
     if user_id is None:
@@ -249,10 +259,21 @@ def dashboard_data_professor():
     }), 200
 
 
+# @desc: CountVectorizer instance
 vec = CountVectorizer()
 
 
 def get_top_n_words(corpus, n=None):
+    """
+    @desc: Get the top n words in the corpus.
+
+    Args:
+        corpus (list): List of strings.
+        n (int): Number of top words to return.
+
+    Returns:
+        list: List of top n words.
+    """
     # @desc: Get the main text from the corpus
 
     if corpus is not None and len(corpus) > 0:
@@ -290,6 +311,16 @@ def get_top_n_words(corpus, n=None):
 
 
 def get_top_n_bigrams(corpus, n=None):
+    """
+    @desc: Get the top n bigrams in the corpus.
+
+    Args:
+        corpus (list): List of strings.
+        n (int): Number of top bigrams to return.
+
+    Returns:
+        list: List of top n bigrams.
+    """
     if corpus is not None and len(corpus) > 0:
         # @desc: Get the main text from the corpus
         main_text = [text[0] for text in corpus]
@@ -326,6 +357,16 @@ def get_top_n_bigrams(corpus, n=None):
 
 
 def get_top_n_trigrams(corpus, n=None):
+    """
+    @desc: Get the top n trigrams in the corpus.
+
+    Args:
+        corpus (list): List of strings.
+        n (int): Number of top trigrams to return.
+
+    Returns:
+        list: List of top n trigrams.
+    """
     if corpus is not None and len(corpus) > 0:
         # @desc: Get the main text from the corpus
         main_text = [text[0] for text in corpus]
@@ -362,7 +403,21 @@ def get_top_n_trigrams(corpus, n=None):
 
 
 def computation(sentiment_converted_list=None, polarity_list=None, review_length_list=None, wordcloud_list=None,
-                wordcloud_list_with_sentiment=None):
+                wordcloud_list_with_sentiment=None) -> tuple[str, str, str, list[tuple[str, str]]]:
+    """
+    @desc: Get the computation of the sentiment, polarity, review length, wordcloud, and wordcloud with sentiment.
+
+    Args:
+        sentiment_converted_list (list): List of sentiment converted.
+        polarity_list (list): List of polarity.
+        review_length_list (list): List of review length.
+        wordcloud_list (list): List of wordcloud.
+        wordcloud_list_with_sentiment (list): List of wordcloud with sentiment.
+
+    Returns:
+        tuple: Tuple of the computation of the sentiment, polarity, review length, wordcloud,
+        and wordcloud with sentiment.
+    """
     sentiment_converted_list = [sentiment for sentiment_list in sentiment_converted_list
                                 for sentiment in sentiment_list]
     polarity_list = [
@@ -457,7 +512,16 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
-def get_starting_ending_year(csv_files: list):
+def get_starting_ending_year(csv_files: list) -> tuple[str, str]:
+    """
+    @desc: Get the starting and ending year of the csv files.
+
+    Args:
+        csv_files (list): List of csv files.
+
+    Returns:
+        tuple: Tuple of the starting and ending year of the csv files.
+    """
     # @desc: Get the year of the csv file based on the list of csv files
     starting_year = csv_files[0].school_year.split(
         "-")[0] if len(csv_files) > 0 else "----"
@@ -473,6 +537,15 @@ def get_starting_ending_year(csv_files: list):
 
 
 def department_positive_and_negative_sentiment(csv_department_files: list) -> list:
+    """
+    @desc: Get the positive and negative sentiment of the csv files.
+
+    Args:
+        csv_department_files (list): List of csv files.
+
+    Returns:
+        list: List of the positive and negative sentiment of the csv files.
+    """
     department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
                        for csv_department_file in csv_department_files]
 
@@ -538,10 +611,17 @@ def department_positive_and_negative_sentiment(csv_department_files: list) -> li
     return sentiment_details
 
 
-def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str):
+def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str) -> list:
     """
     Get the positive and negative sentiments of the professor based on the csv files in the professor_analysis_csv_files
     directory and it will be based on the evaluatee_name of the professor.
+
+    Args:
+        csv_professor_files: The list of the csv files.
+        evaluatee_name: The name of the professor.
+
+    Returns:
+        list: The list of the positive and negative sentiments of the professor.
     """
     # # Get all the files first in the professor_analysis_csv_files directory
     # professor_analysis_csv_files = [csv_professor_file for csv_professor_file in csv_professor_files]
@@ -614,8 +694,8 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
         {"id": 1, "title": "Positive Sentiments",
          "value": f"{evaluatee_positive_sentiments_percentage:,}",
          "percentage": evaluatee_positive_sentiments_percentage,
-         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
-         "color500": "bg-green-500"},
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam",
+         "color50": "bg-green-50", "color500": "bg-green-500"},
         {"id": 2, "title": "Negative Sentiments",
          "value": f"{evaluatee_negative_sentiments_percentage:,}",
          "percentage": evaluatee_negative_sentiments_percentage,
@@ -627,6 +707,15 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
 
 
 def analysis_admin(csv_files: tuple) -> tuple[str, str, str, list[tuple[str, str]]]:
+    """
+    Get the analysis of the admin.
+
+    Args:
+        csv_files (tuple): The tuple of the csv files.
+
+    Returns:
+        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the admins analysis.
+    """
     csv_file_path = [csv_file.csv_file_path for csv_file in csv_files]
 
     # @dec: Read all the csv files in the database
@@ -657,7 +746,7 @@ def analysis_admin(csv_files: tuple) -> tuple[str, str, str, list[tuple[str, str
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
-def analysis_user(csv_files: tuple, evaluatee_name: str):
+def analysis_user(csv_files: tuple, evaluatee_name: str) -> tuple[str, str, str, list[tuple[str, str]]]:
     """@desc: Get the analysis of the user using matplotlib and seaborn library
 
     Args:
@@ -665,7 +754,7 @@ def analysis_user(csv_files: tuple, evaluatee_name: str):
         evaluatee_name (str): Name of the user
 
     Returns:
-        tuple: Tuple of the analysis of the user
+        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the users analysis.
     """
     csv_file_path = [csv_file.csv_file_path for csv_file in csv_files]
 
@@ -701,7 +790,19 @@ def analysis_user(csv_files: tuple, evaluatee_name: str):
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
-def analysis_options_admin(school_year: str, school_semester: str, csv_question: str):
+def analysis_options_admin(school_year: str, school_semester: str, csv_question: str) \
+        -> tuple[Response, int]:
+    """
+    Get the analysis of the admin using matplotlib and seaborn library.
+
+    Args:
+        school_year (str): The school year.
+        school_semester (str): The school semester.
+        csv_question (str): The csv question.
+
+    Returns:
+        tuple[Response, int]: The response and the status code and the analysis of the csv files
+    """
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -890,7 +991,18 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         }), 200
 
 
-def analysis_options_user(school_year: str, school_semester: str, csv_question: str):
+def analysis_options_user(school_year: str, school_semester: str, csv_question: str) -> tuple[Response, int]:
+    """
+    @desc: This function is used to get the analysis of the csv files for the user
+
+    Args:
+        school_year (str): The school year of the csv files
+        school_semester (str): The school semester of the csv files
+        csv_question (str): The csv question of the csv files
+
+    Returns:
+        tuple[Response, int]: The response and the status code and the analysis of the csv files
+    """
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
