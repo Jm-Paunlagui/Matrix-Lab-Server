@@ -324,6 +324,14 @@ class InputTextValidation:
         """
         return self.user_input.replace("_", " ").title()
 
+    def to_csv_professor_name(self):
+        """
+        Converts the professor name to a query.
+
+        :return: The professor name as a query
+        """
+        return self.user_input.upper().split()[0] + ", " + self.user_input.upper().split()[1]
+
 
 class PasswordBcrypt:
     """Hash and check password."""

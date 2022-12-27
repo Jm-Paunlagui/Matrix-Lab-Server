@@ -2,7 +2,6 @@ from config.configurations import app, db
 from controllers.csv_routes import (
     view_columns,
     analyze_save_csv,
-    getting_all_data_from_csv,
     getting_top_department_overall,
     getting_top_professor_overall,
     getting_top_professor_by_file, getting_top_department_by_file, options_for_file_data, getting_list_of_csv_files,
@@ -12,6 +11,8 @@ from controllers.csv_routes import (
     publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files,
     deleting_all_csv_file_permanent
 )
+from controllers.dashboard_routes import for_analysis_options_admin, \
+    options_for_file_data_dashboard, for_analysis_options_user
 from controllers.user_routes import (
     authenticate,
     check_email,
@@ -34,6 +35,7 @@ from controllers.user_routes import (
     unlock_admin_account, verify_unlock_token,
 )
 from database_queries.csv_queries import to_publish_all_csv_files, to_unpublished_all_csv_files
+from database_queries.dashboard_queries import dashboard_data_csv, dashboard_data_professor
 from modules.module import get_ip_address
 
 app.add_url_rule("/ip", view_func=get_ip_address, methods=["GET"])
@@ -46,8 +48,10 @@ app.add_url_rule("/data/analyze-save-csv",
 app.add_url_rule("/data/delete-uploaded-csv-file",
                  view_func=delete_uploaded_csv_file, methods=["POST"])
 # @desc: Dashboard data
-app.add_url_rule("/data/get-all-data-from-csv",
-                 view_func=getting_all_data_from_csv, methods=["GET"])
+app.add_url_rule("/data/dashboard-data-csv",
+                 view_func=dashboard_data_csv, methods=["GET"])
+app.add_url_rule("/data/dashboard-data-user",
+                 view_func=dashboard_data_professor, methods=["GET"])
 app.add_url_rule("/data/get-top-department-overall",
                  view_func=getting_top_department_overall, methods=["GET"])
 app.add_url_rule("/data/get-top-professors-overall",
@@ -62,6 +66,16 @@ app.add_url_rule("/data/list-of-csv-files-to-view/<int:page>/<int:per_page>",
                  view_func=getting_list_of_csv_files, methods=["GET"])
 app.add_url_rule("/data/view-csv-file/<int:csv_id>",
                  view_func=viewing_csv_file, methods=["GET"])
+
+# @desc: Dashboard analysis
+app.add_url_rule("/analysis/options-for-file-data-dashboard",
+                 view_func=options_for_file_data_dashboard, methods=["GET"])
+app.add_url_rule("/analysis/sentiment_vs_polarity/<string:school_year>/<string:school_semester>/<string:csv_question>",
+                 view_func=for_analysis_options_admin, methods=["GET"])
+app.add_url_rule("/analysis/for_analysis_options_user/<string:school_year>/<string:school_semester>/<string"
+                 ":csv_question>",
+                 view_func=for_analysis_options_user, methods=["GET"])
+
 # @desc: Delete csv file
 app.add_url_rule("/data/delete-csv-file-permanent/<int:csv_id>",
                  view_func=deleting_csv_file_permanent, methods=["DELETE"])

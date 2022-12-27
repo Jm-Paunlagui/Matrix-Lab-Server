@@ -1166,9 +1166,9 @@ def redirect_to():
     user_role: User = User.query.filter_by(user_id=user_id).first()
     match user_role.role:
         case 'admin':
-            return "/admin/dashboard/analytics"
+            return "/admin/dashboard/sentiment-analysis"
         case 'user':
-            return "/user/dashboard/analytics"
+            return "/user/dashboard/sentiment-analysis"
     return "/"
 
 
