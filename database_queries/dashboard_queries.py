@@ -72,9 +72,7 @@ def options_read_single_data_dashboard():
 
 
 def dashboard_data_overall():
-    """
-    @desc: Get the overall data of the csv files in the database.
-    """
+    """@desc: Get the overall data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 
@@ -153,9 +151,7 @@ def dashboard_data_overall():
 
 
 def dashboard_data_csv():
-    """
-    @desc: Get the data of the csv files in the database.
-    """
+    """@desc: Get the data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
     user_id: int = session.get('user_id')
 
@@ -200,9 +196,7 @@ def dashboard_data_csv():
 
 
 def dashboard_data_professor():
-    """
-    @desc: Get the data of the professors in the database.
-    """
+    """@desc: Get the data of the professors in the database."""
     user_id: int = session.get('user_id')
 
     if user_id is None:
