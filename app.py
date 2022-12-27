@@ -11,7 +11,7 @@ from controllers.csv_routes import (
     publish_selected_csv_file, unpublished_selected_csv_file, getting_list_of_temporarily_deleted_csv_files,
     deleting_all_csv_file_permanent
 )
-from controllers.dashboard_routes import getting_all_data_from_csv, for_analysis_options_admin, \
+from controllers.dashboard_routes import for_analysis_options_admin, \
     options_for_file_data_dashboard, for_analysis_options_user
 from controllers.user_routes import (
     authenticate,

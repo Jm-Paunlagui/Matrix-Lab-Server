@@ -624,7 +624,6 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
         list: The list of the positive and negative sentiments of the professor.
     """
     # # Get all the files first in the professor_analysis_csv_files directory
-    # professor_analysis_csv_files = [csv_professor_file for csv_professor_file in csv_professor_files]
 
     # Based on the evaluatee_name, get the all its columns in the csv files
     professor_analysis_csv_files = [
@@ -829,7 +828,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All" and school_semester == "All":
+    if school_year == "All" and school_semester == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(
             csv_question=csv_question).all()
@@ -851,7 +850,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All" and csv_question == "All":
+    if school_year == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(
             school_semester=school_semester).all()
@@ -874,7 +873,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_semester == "All" and csv_question == "All":
+    if school_semester == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(
             school_year=school_year).all()
@@ -896,7 +895,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All":
+    if school_year == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question,
                                                                   school_semester=school_semester).all()
@@ -919,7 +918,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_semester == "All":
+    if school_semester == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question,
                                                                   school_year=school_year).all()
@@ -942,7 +941,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif csv_question == "All":
+    if csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_department_files = CsvDepartmentModel.query.filter_by(school_year=school_year,
                                                                   school_semester=school_semester).all()
@@ -965,30 +964,29 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    else:
-        # @desc: Read all the csv file in the database for department
-        csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question,
-                                                                  school_semester=school_semester,
-                                                                  school_year=school_year).all()
+    # @desc: Read all the csv file in the database for department
+    csv_department_files = CsvDepartmentModel.query.filter_by(csv_question=csv_question,
+                                                              school_semester=school_semester,
+                                                              school_year=school_year).all()
 
-        sentiment_details = department_positive_and_negative_sentiment(
-            csv_department_files)
+    sentiment_details = department_positive_and_negative_sentiment(
+        csv_department_files)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
-                                             school_year=school_year).all()
+    # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
+    csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
+                                         school_year=school_year).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+    sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
-        return jsonify({"status": "success", "overall_sentiments": sentiment_details,
-                        "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
-                        "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
-                        "image_path_wordcloud": wordcloud_encoded,
-                        "common_word": get_top_n_words(wordcloud_list_with_sentiment, 30),
-                        "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
-                        "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
-                        }), 200
+    return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                    "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
+                    "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
+                    "image_path_wordcloud": wordcloud_encoded,
+                    "common_word": get_top_n_words(wordcloud_list_with_sentiment, 30),
+                    "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
+                    "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
+                    }), 200
 
 
 def analysis_options_user(school_year: str, school_semester: str, csv_question: str) -> tuple[Response, int]:
@@ -1039,7 +1037,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All" and school_semester == "All":
+    if school_year == "All" and school_semester == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             csv_question=csv_question).all()
@@ -1061,7 +1059,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All" and csv_question == "All":
+    if school_year == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             school_semester=school_semester).all()
@@ -1084,7 +1082,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_semester == "All" and csv_question == "All":
+    if school_semester == "All" and csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             school_year=school_year).all()
@@ -1106,7 +1104,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_year == "All":
+    if school_year == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             csv_question=csv_question, school_semester=school_semester).all()
@@ -1129,7 +1127,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif school_semester == "All":
+    if school_semester == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             csv_question=csv_question, school_year=school_year).all()
@@ -1152,7 +1150,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    elif csv_question == "All":
+    if csv_question == "All":
         # @desc: Read all the csv file in the database for department
         csv_files = CsvProfessorModel.query.filter_by(
             school_year=school_year, school_semester=school_semester).all()
@@ -1175,26 +1173,25 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    else:
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
-                                                      school_year=school_year).all()
+    # @desc: Read all the csv file in the database for department
+    csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
+                                                  school_year=school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+    sentiment_details = professor_positive_and_negative_sentiment(
+        csv_files, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
-                                             school_year=school_year).all()
+    # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
+    csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
+                                         school_year=school_year).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
+    sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
             = analysis_user(csv_files, converted_full_name)
 
-        return jsonify({"status": "success", "overall_sentiments": sentiment_details,
-                        "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
-                        "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
-                        "image_path_wordcloud": wordcloud_encoded,
-                        "common_word": get_top_n_words(wordcloud_list_with_sentiment, 30),
-                        "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
-                        "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
-                        }), 200
+    return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                    "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
+                    "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
+                    "image_path_wordcloud": wordcloud_encoded,
+                    "common_word": get_top_n_words(wordcloud_list_with_sentiment, 30),
+                    "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
+                    "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
+                    }), 200

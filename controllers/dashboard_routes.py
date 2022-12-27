@@ -1,8 +1,6 @@
-from flask import request, jsonify
 
 from database_queries.dashboard_queries import dashboard_data_overall, analysis_options_admin, \
     options_read_single_data_dashboard, analysis_options_user
-from modules.module import InputTextValidation
 
 
 def options_for_file_data_dashboard():
