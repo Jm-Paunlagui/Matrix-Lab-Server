@@ -977,7 +977,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                                          school_year=school_year).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = analysis_admin(csv_files)
+        wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1185,7 +1185,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                                          school_year=school_year).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        = analysis_user(csv_files, converted_full_name)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
