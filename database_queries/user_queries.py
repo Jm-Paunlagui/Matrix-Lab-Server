@@ -815,7 +815,7 @@ def send_tfa(email: str):
             </td></tr></table></body></html> """
             mail.send(msg)
             return True
-        if email == is_email.secondary_email or email == is_email.recovery_email:
+        if email in (is_email.secondary_email, is_email.recovery_email):
             msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
             http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
             0px; background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" 
