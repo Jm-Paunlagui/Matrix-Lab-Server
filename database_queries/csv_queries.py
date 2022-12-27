@@ -1773,7 +1773,6 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                 "school_semester": "00-0000000"}), 200
 
             file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            # file_path = os.path.join(main_directory.csv_file_path, folder_name)
             file_list = os.listdir(file_path)
             file_list_to_read = [
                 {
