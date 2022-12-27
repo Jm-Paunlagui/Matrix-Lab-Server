@@ -594,8 +594,8 @@ def department_positive_and_negative_sentiment(csv_department_files: list) -> li
     sentiment_details = [
         {"id": 1, "title": "Positive Sentiments",
          "value": f"{department_positive_sentiments:,}", "percentage": department_positive_sentiments_percentage,
-         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam", "color50": "bg-green-50",
-         "color500": "bg-green-500"},
+         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam",
+         "color50": "bg-green-50", "color500": "bg-green-500"},
         {"id": 2, "title": "Negative Sentiments",
          "value": f"{department_negative_sentiments:,}", "percentage": department_negative_sentiments_percentage,
          "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-frown", "color50": "bg-red-50",
