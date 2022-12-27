@@ -596,8 +596,7 @@ def get_next_csv_id():
     csv_id = CsvModel.query.order_by(CsvModel.csv_id.desc()).first()
     if csv_id is None:
         return 1
-    else:
-        return csv_id.csv_id + 1
+    return csv_id.csv_id + 1
 
 
 def remove_stopwords(response):
@@ -1344,7 +1343,7 @@ def to_view_selected_csv_file(csv_id: int):
                 "professor_file": professor_file.to_dict(orient="records"),
                 "department_file": department_file.to_dict(orient="records")
             }), 200
-        elif user_data.role == "professor":
+        if user_data.role == "professor":
             if professor_file is None:
                 return jsonify({"status": "error", "message": "No csv file found."}), 400
 
@@ -1354,8 +1353,7 @@ def to_view_selected_csv_file(csv_id: int):
                 "status": "success",
                 "professor_file": professor_file.to_dict(orient="records")
             }), 200
-        else:
-            return jsonify({"status": "error", "message": "You are not allowed to view this page."}), 403
+        return jsonify({"status": "error", "message": "You are not allowed to view this page."}), 403
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
@@ -1757,7 +1755,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                 "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
                 "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
             }), 200
-        elif user_data.role == "user" and user_fullname == folder_name:
+        if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModel to check if its flag_release is True and not deleted.
             main_directory = db.session.query(CsvModel, CsvCollectionModel).join(
                 CsvCollectionModel, CsvCollectionModel.csv_id == CsvModel.csv_id).filter(
@@ -1794,8 +1792,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                 "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
                 "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
             }), 200
-        else:
-            return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
+        return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
@@ -1845,7 +1842,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 "status": "success",
                 "sentiments_list": sentiments_list,
             }), 200
-        elif user_data.role == "user" and user_fullname == folder_name:
+        if user_data.role == "user" and user_fullname == folder_name:
 
             # Join to CsvModel to check if its flag_release is True and not deleted.
             main_directory = db.session.query(CsvModel, CsvCollectionModel).join(
@@ -1873,9 +1870,8 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 "status": "success",
                 "sentiments_list": sentiments_list,
             }), 200
-        else:
-            return jsonify({"status": "error",
-                            "message": "You are not authorized to view this file."}), 401
+        return jsonify({"status": "error",
+                        "message": "You are not authorized to view this file."}), 401
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
