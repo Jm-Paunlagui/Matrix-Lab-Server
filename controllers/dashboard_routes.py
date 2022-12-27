@@ -15,11 +15,9 @@ def getting_all_data_from_csv():
 
 def for_analysis_options_admin(school_year, school_semester, csv_question):
     """Get the data for sentiment vs polarity."""
-    """Get the top professor by file."""
     return analysis_options_admin(school_year, school_semester, csv_question)
 
 
 def for_analysis_options_user(school_year, school_semester, csv_question):
     """Get the data for sentiment vs polarity."""
-    """Get the top professor by file."""
     return analysis_options_user(school_year, school_semester, csv_question)
