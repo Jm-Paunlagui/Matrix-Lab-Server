@@ -3,7 +3,6 @@ flask-bcrypt
 flask-cors
 flask-session
 flask-mail
-flask-jwt-extended
 mysql-connector-python
 redis
 tensorflow
