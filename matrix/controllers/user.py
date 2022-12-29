@@ -1,3 +1,5 @@
+import inspect
+import sys
 import uuid
 from datetime import datetime, timedelta
 
@@ -6,8 +8,10 @@ from flask import jsonify, session
 from flask_mail import Message
 
 from extensions import db, mail
+from matrix.controllers.predictalyze import error_handler
 from matrix.models.user import User
-from matrix.module import Timezone, PayloadSignature, PasswordBcrypt, get_os_browser_versions, get_ip_address, ToptCode
+from matrix.module import Timezone, PayloadSignature, PasswordBcrypt, get_os_browser_versions, get_ip_address, ToptCode, \
+    error_message
 
 
 def check_email_exists(email: str):
@@ -199,11 +203,11 @@ def create_all_users_auto_generated_password():
         return jsonify({"status": "success",
                         "message": "All users have been created with auto-generated password."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error occurred while creating all users with auto-generated password.",
                         "error": f"{e}"}), 500
@@ -273,11 +277,11 @@ def deactivate_all_users():
         return jsonify({"status": "success",
                         "message": "All users have been deactivated."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error has occurred while deactivating all users.",
                         "error": f"{e}"}), 500
@@ -347,11 +351,11 @@ def lock_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All users have been locked."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error occurred while locking all user accounts.",
                         "error": f"{e}"}), 500
@@ -422,11 +426,11 @@ def unlock_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been unlocked."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error occurred while unlocking all user accounts.",
                         "error": f"{e}"}), 500
@@ -497,11 +501,11 @@ def delete_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been deleted."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error occurred while deleting all user accounts.",
                         "error": f"{e}"}), 500
@@ -570,11 +574,11 @@ def restore_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been restored."}), 200
     except Exception as e:
-        # error_handler(
-        #     name_of=f"Cause of error: {e}",
-        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
-        # )
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
         return jsonify({"status": "error",
                         "message": "An error occurred while restoring all user accounts.",
                         "error": f"{e}"}), 500
