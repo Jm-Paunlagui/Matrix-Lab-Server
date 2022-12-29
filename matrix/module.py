@@ -1,23 +1,20 @@
-import os
+import random
 import re
+import string
 from datetime import datetime
 from types import TracebackType
+from urllib.request import urlopen
 
+import jwt
 import pyotp
 import pytz
-import random
-import string
-from config.configurations import app, private_key, public_key
-from flask_bcrypt import Bcrypt
-import jwt
 from flask import request
 from ua_parser import user_agent_parser
 from werkzeug.user_agent import UserAgent
 from werkzeug.utils import cached_property
-from urllib.request import urlopen
 
-# @desc: The bcrypt instance
-bcrypt = Bcrypt(app)
+from config import AllowedExtensions, SecretKeys
+from extensions import bcrypt
 
 
 class AllowedFile:
@@ -30,17 +27,18 @@ class AllowedFile:
         """
         Check if the file is allowed to be uploaded.
 
-        :return: True if the file is allowed, False otherwise
+        :returns: True if the file is allowed to be uploaded, False otherwise
+
         """
         return '.' in self.filename and \
-               self.filename.rsplit('.', 1)[1].lower(
-               ) in app.config["ALLOWED_EXTENSIONS"]
+            self.filename.rsplit('.', 1)[1].lower(
+            ) in AllowedExtensions.ALLOWED_EXTENSIONS
 
     def secure_filename(self) -> str:
         """
         Secure the filename.
 
-        :return: The secure filename
+        :returns: The secure filename
         """
         return re.sub(r'[^a-zA-Z0-9_.]', '', self.filename)
 
@@ -55,7 +53,7 @@ class Timezone:
         """
         Return the current time in the local timezone.
 
-        :return: The current time in the local timezone
+        :returns: The current time in the local timezone
         """
         timezone = pytz.timezone(self.timezone)
         return timezone.localize(datetime.now())
@@ -71,7 +69,7 @@ class InputFileValidation:
         """
         Validate the input file.
 
-        :return: True if the file is valid, False otherwise
+        :returns: True if the file is valid, False otherwise
         """
         if self.file.filename == '':
             return False
@@ -385,7 +383,7 @@ class PayloadSignature:
 
         :return: The encoded payload
         """
-        return jwt.encode(self.payload, private_key, algorithm="RS256")
+        return jwt.encode(self.payload, SecretKeys.PRIVATE_KEY, algorithm="RS256")
 
     def decode_payload(self):
         """
@@ -393,12 +391,12 @@ class PayloadSignature:
 
         :return: The decoded payload
         """
-        return jwt.decode(self.encoded, public_key, algorithms=["RS256"], verify=True)
+        return jwt.decode(self.encoded, SecretKeys.PUBLIC_KEY, algorithms=["RS256"], verify=True)
 
 
 class ToptCode:
     """Generate and verify 2FA code."""
-    totp = pyotp.TOTP(os.getenv("SECRET_KEY_BASE32"), digits=7)
+    totp = pyotp.TOTP(SecretKeys.SECRET_KEY_B32, digits=7)
 
     @staticmethod
     def topt_code():
@@ -503,6 +501,30 @@ def get_ip_address():
     source = urlopen("http://checkip.dyndns.com")
     data = str(source.read())
     return re.search(r"\d+\.\d+\.\d+\.\d+", data).group(0)
+
+
+def get_starting_ending_year(csv_files: list) -> tuple[str, str]:
+    """
+    @desc: Get the starting and ending year of the csv files.
+
+    Args:
+        csv_files (list): List of csv files.
+
+    Returns:
+        tuple: Tuple of the starting and ending year of the csv files.
+    """
+    # @desc: Get the year of the csv file based on the list of csv files
+    starting_year = csv_files[0].school_year.split(
+        "-")[0] if len(csv_files) > 0 else "----"
+    ending_year = csv_files[-1].school_year.split(
+        "-")[1] if len(csv_files) > 0 else "----"
+    # desc: remove the SY from the school year
+    starting_year = starting_year.replace(
+        "SY", "") if len(csv_files) > 0 else "----"
+    ending_year = ending_year.replace(
+        "SY", "") if len(csv_files) > 0 else "----"
+
+    return starting_year, ending_year
 
 
 def error_message(error_class: BaseException | BaseException | TracebackType,

@@ -1,18 +1,16 @@
 import base64
-
 from io import BytesIO
-from typing import Tuple, List
 
 import pandas as pd
 import seaborn as sns
-from flask import session, jsonify, Response
+from flask import jsonify, session, Response
 from matplotlib import pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
-from models.csv_model import CsvProfessorModel, CsvDepartmentModel, CsvModel
-from models.user_model import User
-from modules.module import InputTextValidation
+from matrix.models.csv_file import CsvModel, CsvProfessorModel, CsvDepartmentModel
+from matrix.models.user import User
+from matrix.module import InputTextValidation
 
 
 def options_read_single_data_dashboard():
@@ -58,7 +56,7 @@ def options_read_single_data_dashboard():
         } for index, csv_question in enumerate(csv_question)
     ]
 
-    # Add a All option for school_year, school_semester, and csv_question for the dropdown
+    # Add an option for school_year, school_semester, and csv_question for the dropdown
     school_year_dict.insert(0, {"id": 0, "school_year": "All"})
     school_semester_dict.insert(0, {"id": 0, "school_semester": "All"})
     csv_question_dict.insert(0, {"id": 0, "csv_question": "All"})
@@ -68,85 +66,6 @@ def options_read_single_data_dashboard():
         "school_year": school_year_dict,
         "school_semester": school_semester_dict,
         "csv_question": csv_question_dict
-    }), 200
-
-
-def dashboard_data_overall():
-    """@desc: Get the overall data of the csv files in the database."""
-    # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
-
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 440
-
-    user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
-
-    if user_data.role != "admin":
-        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
-
-    # @desc: Read all the csv file in the database for professor
-    csv_professor_files = CsvProfessorModel.query.all()
-
-    # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the evaluatee column
-    # and return a list of evaluatee
-    evaluatee_list = [pd.read_csv(csv_professor_file.csv_file_path)["evaluatee_list"].tolist()
-                      for csv_professor_file in csv_professor_files]
-
-    # @desc: Flatten the list of list
-    evaluatee_list = [
-        evaluatee for evaluatee_list in evaluatee_list for evaluatee in evaluatee_list]
-
-    # @desc: Get the unique evaluatee
-    evaluatee_list = list(set(evaluatee_list))
-
-    # @desc: Read all the csv file in the database for department
-    csv_department_files = CsvDepartmentModel.query.all()
-
-    # @desc: Read all the csv file in the database by accessing the csv_file_path column and get the department column
-    # and return a list of department
-    department_list = [pd.read_csv(csv_department_file.csv_file_path)["department_list"].tolist()
-                       for csv_department_file in csv_department_files]
-
-    # @desc: Flatten the list of list
-    department_list = [
-        department for department_list in department_list for department in department_list]
-
-    # @desc: Get the unique department
-    department_list = list(set(department_list))
-
-    # @desc: Get the total number of overall_total_course_code and divide it by the total number of files
-    # to get the average number of course code per csv file
-    department_evaluatee_course_code = [
-        pd.read_csv(csv_department_file.csv_file_path)[
-            "department_evaluatee_course_code"].tolist()
-        for csv_department_file in csv_department_files]
-
-    department_evaluatee_course_code = [
-        course_code for course_code_list in department_evaluatee_course_code for course_code in course_code_list]
-
-    department_evaluatee_course_code = sum(
-        department_evaluatee_course_code) / len(csv_department_files) if len(csv_department_files) > 0 else 0
-
-    # @desc: Get the total number of csv files in the database
-    csv_files = CsvModel.query.all()
-
-    total_csv_files = len(csv_files)
-
-    four_top_details = [
-        {"id": 1, "title": "Professors",
-         "value": len(evaluatee_list), "icon": "fas fa-user-tie"},
-        {"id": 2, "title": "Departments",
-         "value": len(department_list), "icon": "fas fa-university"},
-        {"id": 3, "title": "Courses",
-         "value": round(department_evaluatee_course_code, 2), "icon": "fas fa-book"},
-        {"id": 4, "title": "CSV Files",
-         "value": total_csv_files, "icon": "fas fa-file-csv"}
-    ]
-
-    return jsonify({
-        "status": "success", "details": four_top_details, "overall_sentiments": "sentiment_details",
-        # "department_sentiments": department_sentiments
     }), 200
 
 
@@ -608,7 +527,7 @@ def department_positive_and_negative_sentiment(csv_department_files: list) -> li
 def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str) -> list:
     """
     Get the positive and negative sentiments of the professor based on the csv files in the professor_analysis_csv_files
-    directory and it will be based on the evaluatee_name of the professor.
+    directory, and it will be based on the evaluatee_name of the professor.
 
     Args:
         csv_professor_files: The list of the csv files.
@@ -707,7 +626,7 @@ def analysis_admin(csv_files: tuple) -> tuple[str, str, str, list[tuple[str, str
         csv_files (tuple): The tuple of the csv files.
 
     Returns:
-        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the admins analysis.
+        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the admins' analysis.
     """
     csv_file_path = [csv_file.csv_file_path for csv_file in csv_files]
 
@@ -747,7 +666,7 @@ def analysis_user(csv_files: tuple, evaluatee_name: str) -> tuple[str, str, str,
         evaluatee_name (str): Name of the user
 
     Returns:
-        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the users analysis.
+        tuple[str, str, str, list[tuple[str, str]]]: The tuple of the users' analysis.
     """
     csv_file_path = [csv_file.csv_file_path for csv_file in csv_files]
 

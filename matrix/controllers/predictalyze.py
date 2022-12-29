@@ -9,19 +9,18 @@ from zipfile import ZipFile
 
 import nltk
 import pandas as pd
-
-from flask import jsonify, Response, send_file, session
-from keras.utils import pad_sequences
-from keras.models import load_model
+from flask import jsonify, Response, session, send_file
 from nltk import word_tokenize
 from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
-
-from config.configurations import db, app
-from models.csv_model import CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvErrorModel, CsvCollectionModel, \
+from keras.utils import pad_sequences
+from keras.models import load_model
+from config import Directories
+from extensions import db
+from matrix.models.csv_file import CsvErrorModel, CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvCollectionModel, \
     CsvTimeElapsed
-from models.user_model import User
-from modules.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
+from matrix.models.user import User
+from matrix.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
     Timezone
 
 nltk.download('punkt')
@@ -66,7 +65,6 @@ def error_handler(error_occurred: str, name_of: str):
     """
     Log the error to the database.
 
-    :param csv_id: The CSV ID
     :param error_occurred: The error occurred
     :param name_of: The name of the error
     """
@@ -97,39 +95,6 @@ def get_starting_ending_year():
     return starting_year, ending_year
 
 
-def save_csv(csv_name: str, csv_file_path: str, csv_question: str, csv_file: FileStorage) -> tuple[Response, int]:
-    """
-    Save the csv file details to the database.
-
-    :param csv_name: The csv name
-    :param csv_file_path: The csv file path
-    :param csv_question: The csv question
-    :param csv_file: The csv file
-    :return: The status and message
-    """
-    # @desc: Save the csv file
-    csv_file.save(os.path.join(app.config["CSV_FOLDER"], AllowedFile(
-        csv_file.filename).secure_filename()))
-
-    # @desc: Check if the csv file follows the required format: sentence, evaluatee, department and course code.
-    csv_file_ = pd.read_csv(
-        app.config["CSV_FOLDER"] + "/" + AllowedFile(csv_file.filename).secure_filename())
-    csv_columns = csv_file_.columns
-    if csv_columns[0] != "sentence" or csv_columns[1] \
-            != "evaluatee" or csv_columns[2] != "department" or csv_columns[3] != "course_code":
-        # @desc: Delete the csv file if it does not follow the required format
-        os.remove(os.path.join(app.config["CSV_FOLDER"], AllowedFile(
-            csv_file.filename).secure_filename()))
-        return jsonify({"status": "error", "message": "Invalid csv file format"}), 400
-
-    # @desc: Save the csv file details to the database
-    csv = CsvModel(csv_name=csv_name, csv_file_path=csv_file_path,
-                   csv_question=csv_question)
-    db.session.add(csv)
-    db.session.commit()
-    return jsonify({"status": "success", "message": "File uploaded successfully"}), 200
-
-
 def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, int]:
     """
     View the csv file columns with pandas.
@@ -137,17 +102,17 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     :param csv_file_to_view: The csv file to view
     :return: The status and message
     """
-    csv_file_to_view.save(os.path.join(app.config["CSV_UPLOADED_FOLDER"], AllowedFile(
+    csv_file_to_view.save(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
         csv_file_to_view.filename).secure_filename()))
     csv_file_ = pd.read_csv(
-        app.config["CSV_UPLOADED_FOLDER"] + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
+        Directories.CSV_UPLOADED_FOLDER + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
     csv_columns = csv_file_.columns
 
     # desc: Check if the first 4 headers are evaluatee, email, department and course code
     if csv_columns[0] != "evaluatee" or csv_columns[1] != "email" or csv_columns[2] != \
             "department" or csv_columns[3] != "course_code":
         # @desc: Delete the csv file if it does not follow the required format
-        os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], AllowedFile(
+        os.remove(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
             csv_file_to_view.filename).secure_filename()))
         return jsonify({"status": "error", "message": "Invalid header format"}), 400
 
@@ -184,7 +149,7 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
     :return: The formatted csv file
     """
     # @desc: Read the csv file and return a pandas dataframe object
-    csv_file = pd.read_csv(app.config["CSV_UPLOADED_FOLDER"] + "/" + file_name)
+    csv_file = pd.read_csv(Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
 
     # @desc: Get all the columns of the csv file
     csv_columns = csv_file.columns
@@ -220,10 +185,10 @@ def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, dep
 
     # @desc: Save the reformatted csv file to the database
     reformatted_csv.to_csv(
-        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+        Directories.CSV_REFORMATTED_FOLDER + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
-    os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+    os.remove(os.path.join(Directories.CSV_UPLOADED_FOLDER, file_name))
 
 
 def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
@@ -235,7 +200,7 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
     :return: The formatted csv file
     """
     # @desc: Read the csv file and return a pandas dataframe object
-    csv_file = pd.read_csv(app.config["CSV_UPLOADED_FOLDER"] + "/" + file_name)
+    csv_file = pd.read_csv(Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
 
     # @desc: Get all the columns of the csv file
     csv_columns = csv_file.columns
@@ -268,7 +233,7 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
 
     # @desc: Save the reformatted csv file to the database
     reformatted_csv.to_csv(
-        app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name, index=False)
+        Directories.CSV_REFORMATTED_FOLDER + "/" + file_name, index=False)
 
     # @desc: Delete the csv file from the uploaded folder
     # os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
@@ -283,7 +248,7 @@ def done_in_csv_evaluation(file_name: str):
     """
     try:
         # @desc: Delete the csv file from the uploaded folder
-        os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+        os.remove(os.path.join(Directories.CSV_UPLOADED_FOLDER, file_name))
         return jsonify({
             "status": "success",
             "message": f"Analysis completed successfully and {file_name} deleted successfully from the server"
@@ -431,7 +396,7 @@ def professor_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_p
         "evaluatee_share": evaluatee_share,
         "evaluatee_course_code": evaluatee_course_code
     })
-    path: str = app.config["CSV_PROFESSOR_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Professors_" + csv_question + "_" + \
+    path: str = Directories.CSV_PROFESSOR_ANALYSIS_FOLDER + "/" + "Analysis_for_Professors_" + csv_question + "_" + \
         school_year + "_" + school_semester + ".csv"
     # @desc: Save the csv file to the professor_analysis_csv_files folder
     df.to_csv(path, index=False)
@@ -523,7 +488,7 @@ def department_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_
         "department_negative_sentiments_percentage": department_negative_sentiments_percentage,
         "department_share": department_share
     })
-    path: str = app.config["CSV_DEPARTMENT_ANALYSIS_FOLDER"] + "/" + "Analysis_for_Departments_" + csv_question + "_" \
+    path: str = Directories.CSV_DEPARTMENT_ANALYSIS_FOLDER + "/" + "Analysis_for_Departments_" + csv_question + "_" \
         + school_year + "_" + school_semester + ".csv"
     # @desc: Save the csv file to the department_analysis_csv_files folder
     df.to_csv(path, index=False)
@@ -555,7 +520,7 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
     course_codes = csv_file["course_code"].tolist()
 
     # # @desc: Main dictionary
-    path_to_there_main = app.config["CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER"] + "/" + csv_question + \
+    path_to_there_main = Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER + "/" + csv_question + \
         "_" + school_year + "_" + school_semester
 
     # @desc: # Get each of the sentence in the csv file based on the evaluatee name and course code and compile it
@@ -589,14 +554,6 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
     )
     db.session.add(collection_provider_csv)
     db.session.commit()
-
-
-def get_next_csv_id():
-    """@desc: Get the next csv_id"""
-    csv_id = CsvModel.query.order_by(CsvModel.csv_id.desc()).first()
-    if csv_id is None:
-        return 1
-    return csv_id.csv_id + 1
 
 
 def remove_stopwords(response):
@@ -639,7 +596,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Read the reformatted csv file and return a pandas dataframe object
         csv_to_pred = pd.read_csv(
-            app.config["CSV_REFORMATTED_FOLDER"] + "/" + file_name)
+            Directories.CSV_REFORMATTED_FOLDER + "/" + file_name)
 
         # remove the rows that have empty values in the sentence column
         start_time_post_formatter = time.time()
@@ -647,8 +604,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         end_time_post_formatter = time.time()
 
         start_time_tokenizer = time.time()
-        tokenizer = pickle.load(open(
-            app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/tokenizer.pickle", "rb"))
+        tokenizer = pickle.load(
+            open(Directories.DEEP_LEARNING_MODEL_FOLDER + "/tokenizer.pickle", "rb"))
 
         # @desc: Get the sentences from the csv file
         sentences = csv_to_pred["sentence"].to_list()
@@ -669,7 +626,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # @desc: Load the model
         start_time_model = time.time()
         model = load_model(
-            app.config["DEEP_LEARNING_MODEL_FOLDER"] + "/model.h5")
+            Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
         end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences
@@ -688,7 +645,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         csv_to_pred["sentiment"] = predictions
 
         # @desc: Path to the csv file
-        path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
+        path: str = Directories.CSV_ANALYZED_FOLDER + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
             school_semester + ".csv"
         csv_to_pred['sentiment_converted'] = csv_to_pred['sentiment'].apply(
             lambda x: '1' if x >= 50 else '0')
@@ -706,8 +663,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         end_time_adding_predictions = time.time()
 
         # @desc: Delete the reformatted csv file from the reformatted folder
-        os.remove(os.path.join(
-            app.config["CSV_REFORMATTED_FOLDER"], file_name))
+        os.remove(os.path.join(Directories.CSV_REFORMATTED_FOLDER, file_name))
 
         date_processed = Timezone("Asia/Manila").get_timezone_current_time()
 
@@ -790,7 +746,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         }), 200
     except Exception as e:
         # @desc: Path to the csv file
-        path: str = app.config["CSV_ANALYZED_FOLDER"] + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
+        path: str = Directories.CSV_ANALYZED_FOLDER + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
             school_semester + ".csv"
         csv_id = db.session.query.with_entities(
             CsvModel.csv_id).filter_by(csv_file_path=path).first()
@@ -808,7 +764,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         os.remove(csv_file.csv_file_path)
         os.remove(professor_file.csv_file_path)
         os.remove(department_file.csv_file_path)
-        # @desc: Collections has a subdirectory so we need to remove it first. Then we can remove the collections file.
+        # @desc: Collections has a subdirectory, so we need to remove it first. Then we can remove the collections file.
         shutil.rmtree(collections_file.csv_file_path)
 
         db.session.delete(csv_file)
@@ -1385,7 +1341,7 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
         os.remove(csv_file.csv_file_path)
         os.remove(professor_file.csv_file_path)
         os.remove(department_file.csv_file_path)
-        # @desc: Collections has a subdirectory so we need to remove it first. Then we can remove the collections file.
+        # @desc: Collections has a subdirectory, so we need to remove it first. Then we can remove the collections file.
         shutil.rmtree(collections_file.csv_file_path)
 
         db.session.delete(csv_file)
