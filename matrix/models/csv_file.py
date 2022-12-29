@@ -1,5 +1,5 @@
-from config.configurations import db
-from modules.module import Timezone
+from extensions import db
+from matrix.module import Timezone
 
 
 class CsvModel(db.Model):
@@ -68,10 +68,10 @@ class CsvDepartmentModel(db.Model):
 
     def __repr__(self):
         """Csv department model class representation."""
-        return f"CsvDepartmentModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
-               f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
-               f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
-               f"date_processed={self.date_processed})"
+        return f"CsvDepartmentModel(csv_id={self.csv_id}, csv_name={self.csv_name}, " \
+               f"csv_question={self.csv_question}, csv_file_path={self.csv_file_path}, " \
+               f"school_year={self.school_year}, school_semester={self.school_semester}, " \
+               f"date_uploaded={self.date_uploaded}, date_processed={self.date_processed})"
 
     # @desc: For Descending Order (newest to oldest) in the csvs table
     def __lt__(self, other):
@@ -181,11 +181,11 @@ class CsvCollectionModel(db.Model):
 
     def __repr__(self):
         """Csv Collection Model class representation."""
-        return f"CsvCollectionModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
-               f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
-               f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
-               f"date_processed={self.date_processed}, flag_deleted={self.flag_deleted}, " \
-               f"flag_release={self.flag_release})"
+        return f"CsvCollectionModel(csv_id={self.csv_id}, csv_name={self.csv_name}, " \
+               f"csv_question={self.csv_question}, csv_file_path={self.csv_file_path}, " \
+               f"school_year={self.school_year}, school_semester={self.school_semester}, " \
+               f"date_uploaded={self.date_uploaded}, date_processed={self.date_processed}, " \
+               f"flag_deleted={self.flag_deleted}, flag_release={self.flag_release})"
 
     # @desc: For Descending Order (newest to oldest) in the csvs table
     def __lt__(self, other):

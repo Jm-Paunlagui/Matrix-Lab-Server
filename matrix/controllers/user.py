@@ -1,30 +1,22 @@
-import inspect
-import sys
 import uuid
 from datetime import datetime, timedelta
 
 import jwt
 from flask import jsonify, session
 from flask_mail import Message
-from flask_session import Session
 
-from config.configurations import app, db, mail
-from database_queries.csv_queries import error_handler
-from models.user_model import User
-from modules.module import (PasswordBcrypt, PayloadSignature, Timezone,
-                            ToptCode, get_os_browser_versions, error_message, get_ip_address)
-
-# desc: Session configuration
-server_session = Session(app)
+from extensions import db, mail
+from matrix.models.user import User
+from matrix.module import Timezone, PayloadSignature, PasswordBcrypt, get_os_browser_versions, get_ip_address, ToptCode
 
 
 def check_email_exists(email: str):
     """Check if users email exists in the database."""
-    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
+    is_email: User = User.query.with_entities(User.email, User.recovery_email).filter(
+        (User.email == email) | (User.recovery_email == email)).first()
     if (
             is_email is not None
-            and email in (is_email.email, is_email.secondary_email, is_email.recovery_email)
+            and email in (is_email.email, is_email.recovery_email)
     ):
         return True
     return False
@@ -43,9 +35,9 @@ def check_username_exists(username: str):
 
 def check_password_reset_token_exists(email: str):
     """Check if reset password token exists in the database."""
-    is_token: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+    is_token: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.password_reset_token).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
+        (User.email == email) | (User.recovery_email == email)).first()
     if is_token.password_reset_token:
         return True
     return False
@@ -62,7 +54,7 @@ def check_user_id_exists(user_id: int):
 
 def check_email_exists_by_username(username: str):
     """Check if the user's email exists in the database."""
-    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+    is_email: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.username).filter(
         (User.username == username)).first()
     if is_email is None:
@@ -71,7 +63,6 @@ def check_email_exists_by_username(username: str):
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": is_email.email,
-            "secondary_email": is_email.secondary_email,
             "recovery_email": is_email.recovery_email,
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "jti": str(uuid.uuid4())
@@ -208,13 +199,14 @@ def create_all_users_auto_generated_password():
         return jsonify({"status": "success",
                         "message": "All users have been created with auto-generated password."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error occurred while creating all users with auto-generated password."}), 500
+                        "message": "An error occurred while creating all users with auto-generated password.",
+                        "error": f"{e}"}), 500
 
 
 def deactivate_user(user_id: int):
@@ -281,13 +273,14 @@ def deactivate_all_users():
         return jsonify({"status": "success",
                         "message": "All users have been deactivated."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error has occurred while deactivating all users."}), 400
+                        "message": "An error has occurred while deactivating all users.",
+                        "error": f"{e}"}), 500
 
 
 def lock_user_account(user_id: int):
@@ -354,13 +347,14 @@ def lock_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All users have been locked."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error occurred while locking all user accounts."}), 400
+                        "message": "An error occurred while locking all user accounts.",
+                        "error": f"{e}"}), 500
 
 
 def unlock_user_account(user_id: int):
@@ -428,13 +422,14 @@ def unlock_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been unlocked."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error occurred while unlocking all user accounts."}), 500
+                        "message": "An error occurred while unlocking all user accounts.",
+                        "error": f"{e}"}), 500
 
 
 def delete_user_account(user_id: int):
@@ -502,13 +497,14 @@ def delete_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been deleted."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error occurred while deleting all user accounts."}), 500
+                        "message": "An error occurred while deleting all user accounts.",
+                        "error": f"{e}"}), 500
 
 
 def restore_user_account(user_id: int):
@@ -574,13 +570,14 @@ def restore_all_user_accounts():
         return jsonify({"status": "success",
                         "message": "All user accounts have been restored."}), 200
     except Exception as e:
-        error_handler(
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
-        )
+        # error_handler(
+        #     name_of=f"Cause of error: {e}",
+        #     error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+        #                                  function_name=inspect.stack()[0][3], file_name=__name__)
+        # )
         return jsonify({"status": "error",
-                        "message": "An error occurred while restoring all user accounts."}), 500
+                        "message": "An error occurred while restoring all user accounts.",
+                        "error": f"{e}"}), 500
 
 
 def delete_user_permanently(user_id: int):
@@ -758,23 +755,23 @@ def authenticate_user(username: str, password: str):
 def send_tfa(email: str):
     """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
     # Check if the email is primary or recovery
-    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+    is_email: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.username).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
+        (User.email == email) | (User.recovery_email == email)).first()
 
-    if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
+    if email in (is_email.email, is_email.recovery_email):
         # Generate a link for removing the user's email if not recognized by the user using jwt
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": email,
-            "username": is_email[3],
+            "username": is_email[2],
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
         }
         link = PayloadSignature(payload=payload).encode_payload()
 
-        username = is_email[3]
+        username = is_email[2]
         source = get_os_browser_versions()
         ip_address = get_ip_address()
         totp = ToptCode.topt_code()
@@ -815,7 +812,7 @@ def send_tfa(email: str):
             </td></tr></table></body></html> """
             mail.send(msg)
             return True
-        if email in (is_email.secondary_email, is_email.recovery_email):
+        if email == is_email.recovery_email:
             msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
             http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
             0px; background-color: #f2f3f8;" leftmargin="0"> <table cellspacing="0" border="0" cellpadding="0" 
@@ -857,23 +854,23 @@ def send_tfa(email: str):
 def send_email_verification(email: str):
     """Sends a verification to the email that is provided by the user. either primary email or recovery email"""
     # Check if the email is primary or recovery
-    is_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+    is_email: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.username).filter(
-        (User.email == email) | (User.secondary_email == email) | (User.recovery_email == email)).first()
+        (User.email == email) | (User.recovery_email == email)).first()
 
-    if email in (is_email.email, is_email.secondary_email, is_email.recovery_email):
+    if email in (is_email.email, is_email.recovery_email):
         # Generate a link for removing the user's email if not recognized by the user using jwt
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": email,
-            "username": is_email[3],
+            "username": is_email[2],
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
             "jti": str(uuid.uuid4())
         }
         link = PayloadSignature(payload=payload).encode_payload()
 
-        username = is_email[3]
+        username = is_email[2]
         source = get_os_browser_versions()
         ip_address = get_ip_address()
         totp = ToptCode.topt_code()
@@ -1002,7 +999,7 @@ def authenticated_user():
     payload = {
         "sub": "user",
         "token": "true", "id": user_data.user_id,
-        "email": user_data.email, "secondary_email": user_data.secondary_email,
+        "email": user_data.email,
         "recovery_email": user_data.recovery_email, "full_name": user_data.full_name,
         "username": user_data.username, "role": user_data.role, "path": redirect_to(),
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
@@ -1021,8 +1018,7 @@ def password_reset_link(email: str):
     if not check_email_exists(email):
         return False
     is_user: User = User.query.with_entities(User.full_name).filter(
-        (User.email == email) | (User.secondary_email == email) | (
-            User.recovery_email == email)
+        (User.email == email) | (User.recovery_email == email)
     ).first()
     name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
     payload = {
@@ -1089,7 +1085,7 @@ def password_reset(password_reset_token: str, password: str):
         hashed_password: str = PasswordBcrypt(
             password=password).password_hasher()
         intoken: User = User.query.filter(
-            (User.email == email["sub"]) | (User.secondary_email == email["sub"]) | (
+            (User.email == email["sub"]) | (
                 User.recovery_email == email["sub"])
         ).first()
         email_name = intoken.full_name.split(
@@ -1145,14 +1141,13 @@ def has_emails():
     if user_id is None:
         return False
 
-    user_email: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email) \
+    user_email: User = User.query.with_entities(User.email, User.recovery_email) \
         .filter_by(user_id=user_id).first()
 
     user_emails = {
         "iss": "http://127.0.0.1:5000",
         "sub": "has_emails",
         "id1": user_email.email,
-        "id2": user_email.secondary_email,
         "id3": user_email.recovery_email,
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "jti": str(uuid.uuid4())
@@ -1211,20 +1206,20 @@ def verify_authenticated_token(token: str):
 
 def remove_email(option: str, email: str, username: str):
     """Removes the email address if the user does not recognize the email address"""
-    remove: User = User.query.with_entities(User.email, User.secondary_email, User.recovery_email,
+    remove: User = User.query.with_entities(User.email, User.recovery_email,
                                             User.username).filter(
         User.username == username).first()
     if option == "no" and remove is not None:
         if remove.email == email:
             return False
-        if email in (remove.secondary_email, remove.recovery_email) and username == remove.username:
-            type_of_email = "secondary_email" if remove.secondary_email == email else "recovery_email"
+        if email in remove.recovery_email and username == remove.username:
+            type_of_email = "recovery_email"
             User.query.filter_by(username=username).update(
                 {type_of_email: None})
             source = get_os_browser_versions()
             ip_address = get_ip_address()
             msg = Message(subject="Email Removed",
-                          sender="service.matrix.ai@gmail.com", recipients=[remove.email])
+                          sender="service.matrix.ai@gmail.com", recipients=[remove.email, remove.recovery_email])
             msg.html = f"""<!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
                 http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" 
                 style="margin:0;background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" 
@@ -1298,19 +1293,16 @@ def update_personal_info(email: str, full_name: str):
                     "token": authenticated_user()}), 200
 
 
-def update_security_info(secondary_email: str, recovery_email: str):
+def update_security_info(recovery_email: str):
     """Updates the security information of the user"""
     user_id: int = session.get("user_id")
-    user: User = User.query.with_entities(User.secondary_email, User.recovery_email) \
+    user: User = User.query.with_entities(User.recovery_email) \
         .filter(User.user_id == user_id).first()
     if user_id is None and user is None:
         return jsonify({"status": "error", "message": "User not found"}), 404
-    if user.secondary_email != secondary_email and check_email_exists(secondary_email):
-        return jsonify({"status": "warn", "message": "Email already exists"}), 409
     if user.recovery_email != recovery_email and check_email_exists(recovery_email):
         return jsonify({"status": "warn", "message": "Email already exists"}), 409
     User.query.filter_by(user_id=user_id).update({
-        User.secondary_email: secondary_email,
         User.recovery_email: recovery_email
     })
     db.session.commit()
