@@ -48,7 +48,7 @@ app.add_url_rule("/data/analyze-save-csv",
 app.add_url_rule("/data/delete-uploaded-csv-file",
                  view_func=delete_uploaded_csv_file, methods=["POST"])
 # @desc: Dashboard data
-app.add_url_rule("/data/dashboard-data-csv",
+app.add_url_rule("/analysis/dashboard-data-csv",
                  view_func=dashboard_data_csv, methods=["GET"])
 app.add_url_rule("/data/dashboard-data-user",
                  view_func=dashboard_data_professor, methods=["GET"])
