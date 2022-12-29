@@ -595,7 +595,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         end_time_pre_formatter = time.time()
 
         # @desc: Read the reformatted csv file and return a pandas dataframe object
-        csv_to_pred = pd.read_csv(Directories.CSV_REFORMATTED_FOLDER + "/" + file_name)
+        csv_to_pred = pd.read_csv(
+            Directories.CSV_REFORMATTED_FOLDER + "/" + file_name)
 
         # remove the rows that have empty values in the sentence column
         start_time_post_formatter = time.time()
@@ -603,7 +604,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         end_time_post_formatter = time.time()
 
         start_time_tokenizer = time.time()
-        tokenizer = pickle.load(open(Directories.DEEP_LEARNING_MODEL_FOLDER + "/tokenizer.pickle", "rb"))
+        tokenizer = pickle.load(
+            open(Directories.DEEP_LEARNING_MODEL_FOLDER + "/tokenizer.pickle", "rb"))
 
         # @desc: Get the sentences from the csv file
         sentences = csv_to_pred["sentence"].to_list()
@@ -623,7 +625,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Load the model
         start_time_model = time.time()
-        model = load_model(Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
+        model = load_model(
+            Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
         end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences

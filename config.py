@@ -20,15 +20,19 @@ class Directories:
     CSV_ANALYZED_FOLDER = os.path.join(CSV_FOLDER, "analyzed_csv_files")
 
     # @desc: The path to the CSV department analysis folder
-    CSV_DEPARTMENT_ANALYSIS_FOLDER = os.path.join(CSV_FOLDER, "department_analysis_csv_files")
+    CSV_DEPARTMENT_ANALYSIS_FOLDER = os.path.join(
+        CSV_FOLDER, "department_analysis_csv_files")
 
     # @desc: The path to the CSV professor analysis folder
-    CSV_PROFESSOR_ANALYSIS_FOLDER = os.path.join(CSV_FOLDER, "professor_analysis_csv_files")
+    CSV_PROFESSOR_ANALYSIS_FOLDER = os.path.join(
+        CSV_FOLDER, "professor_analysis_csv_files")
 
     CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER = \
-        os.path.join(CSV_FOLDER, "user_collection_of_sentiment_per_evaluatee_csv_files")
+        os.path.join(
+            CSV_FOLDER, "user_collection_of_sentiment_per_evaluatee_csv_files")
 
-    DEEP_LEARNING_MODEL_FOLDER = os.path.join(ROOT_PATH, "matrix/deep_learning_model")
+    DEEP_LEARNING_MODEL_FOLDER = os.path.join(
+        ROOT_PATH, "matrix/deep_learning_model")
 
     # @desc: Creates directories for the CSV files if they do not exist
     @staticmethod
@@ -52,7 +56,8 @@ class Directories:
             os.mkdir(Directories.CSV_PROFESSOR_ANALYSIS_FOLDER)
 
         if not os.path.exists(Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER):
-            os.mkdir(Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER)
+            os.mkdir(
+                Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER)
 
 
 class AllowedExtensions:
