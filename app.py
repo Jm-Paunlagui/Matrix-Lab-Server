@@ -10,6 +10,7 @@ from matrix.routes.dashboard import dashboard
 from matrix.models.user import User
 from matrix.models.csv_file import CsvModel, CsvDepartmentModel, CsvProfessorModel, CsvErrorModel, \
     CsvCollectionModel, CsvTimeElapsed
+from by_database.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment
 
 app = Flask(__name__)
 
