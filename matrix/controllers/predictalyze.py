@@ -13,8 +13,7 @@ from flask import jsonify, Response, session, send_file
 from nltk import word_tokenize
 from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
-from keras.utils import pad_sequences
-from keras.models import load_model
+from keras.utils import pad_sequences, plot_model
 from config import Directories
 from extensions import db
 from matrix.models.csv_file import CsvErrorModel, CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvCollectionModel, \
@@ -565,7 +564,8 @@ def remove_stopwords(response):
     return response
 
 
-def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
+def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str,
+                  model: FileStorage):
     """
     Evaluate the csv file.
 
@@ -574,6 +574,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     :param school_semester: The school semester
     :param school_year: The school year
     :param csv_question: The csv question
+    :param model: The model
     :return: The evaluated csv file
     """
     school_year = InputTextValidation(school_year).to_query_school_year()
@@ -625,8 +626,10 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Load the model
         start_time_model = time.time()
-        model = load_model(
-            Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
+        if model is not None:
+            print(f"Model: {model}")
+            print(f"Model Summary: {model.summary()}")
+            print("Model already loaded")
         end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences

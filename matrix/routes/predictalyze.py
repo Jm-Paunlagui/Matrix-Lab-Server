@@ -1,5 +1,7 @@
 from flask import request, jsonify, Blueprint
+from keras.models import load_model
 
+from config import Directories
 from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evaluator, done_in_csv_evaluation, \
     options_read_single_data, read_overall_data_department_analysis_csv_files, \
     read_overall_data_professor_analysis_csv_files, read_single_data_department_analysis_csv_files, \
@@ -14,6 +16,15 @@ from matrix.module import AllowedFile, InputTextValidation
 
 
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
+
+
+@predictalyze.record_once
+def load_keras_model(state):
+    global model
+    model = state.app.predictalyze_model = load_model(
+        Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
+
+    print("Model loaded.")
 
 
 @predictalyze.route("/view-columns", methods=["POST"])
@@ -62,7 +73,7 @@ def analyze_save_csv():
         return jsonify({"status": "error", "message": "Invalid school year"}), 400
     if not InputTextValidation(school_semester).validate_school_semester():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
-    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
+    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question, model)
 
 
 @predictalyze.route("/delete-uploaded-csv-file", methods=["POST"])
