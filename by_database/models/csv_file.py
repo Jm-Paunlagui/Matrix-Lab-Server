@@ -59,7 +59,6 @@ class CsvAnalyzedSentiment(db.Model):
     csv_analyzed_sentiment_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
     csv_id = db.Column(db.BigInteger, primary_key=True, nullable=False)
     evaluatee = db.Column(db.String(255))
-    email = db.Column(db.String(255), unique=True)
     department = db.Column(db.String(255))
     course_code = db.Column(db.String(255))
     sentence = db.Column(db.Text, nullable=False)
@@ -70,25 +69,10 @@ class CsvAnalyzedSentiment(db.Model):
     word_count = db.Column(db.Integer)
     polarity = db.Column(db.Float)
 
-    def __init__(self, csv_id, evaluatee, email, department, course_code, sentence, sentiment, sentiment_converted,
-                 sentence_remove_stopwords, review_len, word_count, polarity):
-        self.csv_id = csv_id
-        self.evaluatee = evaluatee
-        self.email = email
-        self.department = department
-        self.course_code = course_code
-        self.sentence = sentence
-        self.sentiment = sentiment
-        self.sentiment_converted = sentiment_converted
-        self.sentence_remove_stopwords = sentence_remove_stopwords
-        self.review_len = review_len
-        self.word_count = word_count
-        self.polarity = polarity
-
     def __repr__(self):
         return f"CsvAnalyzedSentiment(csv_analyzed_sentiment_id={self.csv_analyzed_sentiment_id}, " \
-               f"csv_id={self.csv_id}, evaluatee={self.evaluatee}, email={self.email}, " \
-               f"department={self.department}, course_code={self.course_code}, sentence={self.sentence}, " \
-               f"sentiment={self.sentiment}, sentiment_converted={self.sentiment_converted}, " \
+               f"csv_id={self.csv_id}, evaluatee={self.evaluatee}, department={self.department}, " \
+               f"course_code={self.course_code}, sentence={self.sentence}, sentiment={self.sentiment}, " \
+               f"sentiment_converted={self.sentiment_converted}, " \
                f"sentence_remove_stopwords={self.sentence_remove_stopwords}, review_len={self.review_len}, " \
                f"word_count={self.word_count}, polarity={self.polarity})"
