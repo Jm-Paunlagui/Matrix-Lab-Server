@@ -57,7 +57,7 @@ class CsvAnalyzedSentiment(db.Model):
 
     __tablename__ = 'csv_analyzed_sentiment_test'
     csv_analyzed_sentiment_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
-    csv_id = db.Column(db.BigInteger, primary_key=True, nullable=False)
+    csv_id = db.Column(db.BigInteger, nullable=False)
     evaluatee = db.Column(db.String(255))
     department = db.Column(db.String(255))
     course_code = db.Column(db.String(255))
