@@ -210,9 +210,8 @@ class CsvTimeElapsed(db.Model):
     prediction_time: Prediction time varchar(255)
     sentiment_time: Sentiment time varchar(255)
     adding_predictions_time: Adding predictions time varchar(255)
+    adding_to_db: Adding to db time varchar(255)
     analysis_user_time: Analysis user time varchar(255)
-    analysis_department_time: Analysis department time varchar(255)
-    analysis_collection_time: Analysis collection time varchar(255)
     """
 
     __tablename__ = 'csvs_time_elapsed'
@@ -227,9 +226,8 @@ class CsvTimeElapsed(db.Model):
     prediction_time: str = db.Column(db.String(255), nullable=False)
     sentiment_time: str = db.Column(db.String(255), nullable=False)
     adding_predictions_time: str = db.Column(db.String(255), nullable=False)
+    adding_to_db: str = db.Column(db.String(255), nullable=False)
     analysis_user_time: str = db.Column(db.String(255), nullable=False)
-    analysis_department_time: str = db.Column(db.String(255), nullable=False)
-    analysis_collection_time: str = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         """Csv Time Elapsed Model class representation."""
@@ -238,15 +236,5 @@ class CsvTimeElapsed(db.Model):
                f"post_formatter_time={self.post_formatter_time}, tokenizer_time={self.tokenizer_time}, " \
                f"padding_time={self.padding_time}, model_time={self.model_time}, " \
                f"prediction_time={self.prediction_time}, sentiment_time={self.sentiment_time}, " \
-               f"adding_predictions_time={self.adding_predictions_time}, " \
-               f"analysis_user_time={self.analysis_user_time}, " \
-               f"analysis_department_time={self.analysis_department_time}, " \
-               f"analysis_collection_time={self.analysis_collection_time})"
-
-    # @desc: For Descending Order (newest to oldest) in the csvs_time_elapsed table
-    def __lt__(self, other):
-        return self.csv_id < other.csv_id
-
-    # @desc: For Ascending Order (oldest to newest) in the csvs_time_elapsed table
-    def __gt__(self, other):
-        return self.csv_id > other.csv_id
+               f"adding_predictions_time={self.adding_predictions_time}, adding_to_db={self.adding_to_db}, " \
+               f"analysis_user_time={self.analysis_user_time})"
