@@ -932,14 +932,12 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
             round(db.session.query(
                 CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
                 CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department).filter(
+                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.sentiment_converted).filter(
                 CsvModelDetail.school_year == school_year,
                 CsvModelDetail.school_semester == school_semester,
                 CsvModelDetail.csv_question == csv_question,
                 CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department
-            ).count() / db.session.query(CsvAnalyzedSentiment.department).filter(
-                CsvAnalyzedSentiment.department == department).count() * 100, 2))
+                CsvAnalyzedSentiment.department == department).count() / total * 100, 2))
 
     # @desc: Same as read_overall_data_department_analysis_csv_files
     top_department = [
