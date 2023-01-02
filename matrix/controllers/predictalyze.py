@@ -698,10 +698,11 @@ def read_overall_data_department_analysis_csv_files():
                                     f"/ {total}",
             "share": department_share[unique_departments_list.index(department)],
             "evaluatee": department_evaluatee[unique_departments_list.index(department)]
-        } # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
+        }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
         for index, department in enumerate(
             sorted(unique_departments_list,
-                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(x)],
+                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(
+                       x)],
                    reverse=True),
             start=0)
     ]
@@ -740,22 +741,21 @@ def read_overall_data_professor_analysis_csv_files():
         professor_positive_sentiments_percentage.append(
             round((db.session.query(CsvAnalyzedSentiment.evaluatee)
                    .filter_by(evaluatee=professor.evaluatee, sentiment_converted=1).count() /
-                     professor_number_of_sentiments[-1]) * 100, 2))
+                   professor_number_of_sentiments[-1]) * 100, 2))
         # Calculate professor_negative_sentiments_percentage sum and divide by the total number of sentiments negative
         # threshold is 50.00 and negative threshold is 49.99
         professor_negative_sentiments_percentage.append(
             round((db.session.query(CsvAnalyzedSentiment.evaluatee)
                    .filter_by(evaluatee=professor.evaluatee, sentiment_converted=0).count() /
-                     professor_number_of_sentiments[-1]) * 100, 2))
+                   professor_number_of_sentiments[-1]) * 100, 2))
         # Calculate the professor share
         professor_share.append(
             round((db.session.query(CsvAnalyzedSentiment.evaluatee)
                      .filter_by(evaluatee=professor.evaluatee).count() /
-                     db.session.query(CsvAnalyzedSentiment.evaluatee).count()) * 100, 2))
+                   db.session.query(CsvAnalyzedSentiment.evaluatee).count()) * 100, 2))
         # Get the professor department
         professor_department.append(
             db.session.query(CsvAnalyzedSentiment.department).filter_by(evaluatee=professor.evaluatee).first())
-
 
     # Top professor with the highest number of positive sentiments percentage
     top_professor = [{
@@ -768,11 +768,12 @@ def read_overall_data_professor_analysis_csv_files():
         "number_of_sentiments": f"{professor_number_of_sentiments[unique_professors_list.index(professor)]} / {total}",
         "share": professor_share[unique_professors_list.index(professor)],
         "evaluatee_department": professor_department[unique_professors_list.index(professor)][0]
-    } # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
-    for index, professor in enumerate(
+    }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
+        for index, professor in enumerate(
         sorted(unique_professors_list,
-                key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(x)],
-                reverse=True),
+               key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(
+                   x)],
+               reverse=True),
         start=0)
     ]
 
@@ -871,9 +872,10 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
         department_negative_sentiments_percentage, department_share, department_evaluatee = [], [], [], [], []
 
     # @desc: Get the unique department from the csv_file list and store it in a list called unique_departments
-    unique_departments = list(set([department.department for department in csv_file]))
+    unique_departments = list(
+        set([department.department for department in csv_file]))
 
-    unique_departments_list = [ department for department in unique_departments ]
+    unique_departments_list = [department for department in unique_departments]
 
     for department in unique_departments:
         # Count only the date based on the csv_file list
@@ -955,7 +957,8 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
         }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
         for index, department in enumerate(
             sorted(unique_departments_list,
-                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(x)],
+                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(
+                       x)],
                    reverse=True),
             start=0)
     ]
@@ -1005,7 +1008,8 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
         professor_negative_sentiments_percentage, professor_share, professor_department = [], [], [], [], []
 
     # Get the unique professors from the csv_file list
-    unique_professors = list(set([professor.evaluatee for professor in csv_file]))
+    unique_professors = list(
+        set([professor.evaluatee for professor in csv_file]))
 
     unique_professors_list = [professor for professor in unique_professors]
 
@@ -1087,7 +1091,8 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
     }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
         for index, professor in enumerate(
             sorted(unique_professors_list,
-                   key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(x)],
+                   key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(
+                       x)],
                    reverse=True),
             start=0)
     ]
