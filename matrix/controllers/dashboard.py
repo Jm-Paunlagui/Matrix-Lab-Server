@@ -730,17 +730,18 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         total_sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
             CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
-            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).count()
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).count()
 
         department_positive_sentiments = db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
+            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
+            CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvAnalyzedSentiment.sentiment_converted == 1).count()
 
         department_negative_sentiments = db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
+            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
+            CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvAnalyzedSentiment.sentiment_converted == 0).count()
 
@@ -753,7 +754,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         csv_files = CsvModel.query.all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         sentiment_details = [
             {"id": 1, "title": "Positive Sentiments",
@@ -788,7 +789,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         csv_files = CsvModel.query.filter_by(csv_question=csv_question).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -811,7 +812,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             school_semester=school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -833,7 +834,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         csv_files = CsvModel.query.filter_by(school_year=school_year).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -856,7 +857,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             csv_question=csv_question, school_semester=school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -879,7 +880,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             csv_question=csv_question, school_year=school_year).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -902,7 +903,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             school_year=school_year, school_semester=school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = analysis_admin(csv_files)
+            wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -925,7 +926,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                                          school_year=school_year).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-    wordcloud_list_with_sentiment = analysis_admin(csv_files)
+        wordcloud_list_with_sentiment = analysis_admin(csv_files)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,

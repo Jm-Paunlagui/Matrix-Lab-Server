@@ -60,7 +60,7 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     :return: True if the csv name exists, else False
     """
     csv = CsvModelDetail.query.filter_by(csv_question=csv_question,
-                                   school_year=school_year, school_semester=school_semester).first()
+                                         school_year=school_year, school_semester=school_semester).first()
     return bool(csv)
 
 
