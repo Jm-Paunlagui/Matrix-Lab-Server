@@ -489,6 +489,7 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
 
     return sentiment_details
 
+
 def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str) -> list:
     """
     Get the positive and negative sentiments of the professor based on the csv files in the professor_analysis_csv_files
@@ -581,6 +582,7 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
     ]
 
     return sentiment_details
+
 
 def deanlys(analysis: list[tuple[int, int, int, float, str, int]]) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
