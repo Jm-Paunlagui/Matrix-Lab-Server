@@ -458,8 +458,10 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
 
     total_sentiments = len(sentiments)
 
-    positive_sentiments = [sentiment for sentiment in sentiments if sentiment[2] == 1]
-    negative_sentiments = [sentiment for sentiment in sentiments if sentiment[2] == 0]
+    positive_sentiments = [
+        sentiment for sentiment in sentiments if sentiment[2] == 1]
+    negative_sentiments = [
+        sentiment for sentiment in sentiments if sentiment[2] == 0]
 
     total_positive_sentiments = len(positive_sentiments)
     total_negative_sentiments = len(negative_sentiments)
@@ -488,6 +490,7 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
     ]
 
     return sentiment_details
+
 
 def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str) -> list:
     """
@@ -581,6 +584,7 @@ def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluat
     ]
 
     return sentiment_details
+
 
 def deanlys(analysis: list[tuple[int, int, int, float, str, int]]) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
@@ -683,7 +687,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
-            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).all()
 
         sentiment_details = depanc(sentiments, starting_year, ending_year)
 
@@ -691,7 +696,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
-            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = deanlys(analysis)
@@ -796,7 +802,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_details = depanc(sentiments, starting_year, ending_year)
 
@@ -805,7 +812,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = deanlys(analysis)
@@ -825,7 +833,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_year == school_year).all()
 
         sentiment_details = depanc(sentiments, starting_year, ending_year)
 
@@ -834,7 +843,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_year == school_year).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = deanlys(analysis)
@@ -854,7 +864,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_year == school_year,
+                   CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_details = depanc(sentiments, starting_year, ending_year)
 
@@ -863,7 +874,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_year == school_year,
+                   CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = deanlys(analysis)
