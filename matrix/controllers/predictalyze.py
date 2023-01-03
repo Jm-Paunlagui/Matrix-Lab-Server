@@ -1126,17 +1126,15 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
 
     try:
         if user_data.role == "admin":
-            csv_files = db.session.query(CsvModel).order_by(
-                CsvModel.csv_id.desc()).paginate(page=page, per_page=per_page)
-
+            csv_files = db.session.query(CsvModelDetail).order_by(
+                CsvModelDetail.csv_id.desc()).paginate(page=page, per_page=per_page)
+            print(csv_files)
             list_of_csv_files = [
                 {
                     "id": csv_file.csv_id,
                     "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
                     "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
                     "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
-                    "csv_file_path": csv_file.csv_file_path,
-                    "csv_file_name": csv_file.csv_name,
                     "flag_deleted": csv_file.flag_deleted,
                     "flag_release": csv_file.flag_release,
                 } for csv_file in csv_files.items
@@ -1182,8 +1180,8 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
 
     try:
         if user_data.role == "admin":
-            csv_files = db.session.query(CsvModel).filter_by(flag_deleted=True).order_by(
-                CsvModel.csv_id.desc()).paginate(page=page, per_page=per_page)
+            csv_files = db.session.query(CsvModelDetail).filter_by(flag_deleted=True).order_by(
+                CsvModelDetail.csv_id.desc()).paginate(page=page, per_page=per_page)
 
             list_of_csv_files = [
                 {
@@ -1191,8 +1189,6 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
                     "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
                     "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
                     "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
-                    "csv_file_path": csv_file.csv_file_path,
-                    "csv_file_name": csv_file.csv_name,
                     "flag_deleted": csv_file.flag_deleted,
                     "flag_release": csv_file.flag_release,
                 } for csv_file in csv_files.items
@@ -1349,7 +1345,7 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1380,7 +1376,7 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1410,8 +1406,8 @@ def to_delete_all_csv_files_flag():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(
-            CsvModel.csv_id, CsvModel.flag_deleted).all()
+        csv_files = db.session.query(CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.flag_deleted).all()
 
         if all(csv_file[1] == 1 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Deleted."}), 400
@@ -1437,8 +1433,8 @@ def to_delete_all_csv_files_unflag():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(
-            CsvModel.csv_id, CsvModel.flag_deleted).all()
+        csv_files = db.session.query(CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.flag_deleted).all()
 
         if all(csv_file[1] == 0 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Restored."}), 400
@@ -1465,7 +1461,7 @@ def to_publish_selected_csv_file(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1496,7 +1492,7 @@ def to_unpublished_selected_csv_file(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1526,8 +1522,8 @@ def to_publish_all_csv_files():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(
-            CsvModel.csv_id, CsvModel.flag_release).all()
+        csv_files = db.session.query(CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.flag_release).all()
 
         if all(csv_file[1] == 1 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Published."}), 400
@@ -1553,8 +1549,8 @@ def to_unpublished_all_csv_files():
     :return: A json response
     """
     try:
-        csv_files = db.session.query(CsvModel).with_entities(
-            CsvModel.csv_id, CsvModel.flag_release).all()
+        csv_files = db.session.query(CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.flag_release).all()
 
         if all(csv_file[1] == 0 for csv_file in csv_files):
             return jsonify({"status": "error", "message": "All files already Unpublished."}), 400
@@ -1581,7 +1577,7 @@ def to_download_selected_csv_file(csv_id: int):
     :return: The selected csv file.
     """
     try:
-        csv_file = CsvModel.query.filter_by(csv_id=csv_id).first()
+        csv_file = CsvModelDetail.query.filter_by(csv_id=csv_id).first()
         professor_file = CsvProfessorModel.query.filter_by(
             csv_id=csv_id).first()
         department_file = CsvDepartmentModel.query.filter_by(
