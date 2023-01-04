@@ -1641,7 +1641,8 @@ def to_download_selected_csv_file(csv_id: int):
 
         # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
 
-        df = pd.DataFrame(sentiments, columns = ['csv_id','csv_id','evaluatee','department','course_code','sentence','sentiment','sentiment_converted','sentence_remove_stopwords','review_len','word_count','polarity'])
+        df = pd.DataFrame(sentiments, columns=['csv_id', 'csv_id', 'evaluatee', 'department', 'course_code', 'sentence',
+                          'sentiment', 'sentiment_converted', 'sentence_remove_stopwords', 'review_len', 'word_count', 'polarity'])
 
         # Create a BytesIO object to store the dataframe.
         temp_file = BytesIO()
