@@ -1,3 +1,4 @@
+import csv
 import inspect
 import os
 import pickle
@@ -1581,36 +1582,83 @@ def to_download_selected_csv_file(csv_id: int):
     :return: The selected csv file.
     """
     try:
-        csv_file = CsvModelDetail.query.filter_by(csv_id=csv_id).first()
-        professor_file = CsvProfessorModel.query.filter_by(
-            csv_id=csv_id).first()
-        department_file = CsvDepartmentModel.query.filter_by(
-            csv_id=csv_id).first()
-        collections_file = CsvCollectionModel.query.filter_by(
-            csv_id=csv_id).first()
+        # csv_file = CsvModelDetail.query.filter_by(csv_id=csv_id).first()
+        # professor_file = CsvProfessorModel.query.filter_by(
+        #     csv_id=csv_id).first()
+        # department_file = CsvDepartmentModel.query.filter_by(
+        #     csv_id=csv_id).first()
+        # collections_file = CsvCollectionModel.query.filter_by(
+        #     csv_id=csv_id).first()
+        #
+        # if csv_file is None and professor_file is None and department_file is None and collections_file is None:
+        #     return jsonify({"status": "error", "message": "No csv file found."}), 400
+        #
+        # temp_file = BytesIO()
+        # with ZipFile(temp_file, "w") as zip_file:
+        #     zip_file.write(csv_file.csv_file_path, arcname="Raw-Data.csv")
+        #     zip_file.write(professor_file.csv_file_path,
+        #                    arcname="Professors-Metrics.csv")
+        #     zip_file.write(department_file.csv_file_path,
+        #                    arcname="Departments-Metrics.csv")
+        #     for root, dirs, files in os.walk(collections_file.csv_file_path):
+        #         for file in files:
+        #             zip_file.write(os.path.join(
+        #                 root, file), arcname=os.path.join(os.path.basename(root), file))
+        #
+        # temp_file.seek(0)
+        # return send_file(
+        #     path_or_file=temp_file, as_attachment=True,
+        #     download_name=csv_file.csv_question + "_" +
+        #     csv_file.school_year + "_" + csv_file.school_semester + ".zip",
+        #     mimetype="application/zip",
+        # ), 200
 
-        if csv_file is None and professor_file is None and department_file is None and collections_file is None:
+        # Now that we migrate to a database, there are two tables to join to get the file.
+        # The first table is the csv_model_detail_test table, which contains the csv_id, csv_question, school_year,
+        # school_semester, flag_delete and flag_release columns. The second table is the csv_analyzed_sentiment_test
+        # table, which contains the csv_id, evaluatee, dapartment, course code, sentence, sentiment, sentiment_converted
+        # sentence_remove_stopwords, review_len, word_count and polarity columns.
+        # We join the two tables using the csv_id column.
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id,
+            CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.department,
+            CsvAnalyzedSentiment.course_code, CsvAnalyzedSentiment.sentence, CsvAnalyzedSentiment.sentiment,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.sentence_remove_stopwords,
+            CsvAnalyzedSentiment.review_len, CsvAnalyzedSentiment.word_count, CsvAnalyzedSentiment.polarity
+        ).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
+                CsvModelDetail.csv_id == csv_id).all()
+
+        # If the csv_id is not found in the database, return an error message.
+        if sentiments is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
 
-        temp_file = BytesIO()
-        with ZipFile(temp_file, "w") as zip_file:
-            zip_file.write(csv_file.csv_file_path, arcname="Raw-Data.csv")
-            zip_file.write(professor_file.csv_file_path,
-                           arcname="Professors-Metrics.csv")
-            zip_file.write(department_file.csv_file_path,
-                           arcname="Departments-Metrics.csv")
-            for root, dirs, files in os.walk(collections_file.csv_file_path):
-                for file in files:
-                    zip_file.write(os.path.join(
-                        root, file), arcname=os.path.join(os.path.basename(root), file))
+        # Append the two tables into a pandas dataframe and convert it to a csv file. The csv file is then saved in the
+        # server. The csv file is then sent to the client. The csv file is then deleted from the server.
 
+        # Append the two tables into a pandas dataframe and convert it to a list of dictionaries
+        sentiments = [dict(row) for row in sentiments]
+
+        # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
+
+        df = pd.DataFrame(sentiments, columns = ['csv_id','csv_id','evaluatee','department','course_code','sentence','sentiment','sentiment_converted','sentence_remove_stopwords','review_len','word_count','polarity'])
+
+        # Create a BytesIO object to store the dataframe.
+        temp_file = BytesIO()
+
+        # Write the dataframe into the BytesIO object.
+        df.to_csv(temp_file, index=False)
+
+        # Set the cursor to the beginning of the BytesIO object.
         temp_file.seek(0)
+
+        # Return the csv file.
         return send_file(
             path_or_file=temp_file, as_attachment=True,
-            download_name=csv_file.csv_question + "_" +
-            csv_file.school_year + "_" + csv_file.school_semester + ".zip",
-            mimetype="application/zip",
+            download_name=f"evaluated_file_no.{csv_id}.csv",
+            mimetype="text/csv",
         ), 200
+
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
