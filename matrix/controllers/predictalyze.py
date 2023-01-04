@@ -1345,7 +1345,8 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(
+            CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1376,7 +1377,8 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(
+            CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1461,7 +1463,8 @@ def to_publish_selected_csv_file(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(
+            CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
@@ -1492,7 +1495,8 @@ def to_unpublished_selected_csv_file(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).first()
+        csv_file = db.session.query(
+            CsvModelDetail).filter_by(csv_id=csv_id).first()
 
         if csv_file is None:
             return jsonify({"status": "error", "message": "No csv file found."}), 400
