@@ -439,7 +439,8 @@ def get_starting_ending_year(csv_files: list) -> tuple[str, str]:
     return starting_year, ending_year
 
 
-def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_year: str) -> list[dict]:
+def depanc(sentiments: list[tuple[int, int, int]] | list[tuple[int, int, str, int]],
+           starting_year: str, ending_year: str, evaluatee_name: str | None) -> list[dict]:
     """
     Calculate the total number of sentiments.
 
@@ -447,6 +448,7 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
         sentiments (list[tuple[int, int, int]]): The list of sentiments.
         starting_year (int): The starting year.
         ending_year (int): The ending year.
+        evaluatee_name (str): The name of the evaluatee.
 
     Returns:
         int: The total number of sentiments.
@@ -454,23 +456,33 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
         int: The total number of negative sentiments.
         float: The percentage of positive sentiments.
         float: The percentage of negative sentiments.
+        evaluatee_name (str): The name of the evaluatee.
     """
+    if evaluatee_name is not None:
+        total_sentiments = len([sentiment[3] for sentiment in sentiments if sentiment[2] == evaluatee_name])
+        total_positive_sentiments = len([sentiment[3] for sentiment in sentiments if sentiment[3] == 1 and sentiment[2] == evaluatee_name])
+        total_negative_sentiments = len([sentiment[3] for sentiment in sentiments if sentiment[3] == 0 and sentiment[2] == evaluatee_name])
+        positive_sentiment = round(
+            total_positive_sentiments / total_sentiments * 100, 2)
 
-    total_sentiments = len(sentiments)
+        negative_sentiment = round(
+            total_negative_sentiments / total_sentiments * 100, 2)
+    else:
+        total_sentiments = len(sentiments)
 
-    positive_sentiments = [
-        sentiment for sentiment in sentiments if sentiment[2] == 1]
-    negative_sentiments = [
-        sentiment for sentiment in sentiments if sentiment[2] == 0]
+        positive_sentiments = [
+            sentiment for sentiment in sentiments if sentiment[2] == 1]
+        negative_sentiments = [
+            sentiment for sentiment in sentiments if sentiment[2] == 0]
 
-    total_positive_sentiments = len(positive_sentiments)
-    total_negative_sentiments = len(negative_sentiments)
+        total_positive_sentiments = len(positive_sentiments)
+        total_negative_sentiments = len(negative_sentiments)
 
-    positive_sentiment = round(
-        total_positive_sentiments / total_sentiments * 100, 2)
+        positive_sentiment = round(
+            total_positive_sentiments / total_sentiments * 100, 2)
 
-    negative_sentiment = round(
-        total_negative_sentiments / total_sentiments * 100, 2)
+        negative_sentiment = round(
+            total_negative_sentiments / total_sentiments * 100, 2)
 
     sentiment_details = [
         {
@@ -492,106 +504,47 @@ def depanc(sentiments: list[tuple[int, int, int]], starting_year: str, ending_ye
     return sentiment_details
 
 
-def professor_positive_and_negative_sentiment(csv_professor_files: list, evaluatee_name: str) -> list:
+def remove_none_values(sentiment_converted_list: list, polarity_list: list, review_length_list: list,
+                       wordcloud_list: list, wordcloud_list_with_sentiment: list) -> tuple:
     """
-    Get the positive and negative sentiments of the professor based on the csv files in the professor_analysis_csv_files
-    directory, and it will be based on the evaluatee_name of the professor.
+    Remove the None values in the sentiment_converted_list, polarity_list, review_length_list, wordcloud_list,
+    wordcloud_list_with_sentiment.
 
     Args:
-        csv_professor_files: The list of the csv files.
-        evaluatee_name: The name of the professor.
+        sentiment_converted_list: The list of the sentiment converted.
+        polarity_list: The list of the polarity.
+        review_length_list: The list of the review length.
+        wordcloud_list: The list of the wordcloud.
+        wordcloud_list_with_sentiment: The list of the wordcloud with sentiment.
 
     Returns:
-        list: The list of the positive and negative sentiments of the professor.
+        tuple: The tuple of the sentiment_converted_list, polarity_list, review_length_list, wordcloud_list,
+        wordcloud_list_with_sentiment.
     """
-    # # Get all the files first in the professor_analysis_csv_files directory
+    sentiment_converted_list = [
+        sentiment_converted for sentiment_converted in sentiment_converted_list if sentiment_converted is not None]
 
-    # Based on the evaluatee_name, get the all its columns in the csv files
-    professor_analysis_csv_files = [
-        pd.read_csv(csv_professor_file.csv_file_path)[
-            pd.read_csv(csv_professor_file.csv_file_path)["evaluatee_list"] == evaluatee_name]
-        for csv_professor_file in csv_professor_files]
+    polarity_list = [polarity for polarity in polarity_list if polarity is not None]
 
-    # Computations Starts Here
-    # @desc: Get the total number of evaluatee_overall_sentiments of the professor
-    evaluatee_overall_sentiments = [
-        professor_analysis_csv_file["evaluatee_overall_sentiment"].tolist()
-        for professor_analysis_csv_file in professor_analysis_csv_files]
+    review_length_list = [review_length for review_length in review_length_list if review_length is not None]
 
-    evaluatee_overall_sentiments = [
-        evaluatee_overall_sentiment
-        for evaluatee_overall_sentiment_list in evaluatee_overall_sentiments
+    wordcloud_list = [wordcloud for wordcloud in wordcloud_list if wordcloud is not None]
 
-        for evaluatee_overall_sentiment in evaluatee_overall_sentiment_list]
+    wordcloud_list_with_sentiment = [
+        wordcloud_with_sentiment for wordcloud_with_sentiment in wordcloud_list_with_sentiment
+        if wordcloud_with_sentiment is not None]
 
-    evaluatee_overall_sentiments = round(sum(
-        evaluatee_overall_sentiments) / len(evaluatee_overall_sentiments), 2) \
-        if len(evaluatee_overall_sentiments) > 0 else 0
-
-    evaluatee_number_of_sentiments = [
-        professor_analysis_csv_file["evaluatee_number_of_sentiments"].tolist()
-        for professor_analysis_csv_file in professor_analysis_csv_files]
-
-    evaluatee_number_of_sentiments = [
-        evaluatee_number_of_sentiment
-        for evaluatee_number_of_sentiment_list in evaluatee_number_of_sentiments
-        for evaluatee_number_of_sentiment in evaluatee_number_of_sentiment_list]
-
-    evaluatee_number_of_sentiments = sum(evaluatee_number_of_sentiments) if len(
-        evaluatee_number_of_sentiments) > 0 else 0
-
-    evaluatee_positive_sentiments_percentage = [
-        professor_analysis_csv_file["evaluatee_positive_sentiments_percentage"].tolist(
-        )
-        for professor_analysis_csv_file in professor_analysis_csv_files]
-
-    evaluatee_positive_sentiments_percentage = [
-        evaluatee_positive_sentiment_percentage
-        for evaluatee_positive_sentiment_percentage_list in evaluatee_positive_sentiments_percentage
-        for evaluatee_positive_sentiment_percentage in evaluatee_positive_sentiment_percentage_list]
-
-    evaluatee_positive_sentiments_percentage = round(
-        sum(evaluatee_positive_sentiments_percentage) / len(evaluatee_positive_sentiments_percentage), 2) \
-        if len(evaluatee_positive_sentiments_percentage) > 0 else 0
-
-    evaluatee_negative_sentiments_percentage = [
-        professor_analysis_csv_file["evaluatee_negative_sentiments_percentage"].tolist(
-        )
-        for professor_analysis_csv_file in professor_analysis_csv_files]
-
-    evaluatee_negative_sentiments_percentage = [
-        evaluatee_negative_sentiment_percentage
-        for evaluatee_negative_sentiment_percentage_list in evaluatee_negative_sentiments_percentage
-        for evaluatee_negative_sentiment_percentage in evaluatee_negative_sentiment_percentage_list]
-
-    evaluatee_negative_sentiments_percentage = round(
-        sum(evaluatee_negative_sentiments_percentage) / len(evaluatee_negative_sentiments_percentage), 2) \
-        if len(evaluatee_negative_sentiments_percentage) > 0 else 0
-
-    starting_year, ending_year = get_starting_ending_year(csv_professor_files)
-
-    sentiment_details = [
-        {"id": 1, "title": "Positive Sentiments",
-         "value": f"{evaluatee_positive_sentiments_percentage:,}",
-         "percentage": evaluatee_positive_sentiments_percentage,
-         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-smile-beam",
-         "color50": "bg-green-50", "color500": "bg-green-500"},
-        {"id": 2, "title": "Negative Sentiments",
-         "value": f"{evaluatee_negative_sentiments_percentage:,}",
-         "percentage": evaluatee_negative_sentiments_percentage,
-         "year": str(starting_year) + " - " + str(ending_year), "icon": "fas fa-face-frown", "color50": "bg-red-50",
-         "color500": "bg-red-500"}
-    ]
-
-    return sentiment_details
+    return sentiment_converted_list, polarity_list, review_length_list, wordcloud_list, wordcloud_list_with_sentiment
 
 
-def deanlys(analysis: list[tuple[int, int, int, float, str, int]]) -> tuple[str, str, str, list[tuple[str, str]]]:
+def deanlys(analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[int, int, str, int, float, str, int]],
+            evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
     Generate the analysis of the sentiments.
 
     Args:
         analysis (list[tuple[int, int, int, float, str, int]]): The list of the analysis.
+        evaluatee_name (str): The name of the professor.
 
     Returns:
         list[dict]: The list of the analysis.
@@ -604,12 +557,25 @@ def deanlys(analysis: list[tuple[int, int, int, float, str, int]]) -> tuple[str,
     wordcloud_list = []
     wordcloud_list_with_sentiment = []
 
-    for sentiment in analysis:
-        sentiment_converted_list.append(sentiment[2])
-        polarity_list.append(sentiment[3])
-        review_length_list.append(sentiment[5])
-        wordcloud_list.append(sentiment[4])
-        wordcloud_list_with_sentiment.append((sentiment[4], sentiment[2]))
+    if evaluatee_name is not None:
+        for sentiment in analysis:
+            sentiment_converted_list.append(sentiment[3] if sentiment[2] == evaluatee_name else None)
+            polarity_list.append(sentiment[4] if sentiment[2] == evaluatee_name else None)
+            review_length_list.append(sentiment[6] if sentiment[2] == evaluatee_name else None)
+            wordcloud_list.append(sentiment[5] if sentiment[2] == evaluatee_name else None)
+            wordcloud_list_with_sentiment.append((sentiment[5], sentiment[3])
+                                                 if sentiment[2] == evaluatee_name else None)
+    else:
+        for sentiment in analysis:
+            sentiment_converted_list.append(sentiment[2])
+            polarity_list.append(sentiment[3])
+            review_length_list.append(sentiment[5])
+            wordcloud_list.append(sentiment[4])
+            wordcloud_list_with_sentiment.append((sentiment[4], sentiment[2]))
+    sentiment_converted_list, polarity_list, review_length_list, wordcloud_list, wordcloud_list_with_sentiment = \
+        remove_none_values(
+            sentiment_converted_list, polarity_list, review_length_list, wordcloud_list,
+            wordcloud_list_with_sentiment)
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment = \
         computation(sentiment_converted_list=sentiment_converted_list, polarity_list=polarity_list,
@@ -690,7 +656,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
                  CsvAnalyzedSentiment.csv_id).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -700,7 +666,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                  CsvAnalyzedSentiment.csv_id).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -719,7 +685,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -729,7 +695,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.csv_question == csv_question).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -747,7 +713,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -757,7 +723,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -776,7 +742,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -786,7 +752,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.school_year == school_year).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -805,7 +771,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.csv_question == csv_question,
                    CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -816,7 +782,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                    CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -836,7 +802,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.csv_question == csv_question,
                    CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -847,7 +813,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                    CsvModelDetail.school_year == school_year).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -867,7 +833,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.school_year == school_year,
                    CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = depanc(sentiments, starting_year, ending_year)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -878,7 +844,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                    CsvModelDetail.school_semester == school_semester).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis)
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -897,7 +863,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).all()
 
-    sentiment_details = depanc(sentiments, starting_year, ending_year)
+    sentiment_details = depanc(sentiments, starting_year, ending_year, None)
 
     analysis = db.session.query(
         CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -908,7 +874,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                CsvModelDetail.csv_question == csv_question).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = deanlys(analysis)
+        wordcloud_list_with_sentiment = deanlys(analysis, None)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -952,13 +918,26 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         user_data.full_name).to_csv_professor_name()
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
-        csv_files = CsvProfessorModel.query.all()
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).all())
 
-        csv_files = CsvModel.query.all()
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).all()
+
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
+
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).all()
+
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -969,18 +948,26 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if school_year == "All" and school_semester == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            csv_question=csv_question).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).all())
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question).all()
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(csv_question=csv_question).all()
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question).all()
+
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -991,19 +978,25 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if school_year == "All" and csv_question == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            school_semester=school_semester).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).all())
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(
-            school_semester=school_semester).all()
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1014,18 +1007,26 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if school_semester == "All" and csv_question == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            school_year=school_year).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).filter(
+                CsvModelDetail.school_year == school_year).all())
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(school_year=school_year).all()
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_year == school_year).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1036,19 +1037,27 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if school_year == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            csv_question=csv_question, school_semester=school_semester).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).all())
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(
-            csv_question=csv_question, school_semester=school_semester).all()
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1059,19 +1068,28 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if school_semester == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            csv_question=csv_question, school_year=school_year).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).filter(
+                CsvModelDetail.school_year == school_year).all())
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(
-            csv_question=csv_question, school_year=school_year).all()
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.csv_question == csv_question,
+                   CsvModelDetail.school_year == school_year).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1082,19 +1100,28 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
     if csv_question == "All":
-        # @desc: Read all the csv file in the database for department
-        csv_files = CsvProfessorModel.query.filter_by(
-            school_year=school_year, school_semester=school_semester).all()
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).filter(
+                CsvModelDetail.school_year == school_year).all())
+        sentiments = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+            CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_year == school_year,
+                   CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = professor_positive_and_negative_sentiment(
-            csv_files, converted_full_name)
+        sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-        # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-        csv_files = CsvModel.query.filter_by(
-            school_year=school_year, school_semester=school_semester).all()
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+            CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+            filter(CsvModelDetail.school_year == school_year,
+                   CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-            = analysis_user(csv_files, converted_full_name)
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1104,19 +1131,28 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         "common_words": get_top_n_bigrams(wordcloud_list_with_sentiment, 30),
                         "common_phrase": get_top_n_trigrams(wordcloud_list_with_sentiment, 30),
                         }), 200
-    # @desc: Read all the csv file in the database for department
-    csv_files = CsvProfessorModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
-                                                  school_year=school_year).all()
+    starting_year, ending_year = get_starting_ending_year(
+        db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.school_year == school_year).all())
+    sentiments = db.session.query(
+        CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id,
+        CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted). \
+        join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+        filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
+               CsvModelDetail.csv_question == csv_question).all()
 
-    sentiment_details = professor_positive_and_negative_sentiment(
-        csv_files, converted_full_name)
+    sentiment_details = depanc(sentiments, starting_year, ending_year, converted_full_name)
 
-    # @desc: Get Sentiment vs Polarity of the csv files using matplotlib and seaborn library
-    csv_files = CsvModel.query.filter_by(csv_question=csv_question, school_semester=school_semester,
-                                         school_year=school_year).all()
+    analysis = db.session.query(
+        CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+        CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
+        CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
+        join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
+        filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester,
+               CsvModelDetail.csv_question == csv_question).all()
 
-    sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment \
-        = analysis_user(csv_files, converted_full_name)
+    sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+        wordcloud_list_with_sentiment = deanlys(analysis, converted_full_name)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
