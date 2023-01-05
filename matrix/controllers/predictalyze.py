@@ -1131,7 +1131,6 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
         if user_data.role == "admin":
             csv_files = db.session.query(CsvModelDetail).order_by(
                 CsvModelDetail.csv_id.desc()).paginate(page=page, per_page=per_page)
-            print(csv_files)
             list_of_csv_files = [
                 {
                     "id": csv_file.csv_id,
