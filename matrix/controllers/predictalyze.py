@@ -691,12 +691,12 @@ def read_overall_data_department_analysis_csv_files():
         {
             "id": index,
             "department": department,
-            "positive_sentiments_percentage": department_positive_sentiments_percentage[
-                unique_departments_list.index(department)],
-            "negative_sentiments_percentage": department_negative_sentiments_percentage[
-                unique_departments_list.index(department)],
-            "number_of_sentiments": f"{department_number_of_sentiments[unique_departments_list.index(department)]} "
-                                    f"/ {total}",
+            "positive_sentiments_percentage":
+                f"{department_positive_sentiments_percentage[unique_departments_list.index(department)]:,}",
+            "negative_sentiments_percentage":
+                f"{department_negative_sentiments_percentage[unique_departments_list.index(department)]:,}",
+            "number_of_sentiments":
+                f"{department_number_of_sentiments[unique_departments_list.index(department)]:,} / {total:,}",
             "share": department_share[unique_departments_list.index(department)],
             "evaluatee": department_evaluatee[unique_departments_list.index(department)]
         }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
@@ -762,13 +762,14 @@ def read_overall_data_professor_analysis_csv_files():
     top_professor = [{
         "id": index,
         "professor": professor,
-        "positive_sentiments_percentage": professor_positive_sentiments_percentage
-        [unique_professors_list.index(professor)],
-        "negative_sentiments_percentage": professor_negative_sentiments_percentage
-        [unique_professors_list.index(professor)],
-        "number_of_sentiments": f"{professor_number_of_sentiments[unique_professors_list.index(professor)]} / {total}",
+        "positive_sentiments_percentage":
+            f"{professor_positive_sentiments_percentage[unique_professors_list.index(professor)]:,}",
+        "negative_sentiments_percentage":
+            f"{professor_negative_sentiments_percentage[unique_professors_list.index(professor)]:,}",
+        "number_of_sentiments":
+            f"{professor_number_of_sentiments[unique_professors_list.index(professor)]:,} / {total:,}",
         "share": professor_share[unique_professors_list.index(professor)],
-        "evaluatee_department": professor_department[unique_professors_list.index(professor)][0]
+        "evaluatee_department": professor_department[unique_professors_list.index(professor)]
     }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
         for index, professor in enumerate(
         sorted(unique_professors_list,
@@ -947,12 +948,12 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
         {
             "id": index,
             "department": department,
-            "positive_sentiments_percentage": department_positive_sentiments_percentage[
-                unique_departments_list.index(department)],
-            "negative_sentiments_percentage": department_negative_sentiments_percentage[
-                unique_departments_list.index(department)],
-            "number_of_sentiments": f"{department_number_of_sentiments[unique_departments_list.index(department)]} "
-                                    f"/ {total}",
+            "positive_sentiments_percentage":
+                f"{department_positive_sentiments_percentage[unique_departments_list.index(department)]:,}",
+            "negative_sentiments_percentage":
+                f"{department_negative_sentiments_percentage[unique_departments_list.index(department)]:,}",
+            "number_of_sentiments":
+                f"{department_number_of_sentiments[unique_departments_list.index(department)]:,} / {total:,}",
             "share": department_share[unique_departments_list.index(department)],
             "evaluatee": department_evaluatee[unique_departments_list.index(department)]
         }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
@@ -1082,11 +1083,12 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
     top_professor = [{
         "id": index,
         "professor": professor,
-        "positive_sentiments_percentage": professor_positive_sentiments_percentage
-        [unique_professors_list.index(professor)],
-        "negative_sentiments_percentage": professor_negative_sentiments_percentage
-        [unique_professors_list.index(professor)],
-        "number_of_sentiments": f"{professor_number_of_sentiments[unique_professors_list.index(professor)]} / {total}",
+        "positive_sentiments_percentage":
+            f"{professor_positive_sentiments_percentage[unique_professors_list.index(professor)]:,}",
+        "negative_sentiments_percentage":
+            f"{professor_negative_sentiments_percentage[unique_professors_list.index(professor)]:,}",
+        "number_of_sentiments":
+            f"{professor_number_of_sentiments[unique_professors_list.index(professor)]:,} / {total:,}",
         "share": professor_share[unique_professors_list.index(professor)],
         "evaluatee_department": professor_department[unique_professors_list.index(professor)]
     }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
