@@ -458,7 +458,13 @@ def depanc(sentiments: list[tuple[int, int, int]] | list[tuple[int, int, str, in
         float: The percentage of negative sentiments.
         evaluatee_name (str): The name of the evaluatee.
     """
-    if evaluatee_name is not None:
+    print(sentiments)
+    total_sentiments = 0
+    total_positive_sentiments = 0
+    total_negative_sentiments = 0
+    positive_sentiment = 0
+    negative_sentiment = 0
+    if evaluatee_name is not None and sentiments is not None or sentiments != []:
         total_sentiments = len(
             [sentiment[3] for sentiment in sentiments if sentiment[2] == evaluatee_name])
         total_positive_sentiments = len(
@@ -466,11 +472,11 @@ def depanc(sentiments: list[tuple[int, int, int]] | list[tuple[int, int, str, in
         total_negative_sentiments = len(
             [sentiment[3] for sentiment in sentiments if sentiment[3] == 0 and sentiment[2] == evaluatee_name])
         positive_sentiment = round(
-            total_positive_sentiments / total_sentiments * 100, 2)
+            total_positive_sentiments / total_sentiments * 100, 2) if total_sentiments != 0 else 0
 
         negative_sentiment = round(
-            total_negative_sentiments / total_sentiments * 100, 2)
-    else:
+            total_negative_sentiments / total_sentiments * 100, 2) if total_sentiments != 0 else 0
+    if evaluatee_name is None and sentiments is not None or sentiments != []:
         total_sentiments = len(sentiments)
 
         positive_sentiments = [
@@ -482,10 +488,10 @@ def depanc(sentiments: list[tuple[int, int, int]] | list[tuple[int, int, str, in
         total_negative_sentiments = len(negative_sentiments)
 
         positive_sentiment = round(
-            total_positive_sentiments / total_sentiments * 100, 2)
+            total_positive_sentiments / total_sentiments * 100, 2) if total_sentiments != 0 else 0
 
         negative_sentiment = round(
-            total_negative_sentiments / total_sentiments * 100, 2)
+            total_negative_sentiments / total_sentiments * 100, 2) if total_sentiments != 0 else 0
 
     sentiment_details = [
         {

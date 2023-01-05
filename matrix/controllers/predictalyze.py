@@ -714,7 +714,7 @@ def read_overall_data_department_analysis_csv_files():
     return jsonify({
         "status": "success",
         "year": f"{starting_year} - {ending_year}",
-        "top_department": top_department if len(top_department) > 0 else None
+        "top_department": top_department if len(top_department) > 0 else 0
     }), 200
 
 
@@ -784,7 +784,7 @@ def read_overall_data_professor_analysis_csv_files():
     return jsonify({
         "status": "success",
         "year": f"{starting_year} - {ending_year}",
-        "top_professors": top_professor if len(top_professor) > 0 else None
+        "top_professors": top_professor if len(top_professor) > 0 else 0
     }), 200
 
 
@@ -971,7 +971,7 @@ def read_single_data_department_analysis_csv_files(school_year: str, school_seme
     return jsonify({
         "status": "success",
         "year": f"{starting_year} - {ending_year}",
-        "top_departments": top_department if len(top_department) > 0 else None
+        "top_departments": top_department if len(top_department) > 0 else 0
     }), 200
 
 
@@ -1105,7 +1105,7 @@ def read_single_data_professor_analysis_csv_files(school_year: str, school_semes
     return jsonify({
         "status": "success",
         "year": f"{starting_year} - {ending_year}",
-        "top_professors": top_professor if len(top_professor) > 0 else None
+        "top_professors": top_professor if len(top_professor) > 0 else 0
     }), 200
 
 
