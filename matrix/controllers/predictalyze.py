@@ -316,15 +316,15 @@ def course_provider(csv_id: int, csv_file_path: str):
 
     # Get the distinct course code and get their department name and the evaluatee name
     course_code_list = list(set([(row["course_code"], row["department"], row["evaluatee"])
-                                    for index, row in csv_file.iterrows()]))
+                                 for index, row in csv_file.iterrows()]))
     # @desc: Iterate through the course code list and check if the course code exists in the database
     for index, course_code in enumerate(course_code_list):
         if not CsvCourses.query.filter_by(csv_id=csv_id, course_code=course_code[0], course_for_name=course_code[2],
-        course_for_department=course_code[1]).first():
+                                          course_for_department=course_code[1]).first():
             # @desc: Removes the , in the evaluatee name
             course_for_name = course_code[2].replace(",", "")
             csv_course = CsvCourses(csv_id=csv_id, course_code=course_code[0], course_for_name=course_for_name,
-            course_for_department=course_code[1])
+                                    course_for_department=course_code[1])
             db.session.add(csv_course)
             db.session.commit()
         continue
@@ -1633,7 +1633,8 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
 
 
 def format_names():
-    bulk_up = update(CsvCourses).values(course_for_name=func.replace(CsvCourses.course_for_name, ',', ''))
+    bulk_up = update(CsvCourses).values(
+        course_for_name=func.replace(CsvCourses.course_for_name, ',', ''))
     db.session.execute(bulk_up)
     db.session.commit()
     return jsonify({"status": "success", "message": "Successfully formatted the names."}), 200

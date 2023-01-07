@@ -79,7 +79,8 @@ class CsvCourses(db.Model):
     course_for_department: Course for department varchar(255)
     """
     __tablename__ = 'csv_courses_test'
-    csv_courses_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    csv_courses_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
     csv_id = db.Column(db.BigInteger, nullable=False)
     course_code = db.Column(db.String(255))
     course_for_name = db.Column(db.String(255))
@@ -105,7 +106,8 @@ class CsvProfessorSentiment(db.Model):
     """
 
     __tablename__ = 'csv_professor_sentiment_test'
-    csv_professor_sentiment_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    csv_professor_sentiment_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
     csv_id = db.Column(db.BigInteger)
     professor = db.Column(db.String(255))
     evaluatee_department = db.Column(db.String(255))
@@ -137,7 +139,8 @@ class CsvDepartmentSentiment(db.Model):
     """
 
     __tablename__ = 'csv_department_sentiment_test'
-    csv_department_sentiment_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    csv_department_sentiment_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
     csv_id = db.Column(db.BigInteger)
     department = db.Column(db.String(255))
     department_evaluatee = db.Column(db.Integer)
