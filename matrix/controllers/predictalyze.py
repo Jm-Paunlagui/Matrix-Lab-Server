@@ -461,7 +461,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         start_time_post_formatter = time.time()
         csv_to_pred = csv_to_pred.dropna(subset=["sentence"])
         # Remove the comma in evaluatee column
-        csv_to_pred["evaluatee"] = csv_to_pred["evaluatee"].str.replace(",", "")
+        csv_to_pred["evaluatee"] = csv_to_pred["evaluatee"].str.replace(
+            ",", "")
         end_time_post_formatter = time.time()
 
         start_time_tokenizer = time.time()
@@ -612,8 +613,10 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             csv_question=csv_question, school_year=school_year, school_semester=school_semester).first()
 
         if csv_id is not None:
-            db.session.delete(CsvAnalyzedSentiment.query.filter_by(csv_id=csv_id).all())
-            db.session.delete(CsvModelDetail.query.filter_by(csv_id=csv_id).first())
+            db.session.delete(
+                CsvAnalyzedSentiment.query.filter_by(csv_id=csv_id).all())
+            db.session.delete(
+                CsvModelDetail.query.filter_by(csv_id=csv_id).first())
             db.session.commit()
 
         error_handler(
@@ -635,7 +638,7 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None):
 
         positive_sentiments_percentage.append(
             round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 1]) /
-                number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
+                  number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
 
         negative_sentiments_percentage.append(
             round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 0]) /
@@ -646,7 +649,8 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None):
 
         if type_comp == "top_dept":
             department_evaluatee.append(
-                db.session.query(User.department).filter(User.department == name, User.role == "user").count()
+                db.session.query(User.department).filter(
+                    User.department == name, User.role == "user").count()
             )
         if type_comp == "top_prof":
             department_evaluatee.append(duo_raw[names.index(name)][1])
@@ -683,7 +687,8 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None):
             "evaluatee_department": department_evaluatee[names.index(professor)]
         } for index, professor in enumerate(
             sorted(names,
-                   key=lambda x: positive_sentiments_percentage[names.index(x)],
+                   key=lambda x: positive_sentiments_percentage[names.index(
+                       x)],
                    reverse=True),
             start=0)]
         return top_professor
@@ -718,7 +723,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
         school_year = InputTextValidation(school_year).to_query_school_year()
         school_semester = InputTextValidation(
             school_semester).to_query_space_under()
-        csv_question = InputTextValidation(csv_question).to_query_csv_question()
+        csv_question = InputTextValidation(
+            csv_question).to_query_csv_question()
         sentiment_list = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.department,
             CsvAnalyzedSentiment.sentiment_converted).join(
@@ -744,7 +750,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
 def read_overall_data_professor_analysis_csv_files(school_year: str | None, school_semester: str | None, csv_question: str | None):
     """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
 
-    user_list = db.session.query(User.full_name, User.department).filter(User.role == "user").all()
+    user_list = db.session.query(User.full_name, User.department).filter(
+        User.role == "user").all()
     users = [user[0].upper() for user in user_list]
     if school_year is None and school_semester is None and csv_question is None:
         sentiment_list = db.session.query(
@@ -770,7 +777,8 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
         school_year = InputTextValidation(school_year).to_query_school_year()
         school_semester = InputTextValidation(
             school_semester).to_query_space_under()
-        csv_question = InputTextValidation(csv_question).to_query_csv_question()
+        csv_question = InputTextValidation(
+            csv_question).to_query_csv_question()
         sentiment_list = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
             CsvAnalyzedSentiment.sentiment_converted).join(
