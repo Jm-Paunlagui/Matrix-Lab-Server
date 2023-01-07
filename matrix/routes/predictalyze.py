@@ -11,7 +11,7 @@ from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evalua
     to_delete_selected_csv_file_flagged, to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, \
     to_delete_all_csv_files_unflag, to_publish_selected_csv_file, to_unpublished_selected_csv_file, \
     to_publish_all_csv_files, to_unpublished_all_csv_files, to_download_selected_csv_file, list_csv_file_to_read, \
-    to_read_csv_file, list_evaluatees_to_create
+    to_read_csv_file, list_evaluatees_to_create, format_names
 from matrix.module import AllowedFile, InputTextValidation
 
 
@@ -255,3 +255,8 @@ def reading_csv_file(csv_id: int, folder_name: str, file_name: str):
 def getting_list_of_evaluatees(page: int, per_page: int):
     """Get the list of evaluatees."""
     return list_evaluatees_to_create(page, per_page)
+
+
+@predictalyze.route("/format-names", methods=["GET"])
+def formatting_names():
+    return format_names()
