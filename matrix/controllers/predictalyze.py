@@ -1,4 +1,3 @@
-import csv
 import inspect
 import os
 import pickle
@@ -6,17 +5,14 @@ import shutil
 import sys
 import time
 from io import BytesIO
-from zipfile import ZipFile
 
 import nltk
 import pandas as pd
 from flask import jsonify, Response, session, send_file
 from nltk import word_tokenize
-from sqlalchemy import func
-from sqlalchemy.dialects import mysql
 from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
-from keras.utils import pad_sequences, plot_model
+from keras.utils import pad_sequences
 
 from by_database.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment
 from config import Directories
@@ -464,6 +460,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # remove the rows that have empty values in the sentence column
         start_time_post_formatter = time.time()
         csv_to_pred = csv_to_pred.dropna(subset=["sentence"])
+        # Remove the comma in evaluatee column
+        csv_to_pred["evaluatee"] = csv_to_pred["evaluatee"].str.replace(",", "")
         end_time_post_formatter = time.time()
 
         start_time_tokenizer = time.time()
@@ -609,35 +607,15 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         "analysis_user_time": analysis_user_time,
                         }), 200
     except Exception as e:
-        # @desc: Path to the csv file
-        path: str = Directories.CSV_ANALYZED_FOLDER + "/" + "Analyzed_" + csv_question + "_" + school_year + "_" + \
-            school_semester + ".csv"
         csv_id = db.session.query.with_entities(
-            CsvModel.csv_id).filter_by(csv_file_path=path).first()
+            CsvModelDetail.csv_id).filter_by(
+            csv_question=csv_question, school_year=school_year, school_semester=school_semester).first()
 
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
-        professor_file = db.session.query(
-            CsvProfessorModel).filter_by(csv_id=csv_id).first()
-        department_file = db.session.query(
-            CsvDepartmentModel).filter_by(csv_id=csv_id).first()
-        collections_file = db.session.query(
-            CsvCollectionModel).filter_by(csv_id=csv_id).first()
-        time_elapsed_file = db.session.query(
-            CsvTimeElapsed).filter_by(csv_id=csv_id).first()
+        if csv_id is not None:
+            db.session.delete(CsvAnalyzedSentiment.query.filter_by(csv_id=csv_id).all())
+            db.session.delete(CsvModelDetail.query.filter_by(csv_id=csv_id).first())
+            db.session.commit()
 
-        os.remove(csv_file.csv_file_path)
-        os.remove(professor_file.csv_file_path)
-        os.remove(department_file.csv_file_path)
-        # @desc: Collections has a subdirectory, so we need to remove it first. Then we can remove the collections file.
-        shutil.rmtree(collections_file.csv_file_path)
-
-        db.session.delete(csv_file)
-        db.session.delete(professor_file)
-        db.session.delete(department_file)
-        db.session.delete(collections_file)
-        db.session.delete(time_elapsed_file)
-
-        db.session.commit()
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
@@ -646,147 +624,174 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         "message": "Error in the process of evaluating the csv file with the error: " + str(e)}), 500
 
 
-def read_overall_data_department_analysis_csv_files():
-    """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
-    department_number_of_sentiments, department_positive_sentiments_percentage, \
-        department_negative_sentiments_percentage, department_share, department_evaluatee = [], [], [], [], []
+def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None):
+    number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, share, \
+        department_evaluatee = [], [], [], [], []
+    total = len(sentiment_list)
+    for name in names:
+        number_of_sentiments.append(
+            len([sentiment for sentiment in sentiment_list if sentiment[2] == name])
+            if len(sentiment_list) > 0 else 0)
 
-    # @desc: Get the unique departments from the database and store them in a list
-    unique_departments = db.session.query(
-        CsvAnalyzedSentiment.department).distinct().all()
+        positive_sentiments_percentage.append(
+            round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 1]) /
+                number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
 
-    unique_departments_list = [department[0]
-                               for department in unique_departments]
+        negative_sentiments_percentage.append(
+            round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 0]) /
+                  number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
 
-    total = db.session.query(CsvAnalyzedSentiment).count()
+        share.append(
+            round(number_of_sentiments[-1] / total * 100, 2) if total > 0 else 0)
 
-    for department in unique_departments:
-        # department_number_of_sentiments
-        department_number_of_sentiments.append(
-            db.session.query(CsvAnalyzedSentiment.department).filter_by(department=department.department).count())
-        # Count the number of positive sentiments for each department and divide by the total number of sentiments
-        # the threshold is 50.00% or more for the sentiment to be considered positive.
-        department_positive_sentiments_percentage.append(
-            round((db.session.query(CsvAnalyzedSentiment.department)
-                   .filter_by(department=department.department, sentiment_converted=1).count() /
-                   department_number_of_sentiments[-1]) * 100, 2))
-        # Calculate department_negative_sentiments_percentage sum and divide by the total number of sentiments negative
-        # threshold is 50.00 and negative threshold is 49.99
-        department_negative_sentiments_percentage.append(
-            round((db.session.query(CsvAnalyzedSentiment.department)
-                   .filter_by(department=department.department, sentiment_converted=0).count() /
-                   department_number_of_sentiments[-1]) * 100, 2))
-        # Calculate the department share
-        department_share.append(
-            round((db.session.query(CsvAnalyzedSentiment.department)
-                   .filter_by(department=department.department).count() /
-                   db.session.query(CsvAnalyzedSentiment.department).count()) * 100, 2))
-        # Get the number of evaluatees for each department using the unique departments list
-        department_evaluatee.append(
-            db.session.query(CsvAnalyzedSentiment.evaluatee).
-            filter_by(department=department.department).distinct().count())
+        if type_comp == "top_dept":
+            department_evaluatee.append(
+                db.session.query(User.department).filter(User.department == name, User.role == "user").count()
+            )
+        if type_comp == "top_prof":
+            department_evaluatee.append(duo_raw[names.index(name)][1])
 
     # Top department with the highest number of positive sentiments percentage
-    top_department = [
-        {
+    if type_comp == "top_dept":
+        top_department = [
+            {
+                "id": index,
+                "department": department,
+                "positive_sentiments_percentage":
+                    f"{positive_sentiments_percentage[names.index(department)]}%",
+                "negative_sentiments_percentage":
+                    f"{negative_sentiments_percentage[names.index(department)]}%",
+                "number_of_sentiments": f"{number_of_sentiments[names.index(department)]:,} / {total:,}",
+                "share": f"{share[names.index(department)]}%",
+                "evaluatee": department_evaluatee[names.index(department)]
+            } for index, department in enumerate(
+                sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
+                       reverse=True), start=0)]
+
+        return top_department
+    if type_comp == "top_prof":
+        top_professor = [{
             "id": index,
-            "department": department,
+            "professor": professor,
             "positive_sentiments_percentage":
-                f"{department_positive_sentiments_percentage[unique_departments_list.index(department)]:,}",
+                f"{positive_sentiments_percentage[names.index(professor)]}%",
             "negative_sentiments_percentage":
-                f"{department_negative_sentiments_percentage[unique_departments_list.index(department)]:,}",
+                f"{negative_sentiments_percentage[names.index(professor)]}%",
             "number_of_sentiments":
-                f"{department_number_of_sentiments[unique_departments_list.index(department)]:,} / {total:,}",
-            "share": department_share[unique_departments_list.index(department)],
-            "evaluatee": department_evaluatee[unique_departments_list.index(department)]
-        }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
-        for index, department in enumerate(
-            sorted(unique_departments_list,
-                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(
-                       x)],
+                f"{number_of_sentiments[names.index(professor)]:,} / {total:,}",
+            "share": f"{share[names.index(professor)]}%",
+            "evaluatee_department": department_evaluatee[names.index(professor)]
+        } for index, professor in enumerate(
+            sorted(names,
+                   key=lambda x: positive_sentiments_percentage[names.index(x)],
                    reverse=True),
-            start=0)
-    ]
-
-    starting_year, ending_year = get_starting_ending_year(
-        db.session.query(CsvModelDetail.school_year).distinct().all())
-
-    return jsonify({
-        "status": "success",
-        "year": f"{starting_year} - {ending_year}",
-        "top_department": top_department if len(top_department) > 0 else 0
-    }), 200
+            start=0)]
+        return top_professor
+    return None
 
 
-def read_overall_data_professor_analysis_csv_files():
+def read_overall_data_department_analysis_csv_files(school_year: str | None, school_semester: str | None, csv_question: str | None):
+    """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
+
+    department_list = db.session.query(User.department).filter(
+        User.role == "user").distinct().all()
+    departments = [department[0] for department in department_list]
+    if school_year is None and school_semester is None and csv_question is None:
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.department,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
+        top_department = quad(
+            names=departments,
+            sentiment_list=sentiment_list,
+            type_comp="top_dept"
+        )
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).distinct().all())
+
+        return jsonify({
+            "status": "success",
+            "year": f"{starting_year} - {ending_year}",
+            "top_department": top_department if len(top_department) > 0 else 0
+        }), 200
+    if school_year is not None and school_semester is not None and csv_question is not None:
+        school_year = InputTextValidation(school_year).to_query_school_year()
+        school_semester = InputTextValidation(
+            school_semester).to_query_space_under()
+        csv_question = InputTextValidation(csv_question).to_query_csv_question()
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.department,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
+            CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
+            CsvModelDetail.csv_question == csv_question).all()
+
+        top_department = quad(
+            names=departments,
+            sentiment_list=sentiment_list,
+            type_comp="top_dept"
+        )
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).filter(
+                CsvModelDetail.school_year == school_year).all())
+        return jsonify({
+            "status": "success",
+            "year": f"{starting_year} - {ending_year}",
+            "top_department": top_department if len(top_department) > 0 else 0
+        }), 200
+
+
+def read_overall_data_professor_analysis_csv_files(school_year: str | None, school_semester: str | None, csv_question: str | None):
     """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
 
-    professor_number_of_sentiments, professor_positive_sentiments_percentage, \
-        professor_negative_sentiments_percentage, professor_share, professor_department = [], [], [], [], []
+    user_list = db.session.query(User.full_name, User.department).filter(User.role == "user").all()
+    users = [user[0].upper() for user in user_list]
+    if school_year is None and school_semester is None and csv_question is None:
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
 
-    # @desc: Get the unique professors from the database and store them in a list
-    unique_professors = db.session.query(
-        CsvAnalyzedSentiment.evaluatee).distinct().all()
+        top_professor = quad(
+            names=users,
+            sentiment_list=sentiment_list,
+            type_comp="top_prof",
+            duo_raw=user_list
+        )
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).distinct().all())
 
-    unique_professors_list = [evaluatee[0]
-                              for evaluatee in unique_professors]
+        return jsonify({
+            "status": "success",
+            "year": f"{starting_year} - {ending_year}",
+            "top_professors": top_professor if len(top_professor) > 0 else 0
+        }), 200
+    if school_year is not None and school_semester is not None and csv_question is not None:
+        school_year = InputTextValidation(school_year).to_query_school_year()
+        school_semester = InputTextValidation(
+            school_semester).to_query_space_under()
+        csv_question = InputTextValidation(csv_question).to_query_csv_question()
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
+            CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
+            CsvModelDetail.csv_question == csv_question).all()
 
-    total = db.session.query(CsvAnalyzedSentiment).count()
-
-    for professor in unique_professors:
-        # professor_number_of_sentiments
-        professor_number_of_sentiments.append(
-            db.session.query(CsvAnalyzedSentiment.evaluatee).filter_by(evaluatee=professor.evaluatee).count())
-        # Count the number of positive sentiments for each professor and divide by the total number of sentiments
-        # the threshold is 50.00% or more for the sentiment to be considered positive.
-        professor_positive_sentiments_percentage.append(
-            round((db.session.query(CsvAnalyzedSentiment.evaluatee)
-                   .filter_by(evaluatee=professor.evaluatee, sentiment_converted=1).count() /
-                   professor_number_of_sentiments[-1]) * 100, 2))
-        # Calculate professor_negative_sentiments_percentage sum and divide by the total number of sentiments negative
-        # threshold is 50.00 and negative threshold is 49.99
-        professor_negative_sentiments_percentage.append(
-            round((db.session.query(CsvAnalyzedSentiment.evaluatee)
-                   .filter_by(evaluatee=professor.evaluatee, sentiment_converted=0).count() /
-                   professor_number_of_sentiments[-1]) * 100, 2))
-        # Calculate the professor share
-        professor_share.append(
-            round((db.session.query(CsvAnalyzedSentiment.evaluatee)
-                     .filter_by(evaluatee=professor.evaluatee).count() /
-                   db.session.query(CsvAnalyzedSentiment.evaluatee).count()) * 100, 2))
-        # Get the professor department
-        professor_department.append(
-            db.session.query(CsvAnalyzedSentiment.department).filter_by(evaluatee=professor.evaluatee).first())
-
-    # Top professor with the highest number of positive sentiments percentage
-    top_professor = [{
-        "id": index,
-        "professor": professor,
-        "positive_sentiments_percentage":
-            f"{professor_positive_sentiments_percentage[unique_professors_list.index(professor)]:,}",
-        "negative_sentiments_percentage":
-            f"{professor_negative_sentiments_percentage[unique_professors_list.index(professor)]:,}",
-        "number_of_sentiments":
-            f"{professor_number_of_sentiments[unique_professors_list.index(professor)]:,} / {total:,}",
-        "share": professor_share[unique_professors_list.index(professor)],
-        "evaluatee_department": professor_department[unique_professors_list.index(professor)]
-    }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
-        for index, professor in enumerate(
-        sorted(unique_professors_list,
-               key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(
-                   x)],
-               reverse=True),
-        start=0)
-    ]
-
-    starting_year, ending_year = get_starting_ending_year(
-        db.session.query(CsvModelDetail.school_year).distinct().all())
-
-    return jsonify({
-        "status": "success",
-        "year": f"{starting_year} - {ending_year}",
-        "top_professors": top_professor if len(top_professor) > 0 else 0
-    }), 200
+        top_professor = quad(
+            names=users,
+            sentiment_list=sentiment_list,
+            type_comp="top_prof",
+            duo_raw=user_list
+        )
+        starting_year, ending_year = get_starting_ending_year(
+            db.session.query(CsvModelDetail.school_year).filter(
+                CsvModelDetail.school_year == school_year).all())
+        return jsonify({
+            "status": "success",
+            "year": f"{starting_year} - {ending_year}",
+            "top_professors": top_professor if len(top_professor) > 0 else 0
+        }), 200
 
 
 def options_read_single_data():
@@ -840,277 +845,6 @@ def options_read_single_data():
     }), 200
 
 
-def read_single_data_department_analysis_csv_files(school_year: str, school_semester: str, csv_question: str):
-    """
-    @desc: Reads a single csv file and returns the data in a json format
-    :param school_year: str
-    :param school_semester: str
-    :param csv_question: str
-    :return: list
-    """
-    school_year = InputTextValidation(school_year).to_query_school_year()
-    school_semester = InputTextValidation(
-        school_semester).to_query_space_under()
-    csv_question = InputTextValidation(csv_question).to_query_csv_question()
-
-    # Two tables are joined together to get the data from the csv_model_detail table and csv_analyzed_sentiment table
-    # to get the department and the sentiment converted column from the csv_analyzed_sentiment table.
-    csv_file = db.session.query(CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.sentiment_converted).filter(
-        CsvModelDetail.school_year == school_year,
-        CsvModelDetail.school_semester == school_semester,
-        CsvModelDetail.csv_question == csv_question,
-        CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
-
-    # Count the number of sentiments
-    total = db.session.query(CsvAnalyzedSentiment.csv_id).filter(
-        CsvModelDetail.school_year == school_year,
-        CsvModelDetail.school_semester == school_semester,
-        CsvModelDetail.csv_question == csv_question,
-        CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).count()
-
-    department_number_of_sentiments, department_positive_sentiments_percentage, \
-        department_negative_sentiments_percentage, department_share, department_evaluatee = [], [], [], [], []
-
-    # @desc: Get the unique department from the csv_file list and store it in a list called unique_departments
-    unique_departments = list(
-        set([department.department for department in csv_file]))
-
-    unique_departments_list = [department for department in unique_departments]
-
-    for department in unique_departments:
-        # Count only the date based on the csv_file list
-        department_number_of_sentiments.append(
-            db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department).count())
-
-        # Count only the positive sentiments based on the csv_file list
-        department_positive_sentiments_percentage.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department,
-                CsvAnalyzedSentiment.sentiment_converted == 1).count() / department_number_of_sentiments[-1] * 100, 2))
-
-        # Count only the negative sentiments based on the csv_file list
-        department_negative_sentiments_percentage.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department,
-                CsvAnalyzedSentiment.sentiment_converted == 0).count() / department_number_of_sentiments[-1] * 100, 2))
-
-        # Count only the evaluatee based on the csv_file list distinct
-        department_evaluatee.append(
-            db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.evaluatee).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department,
-                CsvAnalyzedSentiment.evaluatee is not None).distinct().count())
-
-        # Count only the share based on the csv_file list
-        department_share.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.department == department).count() / total * 100, 2))
-
-    # @desc: Same as read_overall_data_department_analysis_csv_files
-    top_department = [
-        {
-            "id": index,
-            "department": department,
-            "positive_sentiments_percentage":
-                f"{department_positive_sentiments_percentage[unique_departments_list.index(department)]:,}",
-            "negative_sentiments_percentage":
-                f"{department_negative_sentiments_percentage[unique_departments_list.index(department)]:,}",
-            "number_of_sentiments":
-                f"{department_number_of_sentiments[unique_departments_list.index(department)]:,} / {total:,}",
-            "share": department_share[unique_departments_list.index(department)],
-            "evaluatee": department_evaluatee[unique_departments_list.index(department)]
-        }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
-        for index, department in enumerate(
-            sorted(unique_departments_list,
-                   key=lambda x: department_positive_sentiments_percentage[unique_departments_list.index(
-                       x)],
-                   reverse=True),
-            start=0)
-    ]
-
-    starting_year, ending_year = get_starting_ending_year(
-        db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.school_year == school_year).all())
-
-    return jsonify({
-        "status": "success",
-        "year": f"{starting_year} - {ending_year}",
-        "top_departments": top_department if len(top_department) > 0 else 0
-    }), 200
-
-
-def read_single_data_professor_analysis_csv_files(school_year: str, school_semester: str, csv_question: str):
-    """
-    @desc: Read the csv file
-    :param school_year: str
-    :param school_semester: str
-    :param csv_question: str
-    :return: json
-    """
-    school_year = InputTextValidation(school_year).to_query_school_year()
-    school_semester = InputTextValidation(
-        school_semester).to_query_space_under()
-    csv_question = InputTextValidation(csv_question).to_query_csv_question()
-
-    # Two tables are joined together to get the data from the csv_model_detail table and csv_analyzed_sentiment table
-    # to get the evaluatee and the sentiment converted column from the csv_analyzed_sentiment table.
-    csv_file = db.session.query(CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                                CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted).filter(
-        CsvModelDetail.school_year == school_year,
-        CsvModelDetail.school_semester == school_semester,
-        CsvModelDetail.csv_question == csv_question,
-        CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
-
-    # Count the number of sentiments
-    total = db.session.query(CsvAnalyzedSentiment.csv_id).filter(
-        CsvModelDetail.school_year == school_year,
-        CsvModelDetail.school_semester == school_semester,
-        CsvModelDetail.csv_question == csv_question,
-        CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).count()
-
-    professor_number_of_sentiments, professor_positive_sentiments_percentage, \
-        professor_negative_sentiments_percentage, professor_share, professor_department = [], [], [], [], []
-
-    # Get the unique professors from the csv_file list
-    unique_professors = list(
-        set([professor.evaluatee for professor in csv_file]))
-
-    unique_professors_list = [professor for professor in unique_professors]
-
-    # Loop through the unique professors list
-    for professor in unique_professors_list:
-        # Count only the date based on the csv_file list
-        professor_number_of_sentiments.append(
-            db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee == professor).count())
-
-        # Count only the positive sentiments based on the csv_file list
-        professor_positive_sentiments_percentage.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee == professor,
-                CsvAnalyzedSentiment.sentiment_converted == 1).count() / professor_number_of_sentiments[-1] * 100, 2))
-
-        # Count only the negative sentiments based on the csv_file list
-        professor_negative_sentiments_percentage.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee == professor,
-                CsvAnalyzedSentiment.sentiment_converted == 0).count() / professor_number_of_sentiments[-1] * 100, 2))
-
-        # Get the share of the professor
-        professor_share.append(
-            round(db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee == professor).count() / total * 100, 2))
-
-        # Get the department of the professor
-        professor_department.append(
-            db.session.query(
-                CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
-                CsvModelDetail.csv_question, CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.sentiment_converted,
-                CsvAnalyzedSentiment.department).filter(
-                CsvModelDetail.school_year == school_year,
-                CsvModelDetail.school_semester == school_semester,
-                CsvModelDetail.csv_question == csv_question,
-                CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id,
-                CsvAnalyzedSentiment.evaluatee == professor).first().department)
-
-    top_professor = [{
-        "id": index,
-        "professor": professor,
-        "positive_sentiments_percentage":
-            f"{professor_positive_sentiments_percentage[unique_professors_list.index(professor)]:,}",
-        "negative_sentiments_percentage":
-            f"{professor_negative_sentiments_percentage[unique_professors_list.index(professor)]:,}",
-        "number_of_sentiments":
-            f"{professor_number_of_sentiments[unique_professors_list.index(professor)]:,} / {total:,}",
-        "share": professor_share[unique_professors_list.index(professor)],
-        "evaluatee_department": professor_department[unique_professors_list.index(professor)]
-    }  # Here we sort the list by the positive sentiments percentage in descending order and index reset to 0
-        for index, professor in enumerate(
-            sorted(unique_professors_list,
-                   key=lambda x: professor_positive_sentiments_percentage[unique_professors_list.index(
-                       x)],
-                   reverse=True),
-            start=0)
-    ]
-
-    starting_year, ending_year = get_starting_ending_year(
-        db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.school_year == school_year).all())
-
-    return jsonify({
-        "status": "success",
-        "year": f"{starting_year} - {ending_year}",
-        "top_professors": top_professor if len(top_professor) > 0 else 0
-    }), 200
-
-
 def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
     """
     @desc: List all csv files to view, download, and delete in pagination.
@@ -1130,7 +864,8 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
     try:
         if user_data.role == "admin":
             csv_files = db.session.query(CsvModelDetail).order_by(
-                CsvModelDetail.csv_id.desc()).paginate(page=page, per_page=per_page)
+                CsvModelDetail.csv_id.desc()).filter(
+                CsvModelDetail.flag_deleted == 0).paginate(page=page, per_page=per_page)
             list_of_csv_files = [
                 {
                     "id": csv_file.csv_id,

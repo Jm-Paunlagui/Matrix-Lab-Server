@@ -4,8 +4,8 @@ from keras.models import load_model
 from config import Directories
 from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evaluator, done_in_csv_evaluation, \
     options_read_single_data, read_overall_data_department_analysis_csv_files, \
-    read_overall_data_professor_analysis_csv_files, read_single_data_department_analysis_csv_files, \
-    read_single_data_professor_analysis_csv_files, list_csv_files_to_view_and_delete_pagination, \
+    read_overall_data_professor_analysis_csv_files, \
+    list_csv_files_to_view_and_delete_pagination, \
     list_csv_files_to_permanently_delete_pagination, list_user_collection_of_sentiment_per_evaluatee_csv_files, \
     to_view_selected_csv_file, to_delete_selected_csv_file_permanent, to_delete_all_csv_file_permanent, \
     to_delete_selected_csv_file_flagged, to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, \
@@ -98,13 +98,13 @@ def options_for_file_data():
 @predictalyze.route("/get-top-department-overall", methods=["GET"])
 def getting_top_department_overall():
     """Get the top department overall."""
-    return read_overall_data_department_analysis_csv_files()
+    return read_overall_data_department_analysis_csv_files(None, None, None)
 
 
 @predictalyze.route("/get-top-professor-overall", methods=["GET"])
 def getting_top_professor_overall():
     """Get the top professor overall."""
-    return read_overall_data_professor_analysis_csv_files()
+    return read_overall_data_professor_analysis_csv_files(None, None, None)
 
 
 @predictalyze.route("/get-top-department-by-file", methods=["POST"])
@@ -125,7 +125,7 @@ def getting_top_department_by_file():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
     if not InputTextValidation(csv_question).validate_empty_fields():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
-    return read_single_data_department_analysis_csv_files(school_year, school_semester, csv_question)
+    return read_overall_data_department_analysis_csv_files(school_year, school_semester, csv_question)
 
 
 @predictalyze.route("/get-top-professor-by-file", methods=["POST"])
@@ -146,7 +146,7 @@ def getting_top_professor_by_file():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
     if not InputTextValidation(csv_question).validate_empty_fields():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
-    return read_single_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
+    return read_overall_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
 
 
 @predictalyze.route("/list-of-csv-files-to-view/<int:page>/<int:per_page>", methods=["GET"])
