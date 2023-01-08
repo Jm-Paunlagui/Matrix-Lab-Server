@@ -1047,32 +1047,50 @@ def to_view_selected_csv_file(csv_id: int):
         User.role).filter_by(user_id=user_id).first()
 
     try:
-        professor_file = CsvProfessorModel.query.filter_by(
-            csv_id=csv_id).first()
+        professor_file = CsvProfessorSentiment.query.filter_by(
+            csv_id=csv_id).all()
+        professor_file = [
+            {
+                "id": index,
+                "name": InputTextValidation(professor.professor).to_readable_professor_name(),
+                "positive_sentiments_percentage": professor.evaluatee_positive_sentiments_percentage,
+                "negative_sentiments_percentage": professor.evaluatee_negative_sentiments_percentage,
+                "number_of_sentiments": professor.evaluatee_number_of_sentiments,
+                "share": professor.evaluatee_share,
+                "department": professor.evaluatee_department,
+            } for index, professor in enumerate(professor_file, start=0)
+        ]
         if user_data.role == "admin":
-            department_file = CsvDepartmentModel.query.filter_by(
-                csv_id=csv_id).first()
+            department_file = CsvDepartmentSentiment.query.filter_by(
+                csv_id=csv_id).all()
 
             if professor_file is None and department_file is None:
                 return jsonify({"status": "error", "message": "No csv file found."}), 400
 
-            professor_file = pd.read_csv(professor_file.csv_file_path)
-            department_file = pd.read_csv(department_file.csv_file_path)
+            department_file = [
+                {
+                    "id": index,
+                    "name": department.department,
+                    "positive_sentiments_percentage": department.department_positive_sentiments_percentage,
+                    "negative_sentiments_percentage": department.department_negative_sentiments_percentage,
+                    "number_of_sentiments": department.department_number_of_sentiments,
+                    "share": department.department_share,
+                    "department": department.department_evaluatee
+                } for index, department in enumerate(department_file, start=0)
+            ]
 
             return jsonify({
                 "status": "success",
-                "professor_file": professor_file.to_dict(orient="records"),
-                "department_file": department_file.to_dict(orient="records")
+                "professor_file": professor_file,
+                "department_file": department_file
             }), 200
         if user_data.role == "professor":
             if professor_file is None:
                 return jsonify({"status": "error", "message": "No csv file found."}), 400
 
-            professor_file = pd.read_csv(professor_file.csv_file_path)
-
             return jsonify({
                 "status": "success",
-                "professor_file": professor_file.to_dict(orient="records")
+                "professor_file": professor_file
             }), 200
         return jsonify({"status": "error", "message": "You are not allowed to view this page."}), 403
     except Exception as e:
@@ -1504,8 +1522,9 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
         User.full_name, User.role).filter_by(user_id=user_id).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
-    user_fullname: str = user_data.full_name.upper().replace(" ", "_")
-
+    user_fullname: str = user_data.full_name.upper()
+    print(folder_name)
+    folder_name = folder_name.replace("_", " ")
     try:
         if user_data.role == "admin":
             main_directory = CsvCollectionModel.query.filter_by(
@@ -1530,13 +1549,13 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                 "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
             }), 200
         if user_data.role == "user" and user_fullname == folder_name:
-            # Join to CsvModel to check if its flag_release is True and not deleted.
-            main_directory = db.session.query(CsvModel, CsvCollectionModel).join(
-                CsvCollectionModel, CsvCollectionModel.csv_id == CsvModel.csv_id).filter(
-                CsvModel.csv_id == csv_id, CsvModel.flag_release == 1, CsvModel.flag_deleted == 0).with_entities(
-                CsvCollectionModel.csv_file_path, CsvCollectionModel.csv_question,
-                CsvCollectionModel.school_year, CsvCollectionModel.school_semester).first()
-
+            # Join to CsvModelDetail to check if its flag_release is True and not deleted.
+            main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvCourses.course_for_name,
+                                              CsvCourses.course_code).join(
+                CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
+                CsvModelDetail.csv_id == csv_id, CsvModelDetail.flag_release == 1,
+                CsvModelDetail.flag_deleted == 0, CsvCourses.course_for_name == user_fullname).all()
+            print(main_directory)
             # Check if the main_directory.csv_file_path is not None.
             if main_directory is None:
                 return jsonify({"status": "success",
@@ -1546,25 +1565,28 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                 "school_year": "S.Y. 0000-0000",
                                 "school_semester": "00-0000000"}), 200
 
-            file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            file_list = os.listdir(file_path)
-            file_list_to_read = [
-                {
-                    "id": index,
-                    "file_name": file_name,
-                    "file_title": file_name.split(".")[0].replace("_", " ").title(),
-                    "url_friendly_file_name": file_name.split(".")[0].replace(" ", "_").lower()
-                } for index, file_name in enumerate(file_list)
-            ]
+            # List the courses of the user in the database in main_directory at index 3
+            # @TODO
 
-            return jsonify({
-                "status": "success",
-                "file_path": file_path,
-                "file_list": file_list_to_read,
-                "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
-                "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
-                "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
-            }), 200
+            # file_path = os.path.join(main_directory.csv_file_path, folder_name)
+            # file_list = os.listdir(file_path)
+            # file_list_to_read = [
+            #     {
+            #         "id": index,
+            #         "file_name": file_name,
+            #         "file_title": file_name.split(".")[0].replace("_", " ").title(),
+            #         "url_friendly_file_name": file_name.split(".")[0].replace(" ", "_").lower()
+            #     } for index, file_name in enumerate(file_list)
+            # ]
+            #
+            # return jsonify({
+            #     "status": "success",
+            #     "file_path": file_path,
+            #     "file_list": file_list_to_read,
+            #     "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
+            #     "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
+            #     "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
+            # }), 200
         return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
     except Exception as e:
         error_handler(
@@ -1721,10 +1743,10 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
     """
     try:
         user_collection_of_sentiment_per_evaluatee_csv_files = db.session.query(
-            CsvModel, CsvCollectionModel).filter(CsvModel.csv_id == CsvCollectionModel.csv_id).with_entities(
-            CsvModel.csv_id, CsvModel.school_year, CsvModel.school_semester, CsvModel.csv_question,
-            CsvModel.csv_file_path, CsvModel.csv_name, CsvModel.flag_deleted, CsvModel.flag_release).order_by(
-            CsvModel.csv_id.desc()).paginate(
+            CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester, CsvModelDetail.csv_question,
+            CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
+            CsvModelDetail.csv_id.desc()).paginate(
             page=page, per_page=10, error_out=False)
 
         user_collection_of_sentiment_per_evaluatee_csv_files_to_read = [{
@@ -1732,8 +1754,6 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
             "school_year": InputTextValidation(csv_file.school_year).to_readable_school_year(),
             "school_semester": InputTextValidation(csv_file.school_semester).to_readable_school_semester(),
             "csv_question": InputTextValidation(csv_file.csv_question).to_readable_csv_question(),
-            "csv_file_path": csv_file.csv_file_path,
-            "csv_file_name": csv_file.csv_name,
             "flag_deleted": csv_file.flag_deleted,
             "flag_release": csv_file.flag_release,
         } for csv_file in user_collection_of_sentiment_per_evaluatee_csv_files.items]
