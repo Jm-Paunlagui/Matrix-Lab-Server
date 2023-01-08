@@ -393,7 +393,7 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
 
     # # @desc: Main dictionary
     path_to_there_main = Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER + "/" + csv_question + \
-                         "_" + school_year + "_" + school_semester
+        "_" + school_year + "_" + school_semester
 
 
 def remove_stopwords(response):
@@ -654,10 +654,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
             db.session.add(CsvProfessorSentiment(
                 csv_id=csv_id,
                 professor=professor,
-                evaluatee_department=department_evaluatee[names.index(professor)],
-                evaluatee_number_of_sentiments=number_of_sentiments[names.index(professor)],
-                evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(professor)],
-                evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(professor)],
+                evaluatee_department=department_evaluatee[names.index(
+                    professor)],
+                evaluatee_number_of_sentiments=number_of_sentiments[names.index(
+                    professor)],
+                evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                    professor)],
+                evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                    professor)],
                 evaluatee_share=share[names.index(professor)],
             ))
         db.session.commit()
@@ -668,10 +672,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
             db.session.add(CsvDepartmentSentiment(
                 csv_id=csv_id,
                 department=department,
-                department_evaluatee=department_evaluatee[names.index(department)],
-                department_number_of_sentiments=number_of_sentiments[names.index(department)],
-                department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(department)],
-                department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(department)],
+                department_evaluatee=department_evaluatee[names.index(
+                    department)],
+                department_number_of_sentiments=number_of_sentiments[names.index(
+                    department)],
+                department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                    department)],
+                department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                    department)],
                 department_share=share[names.index(department)],
             ))
         db.session.commit()
@@ -708,7 +716,8 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
     total = sum([sentiment[4] for sentiment in sentiment_list])
     for name in names:
         number_of_sentiments.append(
-            sum([sentiment[4] for sentiment in sentiment_list if sentiment[2] == name])
+            sum([sentiment[4]
+                for sentiment in sentiment_list if sentiment[2] == name])
         )
         # Recalculate the percentage of positive and negative sentiments by department and divide by the number of evaluated files
         positive_sentiments_percentage.append(
@@ -795,7 +804,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
             CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
             CsvModelDetail.csv_question == csv_question).all()
 
-        top_department = computed(sentiment_list=sentiment_list, type_comp="NNTC")
+        top_department = computed(
+            sentiment_list=sentiment_list, type_comp="NNTC")
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).all())
@@ -851,7 +861,8 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
             CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
             CsvModelDetail.csv_question == csv_question).all()
 
-        top_professor = computed(sentiment_list=sentiment_list, type_comp="NNTC")
+        top_professor = computed(
+            sentiment_list=sentiment_list, type_comp="NNTC")
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).all())
