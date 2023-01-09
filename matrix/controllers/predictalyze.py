@@ -393,7 +393,7 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
 
     # # @desc: Main dictionary
     path_to_there_main = Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER + "/" + csv_question + \
-        "_" + school_year + "_" + school_semester
+                         "_" + school_year + "_" + school_semester
 
 
 def remove_stopwords(response):
@@ -717,7 +717,7 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
     for name in names:
         number_of_sentiments.append(
             sum([sentiment[4]
-                for sentiment in sentiment_list if sentiment[2] == name])
+                 for sentiment in sentiment_list if sentiment[2] == name])
         )
         # Recalculate the percentage of positive and negative sentiments by department and divide by the number of evaluated files
         positive_sentiments_percentage.append(
@@ -1523,30 +1523,31 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper()
-    print(folder_name)
-    folder_name = folder_name.replace("_", " ")
+    folder_name = folder_name.replace("_", " ").upper()
     try:
         if user_data.role == "admin":
-            main_directory = CsvCollectionModel.query.filter_by(
-                csv_id=csv_id).first()
-            file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            file_list = os.listdir(file_path)
+            main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
+                                              CsvModelDetail.school_year, CsvModelDetail.school_semester,
+                                              CsvCourses.course_for_name,
+                                              CsvCourses.course_code).join(
+                CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
+                CsvCourses.course_for_name == folder_name,
+                CsvCourses.csv_id == csv_id).all()
+
             file_list_to_read = [
                 {
                     "id": index,
-                    "file_name": file_name,
-                    "file_title": file_name.split(".")[0].replace("_", " ").title(),
-                    "url_friendly_file_name": file_name.split(".")[0].replace(" ", "_").lower()
-                } for index, file_name in enumerate(file_list)
+                    "file_title": file_title[6],
+                    "file_name": file_title[6].replace(" ", "_").lower(),
+                    "file_path": file_title[6].replace(" ", "_").lower(),
+                } for index, file_title in enumerate(main_directory)
             ]
-
             return jsonify({
                 "status": "success",
-                "file_path": file_path,
                 "file_list": file_list_to_read,
-                "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
-                "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
-                "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
+                "topic": InputTextValidation(main_directory[2][2]).to_readable_csv_question(),
+                "school_year": InputTextValidation(main_directory[3][3]).to_readable_school_year(),
+                "school_semester": InputTextValidation(main_directory[4][4]).to_readable_school_semester()
             }), 200
         if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModelDetail to check if its flag_release is True and not deleted.
@@ -1564,9 +1565,6 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                 "topic": "Unavailable",
                                 "school_year": "S.Y. 0000-0000",
                                 "school_semester": "00-0000000"}), 200
-
-            # List the courses of the user in the database in main_directory at index 3
-            # @TODO
 
             # file_path = os.path.join(main_directory.csv_file_path, folder_name)
             # file_list = os.listdir(file_path)
@@ -1618,27 +1616,31 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper().replace(" ", "_")
-
+    folder_name = folder_name.replace("_", " ").upper()
+    file_name = file_name.replace("_", " ").title()
     try:
         if user_data.role == "admin":
-            main_directory = CsvCollectionModel.query.filter_by(
-                csv_id=csv_id).first()
-            file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            file_path = os.path.join(file_path, file_name)
+            sentiments = db.session.query(
+                CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.course_code,
+                CsvAnalyzedSentiment.sentence, CsvAnalyzedSentiment.sentiment) \
+                .join(
+                CsvAnalyzedSentiment, CsvAnalyzedSentiment.csv_id == CsvModelDetail.csv_id) \
+                .filter(
+                CsvModelDetail.csv_id == csv_id, CsvAnalyzedSentiment.csv_id == csv_id,
+                CsvAnalyzedSentiment.course_code == file_name, CsvAnalyzedSentiment.evaluatee == folder_name
+            ).all()
 
-            df = pd.read_csv(file_path)
             sentiments_list = [{
                 "id": index,
-                "sentiment": sentiment,
-                "sentences": sentences,
-            } for index, (sentiment, sentences) in enumerate(zip(df["sentiment"], df["sentence"]))]
-
+                "sentiment": sentence[4],
+                "sentences": sentence[3],
+                } for index, sentence in enumerate(sentiments)
+            ]
             return jsonify({
                 "status": "success",
                 "sentiments_list": sentiments_list,
             }), 200
         if user_data.role == "user" and user_fullname == folder_name:
-
             # Join to CsvModel to check if its flag_release is True and not deleted.
             main_directory = db.session.query(CsvModel, CsvCollectionModel).join(
                 CsvCollectionModel, CsvCollectionModel.csv_id == CsvModel.csv_id).filter(
@@ -1744,7 +1746,8 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
     try:
         user_collection_of_sentiment_per_evaluatee_csv_files = db.session.query(
             CsvModelDetail).with_entities(
-            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester, CsvModelDetail.csv_question,
+            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
+            CsvModelDetail.csv_question,
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).paginate(
             page=page, per_page=10, error_out=False)
