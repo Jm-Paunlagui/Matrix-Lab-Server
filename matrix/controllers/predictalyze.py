@@ -393,7 +393,7 @@ def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, 
 
     # # @desc: Main dictionary
     path_to_there_main = Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER + "/" + csv_question + \
-                         "_" + school_year + "_" + school_semester
+        "_" + school_year + "_" + school_semester
 
 
 def remove_stopwords(response):
@@ -1634,7 +1634,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 "id": index,
                 "sentiment": sentence[4],
                 "sentences": sentence[3],
-                } for index, sentence in enumerate(sentiments)
+            } for index, sentence in enumerate(sentiments)
             ]
             return jsonify({
                 "status": "success",
