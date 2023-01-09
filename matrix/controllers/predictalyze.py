@@ -1551,12 +1551,13 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
             }), 200
         if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModelDetail to check if its flag_release is True and not deleted.
-            main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvCourses.course_for_name,
+            main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
+                                              CsvModelDetail.school_year, CsvModelDetail.school_semester,
+                                              CsvCourses.course_for_name,
                                               CsvCourses.course_code).join(
                 CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
                 CsvModelDetail.csv_id == csv_id, CsvModelDetail.flag_release == 1,
                 CsvModelDetail.flag_deleted == 0, CsvCourses.course_for_name == user_fullname).all()
-            print(main_directory)
             # Check if the main_directory.csv_file_path is not None.
             if main_directory is None:
                 return jsonify({"status": "success",
@@ -1566,25 +1567,21 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                 "school_year": "S.Y. 0000-0000",
                                 "school_semester": "00-0000000"}), 200
 
-            # file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            # file_list = os.listdir(file_path)
-            # file_list_to_read = [
-            #     {
-            #         "id": index,
-            #         "file_name": file_name,
-            #         "file_title": file_name.split(".")[0].replace("_", " ").title(),
-            #         "url_friendly_file_name": file_name.split(".")[0].replace(" ", "_").lower()
-            #     } for index, file_name in enumerate(file_list)
-            # ]
-            #
-            # return jsonify({
-            #     "status": "success",
-            #     "file_path": file_path,
-            #     "file_list": file_list_to_read,
-            #     "topic": InputTextValidation(main_directory.csv_question).to_readable_csv_question(),
-            #     "school_year": InputTextValidation(main_directory.school_year).to_readable_school_year(),
-            #     "school_semester": InputTextValidation(main_directory.school_semester).to_readable_school_semester()
-            # }), 200
+            file_list_to_read = [
+                {
+                    "id": index,
+                    "file_title": file_title[6],
+                    "file_name": file_title[6].replace(" ", "_").lower(),
+                    "file_path": file_title[6].replace(" ", "_").lower(),
+                } for index, file_title in enumerate(main_directory)
+            ]
+            return jsonify({
+                "status": "success",
+                "file_list": file_list_to_read,
+                "topic": InputTextValidation(main_directory[2][2]).to_readable_csv_question(),
+                "school_year": InputTextValidation(main_directory[3][3]).to_readable_school_year(),
+                "school_semester": InputTextValidation(main_directory[4][4]).to_readable_school_semester()
+            }), 200
         return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
     except Exception as e:
         error_handler(
@@ -1615,7 +1612,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
         User.full_name, User.role).filter_by(user_id=user_id).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
-    user_fullname: str = user_data.full_name.upper().replace(" ", "_")
+    user_fullname: str = user_data.full_name.upper()
     folder_name = folder_name.replace("_", " ").upper()
     file_name = file_name.replace("_", " ").title()
     try:
@@ -1640,29 +1637,28 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 "status": "success",
                 "sentiments_list": sentiments_list,
             }), 200
+        print(user_fullname, folder_name)
         if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModel to check if its flag_release is True and not deleted.
-            main_directory = db.session.query(CsvModel, CsvCollectionModel).join(
-                CsvCollectionModel, CsvCollectionModel.csv_id == CsvModel.csv_id).filter(
-                CsvModel.csv_id == csv_id, CsvModel.flag_release == 1, CsvModel.flag_deleted == 0).with_entities(
-                CsvCollectionModel.csv_file_path).first()
+            sentiments = db.session.query(
+                CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.course_code,
+                CsvAnalyzedSentiment.sentence, CsvAnalyzedSentiment.sentiment).join(
+                CsvAnalyzedSentiment, CsvAnalyzedSentiment.csv_id == CsvModelDetail.csv_id).filter(
+                CsvModelDetail.csv_id == csv_id, CsvAnalyzedSentiment.csv_id == csv_id,
+                CsvAnalyzedSentiment.course_code == file_name, CsvAnalyzedSentiment.evaluatee == folder_name
+            ).all()
 
             # Check if the main_directory.csv_file_path is not None.
-            if main_directory is None:
+            if sentiments is None:
                 return jsonify({"status": "success",
                                 "sentiments_list": []}), 200
 
-            file_path = os.path.join(main_directory.csv_file_path, folder_name)
-            file_path = os.path.join(file_path, file_name)
-
-            df = pd.read_csv(file_path)
-
             sentiments_list = [{
                 "id": index,
-                "sentiment": sentiment,
-                "sentences": sentences,
-            } for index, (sentiment, sentences) in enumerate(zip(df["sentiment"], df["sentence"]))]
-
+                "sentiment": sentence[4],
+                "sentences": sentence[3],
+            } for index, sentence in enumerate(sentiments)
+            ]
             return jsonify({
                 "status": "success",
                 "sentiments_list": sentiments_list,
