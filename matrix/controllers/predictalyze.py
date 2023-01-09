@@ -1030,10 +1030,12 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
         )
 
 
-def to_view_selected_csv_file(csv_id: int):
+def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
     """
     @desc: To view the selected csv file
     :param csv_id: The id of the csv file
+    :param page: The page number.
+    :param per_page: The number of items per page.
     :return: The csv file
     """
     # @desc: Get the Session to verify if the user is logged in.
@@ -1048,8 +1050,8 @@ def to_view_selected_csv_file(csv_id: int):
 
     try:
         professor_file = CsvProfessorSentiment.query.filter_by(
-            csv_id=csv_id).all()
-        professor_file = [
+            csv_id=csv_id).paginate(page=page, per_page=per_page)
+        professor_file_list = [
             {
                 "id": index,
                 "name": InputTextValidation(professor.professor).to_readable_professor_name(),
@@ -1081,16 +1083,30 @@ def to_view_selected_csv_file(csv_id: int):
 
             return jsonify({
                 "status": "success",
-                "professor_file": professor_file,
-                "department_file": department_file
+                "professor_file": professor_file_list,
+                "department_file": department_file,
+                "total_pages": professor_file.pages,
+                "current_page": professor_file.page,
+                "has_next": professor_file.has_next,
+                "has_prev": professor_file.has_prev,
+                "next_page": professor_file.next_num,
+                "prev_page": professor_file.prev_num,
+                "total_items": professor_file.total,
             }), 200
         if user_data.role == "professor":
             if professor_file is None:
                 return jsonify({"status": "error", "message": "No csv file found."}), 400
-
+            # TODO: Double check if the professor get the page number and per page.
             return jsonify({
                 "status": "success",
-                "professor_file": professor_file
+                "professor_file": professor_file,
+                "total_pages": professor_file.pages,
+                "current_page": professor_file.page,
+                "has_next": professor_file.has_next,
+                "has_prev": professor_file.has_prev,
+                "next_page": professor_file.next_num,
+                "prev_page": professor_file.prev_num,
+                "total_items": professor_file.total,
             }), 200
         return jsonify({"status": "error", "message": "You are not allowed to view this page."}), 403
     except Exception as e:

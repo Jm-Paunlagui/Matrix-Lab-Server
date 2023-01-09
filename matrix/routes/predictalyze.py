@@ -167,10 +167,11 @@ def getting_collection_of_csv_files(page: int):
     return list_user_collection_of_sentiment_per_evaluatee_csv_files(page)
 
 
-@predictalyze.route("/view-csv-file/<int:csv_id>", methods=["GET"])
-def viewing_csv_file(csv_id: int):
+@predictalyze.route("/view-csv-file/<int:csv_id>/<int:page>/<int:per_page>", methods=["GET"])
+def viewing_csv_file(csv_id: int, page: int, per_page: int):
     """View the csv file."""
-    return to_view_selected_csv_file(csv_id)
+
+    return to_view_selected_csv_file(csv_id=csv_id, page=page, per_page=per_page)
 
 
 @predictalyze.route("/delete-csv-file-permanent/<int:csv_id>", methods=["DELETE"])
