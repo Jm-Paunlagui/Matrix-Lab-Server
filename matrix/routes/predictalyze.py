@@ -14,7 +14,6 @@ from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evalua
     to_read_csv_file, list_evaluatees_to_create, format_names
 from matrix.module import AllowedFile, InputTextValidation
 
-
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
 
 
@@ -161,10 +160,10 @@ def getting_list_of_temporarily_deleted_csv_files(page: int, per_page: int):
     return list_csv_files_to_permanently_delete_pagination(page, per_page)
 
 
-@predictalyze.route("/list-of-csv-files-to-view-collections/<int:page>", methods=["GET"])
-def getting_collection_of_csv_files(page: int):
+@predictalyze.route("/list-of-csv-files-to-view-collections/<int:page>/<int:per_page>", methods=["GET"])
+def getting_collection_of_csv_files(page: int, per_page: int):
     """Get the collection of csv files."""
-    return list_user_collection_of_sentiment_per_evaluatee_csv_files(page)
+    return list_user_collection_of_sentiment_per_evaluatee_csv_files(page, per_page)
 
 
 @predictalyze.route("/view-csv-file/<int:csv_id>/<int:page>/<int:per_page>", methods=["GET"])
@@ -240,16 +239,18 @@ def downloading_csv_file(csv_id: int):
     return to_download_selected_csv_file(csv_id)
 
 
-@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>", methods=["GET"])
-def list_of_csv_files_to_view(csv_id: int, folder_name: str):
+@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>/<int:page>/<int:per_page>",
+                    methods=["GET"])
+def list_of_csv_files_to_view(csv_id: int, folder_name: str, page: int, per_page: int):
     """Get the list of csv files to view."""
-    return list_csv_file_to_read(csv_id, folder_name)
+    return list_csv_file_to_read(csv_id, folder_name, page, per_page)
 
 
-@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>", methods=["GET"])
-def reading_csv_file(csv_id: int, folder_name: str, file_name: str):
+@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>"
+    , methods=["GET"])
+def reading_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
     """Read the csv file."""
-    return to_read_csv_file(csv_id, folder_name, file_name)
+    return to_read_csv_file(csv_id, folder_name, file_name, page, per_page)
 
 
 @predictalyze.route("/list-of-users-to-view/<int:page>/<int:per_page>", methods=["GET"])

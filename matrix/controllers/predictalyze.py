@@ -1520,11 +1520,13 @@ def to_download_selected_csv_file(csv_id: int):
                         "message": "An error occurred while trying to download the selected csv file."}), 500
 
 
-def list_csv_file_to_read(csv_id: int, folder_name: str):
+def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: int):
     """
     This function is used to list the csv file to read.
     :param csv_id: The id of the csv file.
     :param folder_name: The name of the folder.
+    :param page: The current page
+    :param per_page: The number of files to show
     :return: The list of the csv file.
     """
     # @desc: Get the Session to verify if the user is logged in.
@@ -1548,7 +1550,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                               CsvCourses.course_code).join(
                 CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
                 CsvCourses.course_for_name == folder_name,
-                CsvCourses.csv_id == csv_id).all()
+                CsvCourses.csv_id == csv_id).paginate(page=page, per_page=per_page)
 
             file_list_to_read = [
                 {
@@ -1561,9 +1563,16 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
             return jsonify({
                 "status": "success",
                 "file_list": file_list_to_read,
-                "topic": InputTextValidation(main_directory[2][2]).to_readable_csv_question(),
-                "school_year": InputTextValidation(main_directory[3][3]).to_readable_school_year(),
-                "school_semester": InputTextValidation(main_directory[4][4]).to_readable_school_semester()
+                "topic": InputTextValidation(main_directory.items[2][2]).to_readable_csv_question(),
+                "school_year": InputTextValidation(main_directory.items[3][3]).to_readable_school_year(),
+                "school_semester": InputTextValidation(main_directory.items[4][4]).to_readable_school_semester(),
+                "total_pages": main_directory.pages,
+                "current_page": main_directory.page,
+                "has_next": main_directory.has_next,
+                "has_prev": main_directory.has_prev,
+                "next_page": main_directory.next_num,
+                "prev_page": main_directory.prev_num,
+                "total_items": main_directory.total,
             }), 200
         if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModelDetail to check if its flag_release is True and not deleted.
@@ -1573,7 +1582,8 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                                               CsvCourses.course_code).join(
                 CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
                 CsvModelDetail.csv_id == csv_id, CsvModelDetail.flag_release == 1,
-                CsvModelDetail.flag_deleted == 0, CsvCourses.course_for_name == user_fullname).all()
+                CsvModelDetail.flag_deleted == 0, CsvCourses.course_for_name == user_fullname).\
+                paginate(page=page, per_page=per_page)
             # Check if the main_directory.csv_file_path is not None.
             if main_directory is None:
                 return jsonify({"status": "success",
@@ -1594,9 +1604,16 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
             return jsonify({
                 "status": "success",
                 "file_list": file_list_to_read,
-                "topic": InputTextValidation(main_directory[2][2]).to_readable_csv_question(),
-                "school_year": InputTextValidation(main_directory[3][3]).to_readable_school_year(),
-                "school_semester": InputTextValidation(main_directory[4][4]).to_readable_school_semester()
+                "topic": InputTextValidation(main_directory.items[2][2]).to_readable_csv_question(),
+                "school_year": InputTextValidation(main_directory.items[3][3]).to_readable_school_year(),
+                "school_semester": InputTextValidation(main_directory.items[4][4]).to_readable_school_semester(),
+                "total_pages": main_directory.pages,
+                "current_page": main_directory.page,
+                "has_next": main_directory.has_next,
+                "has_prev": main_directory.has_prev,
+                "next_page": main_directory.next_num,
+                "prev_page": main_directory.prev_num,
+                "total_items": main_directory.total,
             }), 200
         return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
     except Exception as e:
@@ -1609,12 +1626,14 @@ def list_csv_file_to_read(csv_id: int, folder_name: str):
                         "message": "An error occurred while trying to view the directory."}), 500
 
 
-def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
+def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
     """
     This function is used to read the csv file using pandas.
     :param csv_id: The id of the csv file.
     :param folder_name: The name of the folder.
     :param file_name: The name of the file.
+    :param page: The page number.
+    :param per_page: The number of items per page.
     :return: The csv file.
     """
     # @desc: Get the Session to verify if the user is logged in.
@@ -1641,7 +1660,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 .filter(
                 CsvModelDetail.csv_id == csv_id, CsvAnalyzedSentiment.csv_id == csv_id,
                 CsvAnalyzedSentiment.course_code == file_name, CsvAnalyzedSentiment.evaluatee == folder_name
-            ).all()
+            ).paginate(page=page, per_page=per_page)
 
             sentiments_list = [{
                 "id": index,
@@ -1652,6 +1671,13 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
             return jsonify({
                 "status": "success",
                 "sentiments_list": sentiments_list,
+                "total_pages": sentiments.pages,
+                "current_page": sentiments.page,
+                "has_next": sentiments.has_next,
+                "has_prev": sentiments.has_prev,
+                "next_page": sentiments.next_num,
+                "prev_page": sentiments.prev_num,
+                "total_items": sentiments.total,
             }), 200
         print(user_fullname, folder_name)
         if user_data.role == "user" and user_fullname == folder_name:
@@ -1662,7 +1688,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
                 CsvAnalyzedSentiment, CsvAnalyzedSentiment.csv_id == CsvModelDetail.csv_id).filter(
                 CsvModelDetail.csv_id == csv_id, CsvAnalyzedSentiment.csv_id == csv_id,
                 CsvAnalyzedSentiment.course_code == file_name, CsvAnalyzedSentiment.evaluatee == folder_name
-            ).all()
+            ).paginate(page=page, per_page=per_page)
 
             # Check if the main_directory.csv_file_path is not None.
             if sentiments is None:
@@ -1678,6 +1704,13 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str):
             return jsonify({
                 "status": "success",
                 "sentiments_list": sentiments_list,
+                "total_pages": sentiments.pages,
+                "current_page": sentiments.page,
+                "has_next": sentiments.has_next,
+                "has_prev": sentiments.has_prev,
+                "next_page": sentiments.next_num,
+                "prev_page": sentiments.prev_num,
+                "total_items": sentiments.total,
             }), 200
         return jsonify({"status": "error",
                         "message": "You are not authorized to view this file."}), 401
@@ -1750,7 +1783,7 @@ def list_evaluatees_to_create(page: int, per_page: int):
                         "message": "An error occurred while trying to list the evaluatees to create."}), 500
 
 
-def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
+def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int, per_page: int):
     """
     This function is used to list the user collection of sentiment per evaluatee csv files.
     :return: The list of the user collection of sentiment per evaluatee csv files.
@@ -1762,7 +1795,7 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int):
             CsvModelDetail.csv_question,
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).paginate(
-            page=page, per_page=10, error_out=False)
+            page=page, per_page=per_page, error_out=False)
 
         user_collection_of_sentiment_per_evaluatee_csv_files_to_read = [{
             "id": csv_file.csv_id,
