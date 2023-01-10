@@ -1819,18 +1819,17 @@ def get_previous_evaluated_file():
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).first()
 
-        previous_evaluated_file_to_read = {
-            "id": previous_evaluated_file.csv_id,
-            "school_year": InputTextValidation(previous_evaluated_file.school_year).to_readable_school_year(),
-            "school_semester": InputTextValidation(previous_evaluated_file.school_semester).to_readable_school_semester(),
-            "csv_question": InputTextValidation(previous_evaluated_file.csv_question).to_readable_csv_question(),
-            "flag_deleted": previous_evaluated_file.flag_deleted,
-            "flag_release": previous_evaluated_file.flag_release,
-        }
-
         return jsonify({
             "status": "success",
-            "csv_file": previous_evaluated_file_to_read,
+            "p_id": previous_evaluated_file.csv_id if previous_evaluated_file else "",
+            "p_school_year": InputTextValidation(previous_evaluated_file.school_year).to_readable_school_year() if
+            previous_evaluated_file else "",
+            "p_school_semester": InputTextValidation(previous_evaluated_file.school_semester).to_readable_school_semester()
+            if previous_evaluated_file else "",
+            "p_csv_question": InputTextValidation(previous_evaluated_file.csv_question).to_readable_csv_question()
+            if previous_evaluated_file else "",
+            "p_flag_deleted": "Yes" if previous_evaluated_file.flag_deleted == 1 else "No",
+            "p_flag_release": "Yes" if previous_evaluated_file.flag_release == 1 else "No"
         }), 200
     except Exception as e:
         error_handler(
