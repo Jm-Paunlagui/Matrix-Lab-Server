@@ -246,8 +246,7 @@ def list_of_csv_files_to_view(csv_id: int, folder_name: str, page: int, per_page
     return list_csv_file_to_read(csv_id, folder_name, page, per_page)
 
 
-@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>"
-    , methods=["GET"])
+@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>", methods=["GET"])
 def reading_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
     """Read the csv file."""
     return to_read_csv_file(csv_id, folder_name, file_name, page, per_page)
