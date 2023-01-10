@@ -77,6 +77,7 @@ class CsvCourses(db.Model):
     course_code: Course code varchar(255)
     course_for_name: Course for name varchar(255)
     course_for_department: Course for department varchar(255)
+    number_of_responses: Number of responses integer
     """
     __tablename__ = 'csv_courses_test'
     csv_courses_id = db.Column(
@@ -85,11 +86,12 @@ class CsvCourses(db.Model):
     course_code = db.Column(db.String(255))
     course_for_name = db.Column(db.String(255))
     course_for_department = db.Column(db.String(255))
+    number_of_responses = db.Column(db.Integer)
 
     def __repr__(self):
         return f"CsvCourses(csv_courses_id={self.csv_courses_id}, csv_id={self.csv_id}, " \
                f"course_code={self.course_code}, course_for_name={self.course_for_name}, " \
-               f"course_for_department={self.course_for_department})"
+               f"course_for_department={self.course_for_department}, number_of_responses={self.number_of_responses})"
 
 
 class CsvProfessorSentiment(db.Model):

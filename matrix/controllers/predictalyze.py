@@ -358,42 +358,22 @@ def course_provider(csv_id: int, csv_file_path: str):
     # @desc: Read the csv file
     csv_file = pd.read_csv(csv_file_path)
 
-    # Get the distinct course code and get their department name and the evaluatee name
-    course_code_list = list(set([(row["course_code"], row["department"], row["evaluatee"])
-                                 for index, row in csv_file.iterrows()]))
-    # @desc: Iterate through the course code list and check if the course code exists in the database
-    for index, course_code in enumerate(course_code_list):
-        if not CsvCourses.query.filter_by(csv_id=csv_id, course_code=course_code[0], course_for_name=course_code[2],
-                                          course_for_department=course_code[1]).first():
+    course_code_sentence_per_professor = csv_file.groupby(["course_code", "evaluatee", "department"]).\
+        size().reset_index(name="count")
+
+    for index, row in course_code_sentence_per_professor.iterrows():
+        if not CsvCourses.query.filter_by(
+                csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
+            course_for_department=row["department"], number_of_responses=row["count"]).first():
             # @desc: Removes the , in the evaluatee name
-            course_for_name = course_code[2].replace(",", "")
-            csv_course = CsvCourses(csv_id=csv_id, course_code=course_code[0], course_for_name=course_for_name,
-                                    course_for_department=course_code[1])
+            course_for_name = row["evaluatee"].replace(",", "")
+            csv_course = CsvCourses(csv_id=csv_id, course_code=row["course_code"],
+                                    course_for_name=course_for_name,
+                                    course_for_department=row["department"],
+                                    number_of_responses=row["count"])
             db.session.add(csv_course)
             db.session.commit()
         continue
-
-
-def collection_provider_analysis(csv_id: int, csv_name: str, csv_question: str, csv_file_path: str, school_year: str,
-                                 school_semester: str):
-    """
-    collection_provider_list: The list of the collection providers without duplicates
-    collection_provider_overall_sentiment: The overall sentiment of the collection provider
-    collection_provider_evaluatee: The number of evaluatee per collection provider
-    collection_provider_number_of_sentiments: The number of sentiments of the collection provider
-    collection_provider_positive_sentiments_percentage: The positive sentiments percentage of the collection provider
-    collection_provider_negative_sentiments_percentage: The negative sentiments percentage of the collection provider
-    collection_provider_share: The share of the collection provider in the total responses of the students
-    """
-    # @desc: Read the path of the csv file
-    csv_file = pd.read_csv(csv_file_path)
-
-    evaluatee_names = csv_file["evaluatee"].tolist()
-    course_codes = csv_file["course_code"].tolist()
-
-    # # @desc: Main dictionary
-    path_to_there_main = Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER + "/" + csv_question + \
-        "_" + school_year + "_" + school_semester
 
 
 def remove_stopwords(response):
@@ -1126,27 +1106,12 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
     :return: A json response
     """
     try:
-        csv_file = db.session.query(CsvModel).filter_by(csv_id=csv_id).first()
-        professor_file = db.session.query(
-            CsvProfessorModel).filter_by(csv_id=csv_id).first()
-        department_file = db.session.query(
-            CsvDepartmentModel).filter_by(csv_id=csv_id).first()
-        collections_file = db.session.query(
-            CsvCollectionModel).filter_by(csv_id=csv_id).first()
-
-        if csv_file is None and professor_file is None and department_file is None and collections_file is None:
-            return jsonify({"status": "error", "message": "No csv file found."}), 400
-
-        os.remove(csv_file.csv_file_path)
-        os.remove(professor_file.csv_file_path)
-        os.remove(department_file.csv_file_path)
-        # @desc: Collections has a subdirectory, so we need to remove it first. Then we can remove the collections file.
-        shutil.rmtree(collections_file.csv_file_path)
-
-        db.session.delete(csv_file)
-        db.session.delete(professor_file)
-        db.session.delete(department_file)
-        db.session.delete(collections_file)
+        # Bulk delete the evaulated file in the database
+        db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).delete()
+        db.session.query(CsvAnalyzedSentiment).filter_by(csv_id=csv_id).delete()
+        db.session.query(CsvProfessorSentiment).filter_by(csv_id=csv_id).delete()
+        db.session.query(CsvDepartmentSentiment).filter_by(csv_id=csv_id).delete()
+        db.session.query(CsvCourses).filter_by(csv_id=csv_id).delete()
         db.session.commit()
 
         return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
@@ -1547,7 +1512,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
             main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
                                               CsvModelDetail.school_year, CsvModelDetail.school_semester,
                                               CsvCourses.course_for_name,
-                                              CsvCourses.course_code).join(
+                                              CsvCourses.course_code, CsvCourses.number_of_responses).join(
                 CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
                 CsvCourses.course_for_name == folder_name,
                 CsvCourses.csv_id == csv_id).paginate(page=page, per_page=per_page)
@@ -1558,6 +1523,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
                     "file_title": file_title[6],
                     "file_name": file_title[6].replace(" ", "_").lower(),
                     "file_path": file_title[6].replace(" ", "_").lower(),
+                    "number_of_responses": file_title[7],
                 } for index, file_title in enumerate(main_directory)
             ]
             return jsonify({
@@ -1579,7 +1545,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
             main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
                                               CsvModelDetail.school_year, CsvModelDetail.school_semester,
                                               CsvCourses.course_for_name,
-                                              CsvCourses.course_code).join(
+                                              CsvCourses.course_code, CsvCourses.number_of_responses).join(
                 CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
                 CsvModelDetail.csv_id == csv_id, CsvModelDetail.flag_release == 1,
                 CsvModelDetail.flag_deleted == 0, CsvCourses.course_for_name == user_fullname).\
@@ -1599,6 +1565,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
                     "file_title": file_title[6],
                     "file_name": file_title[6].replace(" ", "_").lower(),
                     "file_path": file_title[6].replace(" ", "_").lower(),
+                    "number_of_responses": file_title[7],
                 } for index, file_title in enumerate(main_directory)
             ]
             return jsonify({
