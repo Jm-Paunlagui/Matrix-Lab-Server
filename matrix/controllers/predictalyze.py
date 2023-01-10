@@ -1839,5 +1839,3 @@ def get_previous_evaluated_file():
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to get the previous evaluated file."}), 500
-
-
