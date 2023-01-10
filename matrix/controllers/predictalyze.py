@@ -1804,3 +1804,41 @@ def format_names():
     db.session.execute(bulk_up)
     db.session.commit()
     return jsonify({"status": "success", "message": "Successfully formatted the names."}), 200
+
+
+def get_previous_evaluated_file():
+    """
+    This function is used to get the previous evaluated file.
+    :return: The previous evaluated file.
+    """
+    try:
+        previous_evaluated_file = db.session.query(
+            CsvModelDetail).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
+            CsvModelDetail.csv_question,
+            CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
+            CsvModelDetail.csv_id.desc()).first()
+
+        previous_evaluated_file_to_read = {
+            "id": previous_evaluated_file.csv_id,
+            "school_year": InputTextValidation(previous_evaluated_file.school_year).to_readable_school_year(),
+            "school_semester": InputTextValidation(previous_evaluated_file.school_semester).to_readable_school_semester(),
+            "csv_question": InputTextValidation(previous_evaluated_file.csv_question).to_readable_csv_question(),
+            "flag_deleted": previous_evaluated_file.flag_deleted,
+            "flag_release": previous_evaluated_file.flag_release,
+        }
+
+        return jsonify({
+            "status": "success",
+            "csv_file": previous_evaluated_file_to_read,
+        }), 200
+    except Exception as e:
+        error_handler(
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while trying to get the previous evaluated file."}), 500
+
+
