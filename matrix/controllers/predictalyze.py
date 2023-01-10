@@ -363,8 +363,8 @@ def course_provider(csv_id: int, csv_file_path: str):
 
     for index, row in course_code_sentence_per_professor.iterrows():
         if not CsvCourses.query.filter_by(
-                csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
-            course_for_department=row["department"], number_of_responses=row["count"]).first():
+            csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
+                course_for_department=row["department"], number_of_responses=row["count"]).first():
             # @desc: Removes the , in the evaluatee name
             course_for_name = row["evaluatee"].replace(",", "")
             csv_course = CsvCourses(csv_id=csv_id, course_code=row["course_code"],
@@ -1108,9 +1108,12 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
     try:
         # Bulk delete the evaulated file in the database
         db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).delete()
-        db.session.query(CsvAnalyzedSentiment).filter_by(csv_id=csv_id).delete()
-        db.session.query(CsvProfessorSentiment).filter_by(csv_id=csv_id).delete()
-        db.session.query(CsvDepartmentSentiment).filter_by(csv_id=csv_id).delete()
+        db.session.query(CsvAnalyzedSentiment).filter_by(
+            csv_id=csv_id).delete()
+        db.session.query(CsvProfessorSentiment).filter_by(
+            csv_id=csv_id).delete()
+        db.session.query(CsvDepartmentSentiment).filter_by(
+            csv_id=csv_id).delete()
         db.session.query(CsvCourses).filter_by(csv_id=csv_id).delete()
         db.session.commit()
 
