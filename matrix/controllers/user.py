@@ -18,6 +18,7 @@ def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.with_entities(User.email, User.recovery_email).filter(
         (User.email == email) | (User.recovery_email == email)).first()
+    db.session.close()
     if (
             is_email is not None
             and email in (is_email.email, is_email.recovery_email)
@@ -29,6 +30,7 @@ def check_email_exists(email: str):
 def check_username_exists(username: str):
     """Checks if the username exists in the database."""
     is_username: User = User.query.filter_by(username=username).first()
+    db.session.close()
     if (
             is_username is not None
             and username == is_username.username
@@ -42,6 +44,7 @@ def check_password_reset_token_exists(email: str):
     is_token: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.password_reset_token).filter(
         (User.email == email) | (User.recovery_email == email)).first()
+    db.session.close()
     if is_token.password_reset_token:
         return True
     return False
@@ -51,6 +54,7 @@ def check_password_reset_token_exists(email: str):
 def check_user_id_exists(user_id: int):
     """Check if the user id exists in the database."""
     is_user_id: User = User.query.filter_by(user_id=user_id).first()
+    db.session.close()
     if is_user_id.user_id:
         return True
     return False
@@ -61,6 +65,7 @@ def check_email_exists_by_username(username: str):
     is_email: User = User.query.with_entities(User.email, User.recovery_email,
                                               User.username).filter(
         (User.username == username)).first()
+    db.session.close()
     if is_email is None:
         return False
     if is_email is not None and username == is_email.username:
@@ -85,6 +90,7 @@ def create_user(email: str, full_name: str, username: str, password: str, role: 
                     password=hashed_password, role=role)
     db.session.add(new_user)
     db.session.commit()
+    db.session.close()
     return True
 
 
@@ -184,6 +190,7 @@ def create_user_auto_generated_password(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -193,7 +200,7 @@ def create_all_users_auto_generated_password():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.password).filter_by(role='user').all()
-
+        db.session.close()
         if all(users[1] is not None for users in users):
             return jsonify({"status": "error", "message": "All users already have a password."}), 400
 
@@ -257,6 +264,7 @@ def deactivate_user(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -266,7 +274,7 @@ def deactivate_all_users():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_active).filter_by(role='user').all()
-
+        db.session.close()
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
                             "message": "All users are already deactivated."}), 400
@@ -330,7 +338,9 @@ def lock_user_account(user_id: int):
 
         mail.send(msg)
         db.session.commit()
+        db.session.close()
         return True
+    db.session.close()
     return False
 
 
@@ -340,7 +350,7 @@ def lock_all_user_accounts():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_locked).filter_by(role='user').all()
-
+        db.session.close()
         if all(user[1] == 1 for user in users):
             return jsonify({"status": "success",
                             "message": "All users are already locked."}), 400
@@ -406,6 +416,7 @@ def unlock_user_account(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -481,6 +492,7 @@ def delete_user_account(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -554,6 +566,7 @@ def restore_user_account(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -563,7 +576,7 @@ def restore_all_user_accounts():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_deleted).filter_by(role='user').all()
-
+        db.session.close()
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
                             "message": "All user accounts are already restored."}), 400
@@ -592,12 +605,14 @@ def delete_user_permanently(user_id: int):
         db.session.delete(permanently_delete_user)
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
 def list_flag_deleted_users():
     """Lists all the users that have been flagged as deleted."""
     flag_deleted_users: User = User.query.filter_by(flag_deleted=True).all()
+    db.session.close()
     return flag_deleted_users
 
 
@@ -752,6 +767,7 @@ def authenticate_user(username: str, password: str):
     session['user_id'] = is_user.user_id
     # Reset the number of failed login attempts to 0 if the user successfully logs in.
     is_user.login_attempts = 0
+    db.session.close()
     return jsonify(
         {"status": "success", "message": "User authenticated successfully.", "emails": has_emails()}), 200
 
@@ -852,6 +868,7 @@ def send_tfa(email: str):
             </td></tr></table></body></html> """
             mail.send(msg)
             return True
+    db.session.close()
     return False
 
 
@@ -918,6 +935,7 @@ def send_email_verification(email: str):
         """
         mail.send(msg)
         return True
+    db.session.close()
     return False
 
 
@@ -991,6 +1009,7 @@ def verify_verification_code_to_unlock(code: str, email: str):
             db.session.commit()
             return jsonify({"status": "success", "message": "Account unlocked successfully."}), 200
         return jsonify({"status": "error", "message": "Account not found."}), 404
+    db.session.close()
     return jsonify({"status": "error", "message": "Invalid verification code."}), 400
 
 
@@ -1011,6 +1030,7 @@ def authenticated_user():
         "jti": str(uuid.uuid4())
     }
     user_data_token = PayloadSignature(payload=payload).encode_payload()
+    db.session.close()
     return user_data_token
 
 
@@ -1075,6 +1095,7 @@ def password_reset_link(email: str):
     Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table>
     </td></tr></table></body></html> """
     mail.send(msg)
+    db.session.close()
     return True
 
 
@@ -1133,6 +1154,7 @@ def password_reset(password_reset_token: str, password: str):
             City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
             </td></tr></table></body></html> """
         mail.send(msg)
+        db.session.close()
         return True
     except jwt.exceptions.InvalidTokenError:
         return False
@@ -1156,6 +1178,7 @@ def has_emails():
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "jti": str(uuid.uuid4())
     }
+    db.session.close()
     return PayloadSignature(payload=user_emails).encode_payload()
 
 
@@ -1163,6 +1186,7 @@ def redirect_to():
     """Redirects the user to the appropriate page based on the user role."""
     user_id: int = session.get('user_id')
     user_role: User = User.query.filter_by(user_id=user_id).first()
+    db.session.close()
     match user_role.role:
         case 'admin':
             return "/admin/dashboard/sentiment-analysis"
@@ -1259,6 +1283,7 @@ def remove_email(option: str, email: str, username: str):
             db.session.commit()
             return True
         return False
+    db.session.close()
     return False
 
 
@@ -1275,6 +1300,7 @@ def update_password(old_password: str, new_password: str):
         })
         db.session.commit()
         return True
+    db.session.close()
     return False
 
 
@@ -1292,6 +1318,7 @@ def update_personal_info(email: str, full_name: str):
         User.full_name: full_name,
     })
     db.session.commit()
+    db.session.close()
     return jsonify({"status": "success",
                     "message": "Your personal information has been updated successfully.",
                     "token": authenticated_user()}), 200
@@ -1310,6 +1337,7 @@ def update_security_info(recovery_email: str):
         User.recovery_email: recovery_email
     })
     db.session.commit()
+    db.session.close()
     return jsonify({"status": "success",
                     "message": "Your security information has been updated successfully.",
                     "token": authenticated_user()}), 200
@@ -1328,6 +1356,7 @@ def update_username(username: str):
         User.username: username
     })
     db.session.commit()
+    db.session.close()
     return jsonify({"status": "success",
                     "message": "Your username has been updated successfully.",
                     "token": authenticated_user()}), 200

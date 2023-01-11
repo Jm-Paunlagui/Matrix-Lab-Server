@@ -451,10 +451,10 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Load the model
         start_time_model = time.time()
-        if model is not None:
-            print(f"Model: {model}")
-            print(f"Model Summary: {model.summary()}")
-            print("Model already loaded")
+        # if model is not None:
+        #     print(f"Model: {model}")
+        #     print(f"Model Summary: {model.summary()}")
+        #     print("Model already loaded")
         end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences
