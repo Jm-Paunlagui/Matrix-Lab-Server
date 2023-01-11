@@ -1,6 +1,5 @@
 import base64
 from io import BytesIO
-from typing import Tuple, List
 
 import pandas as pd
 import seaborn as sns
@@ -9,9 +8,8 @@ from matplotlib import pyplot as plt
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
-from by_database.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment
 from extensions import db
-from matrix.models.csv_file import CsvModel, CsvProfessorModel, CsvDepartmentModel
+from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment
 from matrix.models.user import User
 from matrix.module import InputTextValidation
 

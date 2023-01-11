@@ -99,12 +99,6 @@ class SecretKeys:
 class Config:
     DEBUG = True
     TESTING = False
-    # Reuse the class variables from the above classes to avoid repetition of code and to make the code more readable
-    ALLOWED_EXTENSIONS = AllowedExtensions.ALLOWED_EXTENSIONS
-    CSV_FOLDER = Directories.CSV_FOLDER
-    CSV_UPLOADED_FOLDER = Directories.CSV_UPLOADED_FOLDER
-    CSV_REFORMATTED_FOLDER = Directories.CSV_REFORMATTED_FOLDER
-    DEEP_LEARNING_MODEL_FOLDER = Directories.DEEP_LEARNING_MODEL_FOLDER
 
     MAIL_SERVER = FlaskEmail.MAIL_SERVER
     MAIL_PORT = FlaskEmail.MAIL_PORT

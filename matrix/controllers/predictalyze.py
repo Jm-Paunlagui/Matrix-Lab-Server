@@ -1,7 +1,6 @@
 import inspect
 import os
 import pickle
-import shutil
 import sys
 import time
 from io import BytesIO
@@ -15,12 +14,10 @@ from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
 from keras.utils import pad_sequences
 
-from by_database.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
-    CsvDepartmentSentiment
 from config import Directories
 from extensions import db
-from matrix.models.csv_file import CsvErrorModel, CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvCollectionModel, \
-    CsvTimeElapsed
+from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
+    CsvDepartmentSentiment, CsvErrorModel, CsvTimeElapsed
 from matrix.models.user import User
 from matrix.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
     Timezone, get_starting_ending_year
@@ -72,6 +69,7 @@ def error_handler(error_occurred: str, name_of: str):
     """
     db.session.add(CsvErrorModel(csv_error=error_occurred, name_of=name_of))
     db.session.commit()
+    db.session.close()
     return jsonify({"status": "error", "message": error_occurred}), 500
 
 
@@ -296,6 +294,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
                         full_name=full_name, department=department, role="user")
             db.session.add(user)
             db.session.commit()
+            db.session.close()
         continue
 
     # @desc: For each Professor computing code
@@ -307,6 +306,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
 
     user_list = db.session.query(User.full_name, User.department).filter(
         User.role == "user").all()
+    db.session.close()
 
     users = [user[0].upper() for user in user_list]
 
@@ -333,7 +333,7 @@ def department_analysis(csv_id: int):
         CsvAnalyzedSentiment.sentiment_converted).join(
         CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
         CsvAnalyzedSentiment.csv_id == csv_id).all()
-
+    db.session.close()
     quad(
         names=departments,
         sentiment_list=sentiment_list,
@@ -373,6 +373,7 @@ def course_provider(csv_id: int, csv_file_path: str):
                                     number_of_responses=row["count"])
             db.session.add(csv_course)
             db.session.commit()
+            db.session.close()
         continue
 
 
@@ -517,14 +518,16 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         professor_analysis(
             csv_file_path=Directories.CSV_REFORMATTED_FOLDER + "/" + file_name, csv_id=csv_file.csv_id)
         end_time_analysis_user = time.time()
-
+        start_time_analysis_department = time.time()
         department_analysis(csv_id=csv_file.csv_id)
-
+        end_time_analysis_department = time.time()
         # @desc: Key provider to the user
+        start_time_analysis_collection = time.time()
         course_provider(
             csv_id=csv_file.csv_id,
             csv_file_path=Directories.CSV_REFORMATTED_FOLDER + "/" + file_name
         )
+        end_time_analysis_collection = time.time()
 
         end_time = time.time()
         # @desc: Get the overall time taken to evaluate the csv file
@@ -550,19 +553,25 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # @desc: Get the time taken to analyze the csv file for the user
         analysis_user_time = end_time_analysis_user - start_time_analysis_user
         # @desc: Get the time taken to analyze the csv file for the department
+        analysis_department_time = end_time_analysis_department - start_time_analysis_department
+        # @desc: Get the time taken to analyze the csv file for the collection
+        analysis_collection_time = end_time_analysis_collection - start_time_analysis_collection
 
         # @desc Save the time taken to evaluate the csv file to the database
         time_data = CsvTimeElapsed(csv_id=csv_file.csv_id, date_processed=date_processed, time_elapsed=overall_time,
                                    pre_formatter_time=pre_formatter_time, post_formatter_time=post_formatter_time,
                                    tokenizer_time=tokenizer_time, padding_time=padding_time, model_time=model_time,
                                    prediction_time=prediction_time, sentiment_time=sentiment_time,
-                                   adding_predictions_time=adding_predictions_time,
-                                   adding_to_db=adding_to_db_time, analysis_user_time=analysis_user_time)
+                                   adding_predictions_time=adding_predictions_time, adding_to_db=adding_to_db_time,
+                                   analysis_user_time=analysis_user_time,
+                                   analysis_department_time=analysis_department_time,
+                                   analysis_collection_time=analysis_collection_time)
 
         db.session.add(time_data)
         db.session.commit()
         # @desc: Delete the reformatted csv file from the reformatted folder
         os.remove(os.path.join(Directories.CSV_REFORMATTED_FOLDER, file_name))
+        db.session.close()
         return jsonify({"status": "success",
                         "message": "CSV file evaluated successfully",
                         "csv_file": "Analyzed_" + csv_question + "_" + school_year + ".csv",
@@ -575,21 +584,22 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         "prediction_time": prediction_time,
                         "sentiment_time": sentiment_time,
                         "adding_predictions_time": adding_predictions_time,
-                        "adding_to_db_time": adding_to_db_time,
                         "analysis_user_time": analysis_user_time,
+                        "analysis_department_time": analysis_department_time,
+                        "analysis_collection_time": analysis_collection_time
                         }), 200
     except Exception as e:
-        csv_id = db.session.query.with_entities(
-            CsvModelDetail.csv_id).filter_by(
+        csv_id = db.session.query(CsvModelDetail.csv_id).filter_by(
             csv_question=csv_question, school_year=school_year, school_semester=school_semester).first()
-
+        csv_id = csv_id[0]
         if csv_id is not None:
-            db.session.delete(
-                CsvAnalyzedSentiment.query.filter_by(csv_id=csv_id).all())
-            db.session.delete(
-                CsvModelDetail.query.filter_by(csv_id=csv_id).first())
+            db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).delete()
+            db.session.query(CsvAnalyzedSentiment).filter_by(csv_id=csv_id).delete()
+            db.session.query(CsvProfessorSentiment).filter_by(csv_id=csv_id).delete()
+            db.session.query(CsvDepartmentSentiment).filter_by(csv_id=csv_id).delete()
+            db.session.query(CsvTimeElapsed).filter_by(csv_id=csv_id).delete()
             db.session.commit()
-
+        db.session.close()
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
@@ -645,6 +655,7 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 evaluatee_share=share[names.index(professor)],
             ))
         db.session.commit()
+        db.session.close()
     if type_comp == "department_computing":
         # Insert the department's name and the number of sentiments to the database CsvDepartmentSentiment
         for index, department in enumerate(
@@ -663,6 +674,7 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 department_share=share[names.index(department)],
             ))
         db.session.commit()
+        db.session.close()
     return None
 
 
@@ -699,26 +711,27 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
             sum([sentiment[4]
                  for sentiment in sentiment_list if sentiment[2] == name])
         )
-        # Recalculate the percentage of positive and negative sentiments by department and divide by the number of evaluated files
+        # Recalculate the percentage of positive and negative sentiments by department and divide by the number of
+        # evaluated files
         positive_sentiments_percentage.append(
             round(
                 sum([sentiment[5] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
-        )
+        ) if no_of_evaluated > 0 else 0
         negative_sentiments_percentage.append(
             round(
                 sum([sentiment[6] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
-        )
+        ) if no_of_evaluated > 0 else 0
         share.append(
             round(
                 sum([sentiment[4] for sentiment in sentiment_list if sentiment[2] == name]) / total * 100, 2)
-        )
+        ) if total > 0 else 0
         if type_comp == "top_dept":
             department_evaluatee.append(
                 db.session.query(User.department).filter(
                     User.department == name, User.role == "user").count()
-            )
+            ) if type_comp == "top_dept" else 0
         if type_comp == "top_prof":
-            department_evaluatee.append(duo_raw[names.index(name)][1])
+            department_evaluatee.append(duo_raw[names.index(name)][1]) if type_comp == "top_prof" else 0
 
     top = [
         {
@@ -733,7 +746,7 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
             "department": department_evaluatee[names.index(name)]
         } for index, name in enumerate(
             sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
-                   reverse=True), start=0)]
+                   reverse=True), start=0)] if positive_sentiments_percentage else []
 
     return top
 
@@ -1116,7 +1129,7 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
             csv_id=csv_id).delete()
         db.session.query(CsvCourses).filter_by(csv_id=csv_id).delete()
         db.session.commit()
-
+        db.session.close()
         return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1136,8 +1149,8 @@ def to_delete_all_csv_file_permanent():
     """
     try:
         # @desc: Get all csv files that is flagged as deleted.
-        csv_files = CsvModel.query.filter_by(flag_deleted=True).with_entities(
-            CsvModel.csv_id, CsvModel.flag_deleted).all()
+        csv_files = CsvModelDetail.query.filter_by(flag_deleted=True).with_entities(
+            CsvModelDetail.csv_id, CsvModelDetail.flag_deleted).all()
 
         if all(csv_file is None for csv_file in csv_files):
             return jsonify({"status": "error", "message": "No files to be deleted."}), 400
@@ -1175,7 +1188,7 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
         csv_file.flag_deleted = True
 
         db.session.commit()
-
+        db.session.close()
         return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1207,7 +1220,7 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
         csv_file.flag_deleted = False
 
         db.session.commit()
-
+        db.session.close()
         return jsonify({"status": "success", "message": "Successfully restored the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1293,7 +1306,7 @@ def to_publish_selected_csv_file(csv_id: int):
         csv_file.flag_release = True
 
         db.session.commit()
-
+        db.session.close()
         return jsonify({"status": "success", "message": "Successfully published the selected csv file with id: "
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
@@ -1325,7 +1338,7 @@ def to_unpublished_selected_csv_file(csv_id: int):
         csv_file.flag_release = False
 
         db.session.commit()
-
+        db.session.close()
         return jsonify({"status": "success", "message": "Successfully unpublished the selected csv file with id: "
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
@@ -1803,6 +1816,7 @@ def format_names():
         course_for_name=func.replace(CsvCourses.course_for_name, ',', ''))
     db.session.execute(bulk_up)
     db.session.commit()
+    db.session.close()
     return jsonify({"status": "success", "message": "Successfully formatted the names."}), 200
 
 
@@ -1818,7 +1832,7 @@ def get_previous_evaluated_file():
             CsvModelDetail.csv_question,
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).first()
-
+        db.session.close()
         return jsonify({
             "status": "success",
             "p_id": previous_evaluated_file.csv_id if previous_evaluated_file else "",

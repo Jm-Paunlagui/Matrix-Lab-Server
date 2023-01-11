@@ -2,11 +2,10 @@ from extensions import db
 from matrix.module import Timezone
 
 
-class CsvModel(db.Model):
+class CsvModelDetail(db.Model):
     """
     Csv model class attributes
     csv_id: Csv id number (primary key) (auto increment) bigint
-    csv_name: Csv name varchar(255)
     csv_question: Csv question varchar(255)
     csv_file_path: Csv file path text
     school_year: School year varchar(255)
@@ -15,112 +14,151 @@ class CsvModel(db.Model):
     flag_release: Flag release boolean
     """
 
-    __tablename__ = 'csvs'
-    csv_id: int = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    csv_name: str = db.Column(db.String(255), nullable=False)
-    csv_question: str = db.Column(db.String(255), nullable=False)
-    csv_file_path: str = db.Column(db.Text, nullable=False)
-    school_year: str = db.Column(db.String(255), nullable=False)
-    school_semester: str = db.Column(db.String(255), nullable=False)
-    flag_deleted: bool = db.Column(db.Boolean, nullable=False, default=False)
-    flag_release: bool = db.Column(db.Boolean, nullable=False, default=False)
+    __tablename__ = 'csv_model_detail'
+    csv_id = db.Column(db.BigInteger, primary_key=True, autoincrement=True)
+    csv_question = db.Column(db.String(255))
+    school_year = db.Column(db.String(255))
+    school_semester = db.Column(db.String(255))
+    flag_deleted = db.Column(db.Boolean, default=False)
+    flag_release = db.Column(db.Boolean, default=False)
 
     def __repr__(self):
-        """Csv model class representation."""
-        return f"CsvModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
-               f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
+        return f"CsvModel(csv_id={self.csv_id}, csv_question={self.csv_question}, school_year={self.school_year}, " \
                f"school_semester={self.school_semester}, flag_deleted={self.flag_deleted}, " \
                f"flag_release={self.flag_release})"
 
-    # @desc: For Descending Order (newest to oldest) in the csvs table
-    def __lt__(self, other):
-        return self.csv_id < other.csv_id
 
-    # @desc: For Ascending Order (oldest to newest) in the csvs table
-    def __gt__(self, other):
-        return self.csv_id > other.csv_id
-
-
-class CsvDepartmentModel(db.Model):
+class CsvAnalyzedSentiment(db.Model):
     """
-    Csv department model class attributes
-    csv_id: Csv id number (primary key) (auto increment) bigint
-    csv_name: Csv name varchar(255)
-    csv_question: Csv question varchar(255)
-    csv_file_path: Csv file path text
-    school_year: School year varchar(255)
-    school_semester: School semester varchar(255)
-    date_uploaded: Csv date uploaded timestamp
-    date_processed: Csv date processed timestamp
+    Csv analyzed sentiment model class attributes
+    csv_analyzed_sentiment_id: Csv analyzed sentiment id number (primary key) (auto increment) bigint
+    csv_id: Csv id number (foreign key) (not null) bigint relationship with csv model
+    evaluatee: Evaluatee varchar(255)
+    email: Email varchar(255) (unique)
+    department: Department varchar(255)
+    course_code: Course code varchar(255)
+    sentence: Sentence text (not null)
+    sentiment: Sentiment varchar(255)
+    sentiment_converted: Sentiment integer 1 or 0
+    sentence_remove_stopwords: Sentence remove stopwords text
+    review_len: Review length integer
+    word_count: Word count integer
+    polarity: Polarity float
     """
 
-    __tablename__ = 'csvs_department'
-    csv_id: int = db.Column(db.Integer, primary_key=True)
-    csv_name: str = db.Column(db.String(255), nullable=False)
-    csv_question: str = db.Column(db.String(255), nullable=False)
-    csv_file_path: str = db.Column(db.Text, nullable=False)
-    school_year: str = db.Column(db.String(255), nullable=False)
-    school_semester: str = db.Column(db.String(255), nullable=False)
-    date_uploaded: str = db.Column(db.DateTime, nullable=False,
-                                   default=Timezone("Asia/Manila").get_timezone_current_time())
-    date_processed: str = db.Column(db.DateTime, nullable=False,
-                                    default=Timezone("Asia/Manila").get_timezone_current_time())
+    __tablename__ = 'csv_analyzed_sentiment'
+    csv_analyzed_sentiment_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger, nullable=False)
+    evaluatee = db.Column(db.String(255))
+    department = db.Column(db.String(255))
+    course_code = db.Column(db.String(255))
+    sentence = db.Column(db.Text, nullable=False)
+    sentiment = db.Column(db.Float)
+    sentiment_converted = db.Column(db.Integer)
+    sentence_remove_stopwords = db.Column(db.Text)
+    review_len = db.Column(db.Integer)
+    word_count = db.Column(db.Integer)
+    polarity = db.Column(db.Float)
 
     def __repr__(self):
-        """Csv department model class representation."""
-        return f"CsvDepartmentModel(csv_id={self.csv_id}, csv_name={self.csv_name}, " \
-               f"csv_question={self.csv_question}, csv_file_path={self.csv_file_path}, " \
-               f"school_year={self.school_year}, school_semester={self.school_semester}, " \
-               f"date_uploaded={self.date_uploaded}, date_processed={self.date_processed})"
-
-    # @desc: For Descending Order (newest to oldest) in the csvs table
-    def __lt__(self, other):
-        return self.csv_id < other.csv_id
-
-    # @desc: For Ascending Order (oldest to newest) in the csvs table
-    def __gt__(self, other):
-        return self.csv_id > other.csv_id
+        return f"CsvAnalyzedSentiment(csv_analyzed_sentiment_id={self.csv_analyzed_sentiment_id}, " \
+               f"csv_id={self.csv_id}, evaluatee={self.evaluatee}, department={self.department}, " \
+               f"course_code={self.course_code}, sentence={self.sentence}, sentiment={self.sentiment}, " \
+               f"sentiment_converted={self.sentiment_converted}, " \
+               f"sentence_remove_stopwords={self.sentence_remove_stopwords}, review_len={self.review_len}, " \
+               f"word_count={self.word_count}, polarity={self.polarity})"
 
 
-class CsvProfessorModel(db.Model):
+class CsvCourses(db.Model):
     """
-    Csv professor model class attributes
-    csv_id: Csv id number (primary key) (auto increment) bigint
-    csv_name: Csv name varchar(255)
-    csv_question: Csv question varchar(255)
-    csv_file_path: Csv file path text
-    school_year: School year varchar(255)
-    school_semester: School semester varchar(255)
-    date_uploaded: Csv date uploaded timestamp
-    date_processed: Csv date processed timestamp
+    Csv courses model class attributes
+    csv_courses_id: Csv courses id number (primary key) (auto increment) bigint
+    csv_id: Csv id number (foreign key) (not null) bigint relationship with csv model
+    course_code: Course code varchar(255)
+    course_for_name: Course for name varchar(255)
+    course_for_department: Course for department varchar(255)
+    number_of_responses: Number of responses integer
     """
-
-    __tablename__ = 'csvs_professor'
-    csv_id: int = db.Column(db.Integer, primary_key=True)
-    csv_name: str = db.Column(db.String(255), nullable=False)
-    csv_question: str = db.Column(db.String(255), nullable=False)
-    csv_file_path: str = db.Column(db.Text, nullable=False)
-    school_year: str = db.Column(db.String(255), nullable=False)
-    school_semester: str = db.Column(db.String(255), nullable=False)
-    date_uploaded: str = db.Column(db.DateTime, nullable=False,
-                                   default=Timezone("Asia/Manila").get_timezone_current_time())
-    date_processed: str = db.Column(db.DateTime, nullable=False,
-                                    default=Timezone("Asia/Manila").get_timezone_current_time())
+    __tablename__ = 'csv_courses'
+    csv_courses_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger, nullable=False)
+    course_code = db.Column(db.String(255))
+    course_for_name = db.Column(db.String(255))
+    course_for_department = db.Column(db.String(255))
+    number_of_responses = db.Column(db.Integer)
 
     def __repr__(self):
-        """Csv professor model class representation."""
-        return f"CsvProfessorModel(csv_id={self.csv_id}, csv_name={self.csv_name}, csv_question={self.csv_question}, " \
-               f"csv_file_path={self.csv_file_path}, school_year={self.school_year}, " \
-               f"school_semester={self.school_semester}, date_uploaded={self.date_uploaded}, " \
-               f"date_processed={self.date_processed})"
+        return f"CsvCourses(csv_courses_id={self.csv_courses_id}, csv_id={self.csv_id}, " \
+               f"course_code={self.course_code}, course_for_name={self.course_for_name}, " \
+               f"course_for_department={self.course_for_department}, number_of_responses={self.number_of_responses})"
 
-    # @desc: For Descending Order (newest to oldest) in the csvs table
-    def __lt__(self, other):
-        return self.csv_id < other.csv_id
 
-    # @desc: For Ascending Order (oldest to newest) in the csvs table
-    def __gt__(self, other):
-        return self.csv_id > other.csv_id
+class CsvProfessorSentiment(db.Model):
+    """
+    Csv professor sentiment model class attributes
+    csv_professor_sentiment_id: Csv professor sentiment id number (primary key) (auto increment) bigint
+    csv_id: Csv id number bigint
+    professor: Professor varchar(255) evaluatee
+    evaluatee_department: Evaluatee department varchar(255)
+    evaluatee_number_of_sentiments: Evaluatee number of sentiments integer
+    evaluatee_positive_sentiments_percentage: Evaluatee positive sentiments percentage float
+    evaluatee_negative_sentiments_percentage: Evaluatee negative sentiments percentage float
+    evaluatee_share: Evaluatee share float
+    """
+
+    __tablename__ = 'csv_professor_sentiment'
+    csv_professor_sentiment_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger)
+    professor = db.Column(db.String(255))
+    evaluatee_department = db.Column(db.String(255))
+    evaluatee_number_of_sentiments = db.Column(db.Integer)
+    evaluatee_positive_sentiments_percentage = db.Column(db.Float)
+    evaluatee_negative_sentiments_percentage = db.Column(db.Float)
+    evaluatee_share = db.Column(db.Float)
+
+    def __repr__(self):
+        return f"CsvProfessorSentiment(csv_professor_sentiment_id={self.csv_professor_sentiment_id}, " \
+               f"csv_id={self.csv_id}, professor={self.professor}, evaluatee_department={self.evaluatee_department}, " \
+               f"evaluatee_number_of_sentiments={self.evaluatee_number_of_sentiments}, " \
+               f"evaluatee_positive_sentiments_percentage={self.evaluatee_positive_sentiments_percentage}, " \
+               f"evaluatee_negative_sentiments_percentage={self.evaluatee_negative_sentiments_percentage}, " \
+               f"evaluatee_share={self.evaluatee_share})"
+
+
+class CsvDepartmentSentiment(db.Model):
+    """
+    Csv department sentiment model class attributes
+    csv_department_sentiment_id: Csv department sentiment id number (primary key) (auto increment) bigint
+    csv_id: Csv id number bigint
+    department: Department varchar(255)
+    department_evaluatee: Department evaluatee varchar(255)
+    department_number_of_sentiments: Department number of sentiments integer
+    department_positive_sentiments_percentage: Department positive sentiments percentage float
+    department_negative_sentiments_percentage: Department negative sentiments percentage float
+    department_share: Department share float
+    """
+
+    __tablename__ = 'csv_department_sentiment'
+    csv_department_sentiment_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger)
+    department = db.Column(db.String(255))
+    department_evaluatee = db.Column(db.Integer)
+    department_number_of_sentiments = db.Column(db.Integer)
+    department_positive_sentiments_percentage = db.Column(db.Float)
+    department_negative_sentiments_percentage = db.Column(db.Float)
+    department_share = db.Column(db.Float)
+
+    def __repr__(self):
+        return f"CsvDepartmentSentiment(csv_department_sentiment_id={self.csv_department_sentiment_id}, " \
+               f"csv_id={self.csv_id}, department={self.department}, department_evaluatee={self.department_evaluatee}, " \
+               f"department_number_of_sentiments={self.department_number_of_sentiments}, " \
+               f"department_positive_sentiments_percentage={self.department_positive_sentiments_percentage}, " \
+               f"department_negative_sentiments_percentage={self.department_negative_sentiments_percentage}, " \
+               f"department_share={self.department_share})"
 
 
 class CsvErrorModel(db.Model):
@@ -154,48 +192,6 @@ class CsvErrorModel(db.Model):
         return self.csv_error_id > other.csv_error_id
 
 
-class CsvCollectionModel(db.Model):
-    """
-    Csv Collection Model class attributes
-    csv_id: Csv id number (primary key) (auto increment) bigint
-    csv_name: Csv name varchar(255)
-    csv_question: Csv question varchar(255)
-    csv_file_path: Csv file path text
-    school_year: School year varchar(255)
-    school_semester: School semester varchar(255)
-    date_uploaded: Csv date uploaded timestamp
-    date_processed: Csv date processed timestamp
-    """
-
-    __tablename__ = 'csvs_collection'
-    csv_id: int = db.Column(db.Integer, primary_key=True)
-    csv_name: str = db.Column(db.String(255), nullable=False)
-    csv_question: str = db.Column(db.String(255), nullable=False)
-    csv_file_path: str = db.Column(db.Text, nullable=False)
-    school_year: str = db.Column(db.String(255), nullable=False)
-    school_semester: str = db.Column(db.String(255), nullable=False)
-    date_uploaded: str = db.Column(db.DateTime, nullable=False,
-                                   default=Timezone("Asia/Manila").get_timezone_current_time())
-    date_processed: str = db.Column(db.DateTime, nullable=False,
-                                    default=Timezone("Asia/Manila").get_timezone_current_time())
-
-    def __repr__(self):
-        """Csv Collection Model class representation."""
-        return f"CsvCollectionModel(csv_id={self.csv_id}, csv_name={self.csv_name}, " \
-               f"csv_question={self.csv_question}, csv_file_path={self.csv_file_path}, " \
-               f"school_year={self.school_year}, school_semester={self.school_semester}, " \
-               f"date_uploaded={self.date_uploaded}, date_processed={self.date_processed}, " \
-               f"flag_deleted={self.flag_deleted}, flag_release={self.flag_release})"
-
-    # @desc: For Descending Order (newest to oldest) in the csvs table
-    def __lt__(self, other):
-        return self.csv_id < other.csv_id
-
-    # @desc: For Ascending Order (oldest to newest) in the csvs table
-    def __gt__(self, other):
-        return self.csv_id > other.csv_id
-
-
 class CsvTimeElapsed(db.Model):
     """
     Csv Time Elapsed Model class attributes
@@ -212,6 +208,8 @@ class CsvTimeElapsed(db.Model):
     adding_predictions_time: Adding predictions time varchar(255)
     adding_to_db: Adding to db time varchar(255)
     analysis_user_time: Analysis user time varchar(255)
+    analysis_department_time: Analysis department time varchar(255)
+    analysis_collection_time: Analysis collection time varchar(255)
     """
 
     __tablename__ = 'csvs_time_elapsed'
@@ -228,6 +226,8 @@ class CsvTimeElapsed(db.Model):
     adding_predictions_time: str = db.Column(db.String(255), nullable=False)
     adding_to_db: str = db.Column(db.String(255), nullable=False)
     analysis_user_time: str = db.Column(db.String(255), nullable=False)
+    analysis_department_time: str = db.Column(db.String(255), nullable=False)
+    analysis_collection_time: str = db.Column(db.String(255), nullable=False)
 
     def __repr__(self):
         """Csv Time Elapsed Model class representation."""
@@ -237,4 +237,6 @@ class CsvTimeElapsed(db.Model):
                f"padding_time={self.padding_time}, model_time={self.model_time}, " \
                f"prediction_time={self.prediction_time}, sentiment_time={self.sentiment_time}, " \
                f"adding_predictions_time={self.adding_predictions_time}, adding_to_db={self.adding_to_db}, " \
-               f"analysis_user_time={self.analysis_user_time})"
+               f"analysis_user_time={self.analysis_user_time}, " \
+               f"analysis_department_time={self.analysis_department_time}, " \
+               f"analysis_collection_time={self.analysis_collection_time})"
