@@ -1549,10 +1549,10 @@ def to_download_selected_csv_file(csv_id: int):
             zf.writestr("top_departments.csv", temp_file_departments.read())
             zf.writestr("distribution_of_courses_per_professors.csv",
                         temp_file_courses.read())
-            zf.writestr("common_words_of_unigrams.csv",
+            zf.writestr("common_words_in_unigrams.csv",
                         temp_file_unigram.read())
-            zf.writestr("common_words_of_bigrams.csv", temp_file_bigram.read())
-            zf.writestr("common_words_of_trigrams.csv",
+            zf.writestr("common_words_in_bigrams.csv", temp_file_bigram.read())
+            zf.writestr("common_words_in_trigrams.csv",
                         temp_file_trigram.read())
             zf.writestr("sentiment_polarity_encoded.png",
                         temp_sentiment_polarity_encoded.read())
@@ -1912,18 +1912,22 @@ def get_previous_evaluated_file():
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).first()
         db.session.close()
-        return jsonify({
-            "status": "success",
-            "p_id": previous_evaluated_file.csv_id if previous_evaluated_file else "",
-            "p_school_year": InputTextValidation(previous_evaluated_file.school_year).to_readable_school_year() if
-            previous_evaluated_file else "",
-            "p_school_semester": InputTextValidation(previous_evaluated_file.school_semester).to_readable_school_semester()
-            if previous_evaluated_file else "",
-            "p_csv_question": InputTextValidation(previous_evaluated_file.csv_question).to_readable_csv_question()
-            if previous_evaluated_file else "",
-            "p_flag_deleted": "Yes" if previous_evaluated_file.flag_deleted == 1 else "No",
-            "p_flag_release": "Yes" if previous_evaluated_file.flag_release == 1 else "No"
-        }), 200
+
+        if previous_evaluated_file:
+            return jsonify({
+                "status": "success",
+                "p_id": previous_evaluated_file.csv_id if previous_evaluated_file else "",
+                "p_school_year": InputTextValidation(previous_evaluated_file.school_year).to_readable_school_year() if
+                previous_evaluated_file else "",
+                "p_school_semester": InputTextValidation(previous_evaluated_file.school_semester).to_readable_school_semester()
+                if previous_evaluated_file else "",
+                "p_csv_question": InputTextValidation(previous_evaluated_file.csv_question).to_readable_csv_question()
+                if previous_evaluated_file else "",
+                "p_flag_deleted": "Yes" if previous_evaluated_file.flag_deleted == 1 else "No",
+                "p_flag_release": "Yes" if previous_evaluated_file.flag_release == 1 else "No"
+            }), 200
+        return jsonify({"status": "error", "p_id": "", "p_school_year": "", "p_school_semester": "",
+                        "p_csv_question": "", "p_flag_deleted": "", "p_flag_release": ""}), 200
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
