@@ -7,10 +7,6 @@ from extensions import db, bcrypt, mail, session
 from matrix.routes.user import user
 from matrix.routes.predictalyze import predictalyze
 from matrix.routes.dashboard import dashboard
-from matrix.models.user import User
-from matrix.models.csv_file import CsvModel, CsvDepartmentModel, CsvProfessorModel, CsvErrorModel, \
-    CsvCollectionModel, CsvTimeElapsed
-from by_database.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment
 
 app = Flask(__name__)
 
