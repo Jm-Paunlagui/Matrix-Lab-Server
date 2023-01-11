@@ -18,7 +18,6 @@ def check_email_exists(email: str):
     """Check if users email exists in the database."""
     is_email: User = User.query.with_entities(User.email, User.recovery_email).filter(
         (User.email == email) | (User.recovery_email == email)).first()
-    db.session.close()
     if (
             is_email is not None
             and email in (is_email.email, is_email.recovery_email)
@@ -30,7 +29,6 @@ def check_email_exists(email: str):
 def check_username_exists(username: str):
     """Checks if the username exists in the database."""
     is_username: User = User.query.filter_by(username=username).first()
-    db.session.close()
     if (
             is_username is not None
             and username == is_username.username
@@ -39,22 +37,10 @@ def check_username_exists(username: str):
     return False
 
 
-def check_password_reset_token_exists(email: str):
-    """Check if reset password token exists in the database."""
-    is_token: User = User.query.with_entities(User.email, User.recovery_email,
-                                              User.password_reset_token).filter(
-        (User.email == email) | (User.recovery_email == email)).first()
-    db.session.close()
-    if is_token.password_reset_token:
-        return True
-    return False
-
-
 # @desc: Checks if the user id exists
 def check_user_id_exists(user_id: int):
     """Check if the user id exists in the database."""
     is_user_id: User = User.query.filter_by(user_id=user_id).first()
-    db.session.close()
     if is_user_id.user_id:
         return True
     return False
@@ -200,7 +186,6 @@ def create_all_users_auto_generated_password():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.password).filter_by(role='user').all()
-        db.session.close()
         if all(users[1] is not None for users in users):
             return jsonify({"status": "error", "message": "All users already have a password."}), 400
 
@@ -274,7 +259,6 @@ def deactivate_all_users():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_active).filter_by(role='user').all()
-        db.session.close()
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
                             "message": "All users are already deactivated."}), 400
@@ -350,7 +334,6 @@ def lock_all_user_accounts():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_locked).filter_by(role='user').all()
-        db.session.close()
         if all(user[1] == 1 for user in users):
             return jsonify({"status": "success",
                             "message": "All users are already locked."}), 400
@@ -414,7 +397,6 @@ def unlock_user_account(user_id: int):
         """
 
         mail.send(msg)
-        db.session.commit()
         return True
     db.session.close()
     return False
@@ -490,7 +472,6 @@ def delete_user_account(user_id: int):
         """
 
         mail.send(msg)
-        db.session.commit()
         return True
     db.session.close()
     return False
@@ -564,7 +545,6 @@ def restore_user_account(user_id: int):
         """
 
         mail.send(msg)
-        db.session.commit()
         return True
     db.session.close()
     return False
@@ -576,7 +556,6 @@ def restore_all_user_accounts():
         # Get all users with a role of 'user'
         users = User.query.with_entities(
             User.user_id, User.flag_deleted).filter_by(role='user').all()
-        db.session.close()
         if all(user[1] == 0 for user in users):
             return jsonify({"status": "success",
                             "message": "All user accounts are already restored."}), 400
@@ -603,7 +582,6 @@ def delete_user_permanently(user_id: int):
         permanently_delete_user: User = User.query.filter_by(
             user_id=user_id).first()
         db.session.delete(permanently_delete_user)
-        db.session.commit()
         return True
     db.session.close()
     return False
@@ -1298,7 +1276,6 @@ def update_password(old_password: str, new_password: str):
             User.password: PasswordBcrypt(
                 password=new_password).password_hasher()
         })
-        db.session.commit()
         return True
     db.session.close()
     return False
