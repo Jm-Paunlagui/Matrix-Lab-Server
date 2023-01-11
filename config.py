@@ -47,7 +47,6 @@ class Directories:
             os.mkdir(Directories.CSV_REFORMATTED_FOLDER)
 
 
-
 class AllowedExtensions:
     ALLOWED_EXTENSIONS = {"csv"}
 
