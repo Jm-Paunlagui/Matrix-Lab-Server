@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from sqlalchemy_utils import database_exists, create_database
 
-from config import Config, SQLDatabase
+from config import Config, SQLDatabase, Directories
 from extensions import db, bcrypt, mail, session
 from matrix.routes.user import user
 from matrix.routes.predictalyze import predictalyze
@@ -24,6 +24,8 @@ db.init_app(app=app)
 bcrypt.init_app(app=app)
 mail.init_app(app=app)
 session.init_app(app=app)
+
+Directories.create_csv_directories()
 
 if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
     print(f"Creating database: {app.config['SQLALCHEMY_DATABASE_URI']}")

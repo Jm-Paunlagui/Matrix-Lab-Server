@@ -73,28 +73,6 @@ def error_handler(error_occurred: str, name_of: str):
     return jsonify({"status": "error", "message": error_occurred}), 500
 
 
-# def get_starting_ending_year():
-#     """
-#     Get the starting and ending year of the csv files.
-#
-#     :return: The starting and ending year of the csv files
-#     """
-#     csv_files = CsvModelDetail.query.all()
-#
-#     # desc: Starting year and ending year of the csv files
-#     starting_year = csv_files[0].school_year.split(
-#         "-")[0] if len(csv_files) > 0 else "----"
-#     ending_year = csv_files[-1].school_year.split(
-#         "-")[1] if len(csv_files) > 0 else "----"
-#     # desc: remove the SY from the school year
-#     starting_year = starting_year.replace(
-#         "SY", "") if len(csv_files) > 0 else "----"
-#     ending_year = ending_year.replace(
-#         "SY", "") if len(csv_files) > 0 else "----"
-#
-#     return starting_year, ending_year
-
-
 def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, int]:
     """
     View the csv file columns with pandas.
@@ -294,7 +272,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
                         full_name=full_name, department=department, role="user")
             db.session.add(user)
             db.session.commit()
-            db.session.close()
+
         continue
 
     # @desc: For each Professor computing code
@@ -306,7 +284,6 @@ def professor_analysis(csv_file_path: str, csv_id: int):
 
     user_list = db.session.query(User.full_name, User.department).filter(
         User.role == "user").all()
-    db.session.close()
 
     users = [user[0].upper() for user in user_list]
 
@@ -333,7 +310,7 @@ def department_analysis(csv_id: int):
         CsvAnalyzedSentiment.sentiment_converted).join(
         CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
         CsvAnalyzedSentiment.csv_id == csv_id).all()
-    db.session.close()
+
     quad(
         names=departments,
         sentiment_list=sentiment_list,
@@ -373,7 +350,7 @@ def course_provider(csv_id: int, csv_file_path: str):
                                     number_of_responses=row["count"])
             db.session.add(csv_course)
             db.session.commit()
-            db.session.close()
+
         continue
 
 
@@ -660,7 +637,6 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 evaluatee_share=share[names.index(professor)],
             ))
         db.session.commit()
-        db.session.close()
     if type_comp == "department_computing":
         # Insert the department's name and the number of sentiments to the database CsvDepartmentSentiment
         for index, department in enumerate(
@@ -679,7 +655,6 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 department_share=share[names.index(department)],
             ))
         db.session.commit()
-        db.session.close()
     return None
 
 
