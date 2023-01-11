@@ -13,7 +13,7 @@ from flask import jsonify, Response, session, send_file
 from nltk import word_tokenize
 from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
-from keras.utils import pad_sequences, plot_model
+from keras.utils import pad_sequences
 from config import Directories
 from extensions import db
 from matrix.models.csv_file import CsvErrorModel, CsvModel, CsvProfessorModel, CsvDepartmentModel, CsvCollectionModel, \
