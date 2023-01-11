@@ -787,7 +787,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
 def read_overall_data_department_analysis_csv_files():
     """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
-
     # @desc: Get the csv files that are department analysis csv files
     csv_files = CsvDepartmentModel.query.all()
 
@@ -889,7 +888,6 @@ def read_overall_data_department_analysis_csv_files():
 
 def read_overall_data_professor_analysis_csv_files():
     """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
-
     # @desc: Get the csv files that are professor analysis csv files
     csv_files = CsvProfessorModel.query.all()
 
