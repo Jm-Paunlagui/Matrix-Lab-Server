@@ -46,18 +46,6 @@ class Directories:
         if not os.path.exists(Directories.CSV_REFORMATTED_FOLDER):
             os.mkdir(Directories.CSV_REFORMATTED_FOLDER)
 
-        # if not os.path.exists(Directories.CSV_ANALYZED_FOLDER):
-        #     os.mkdir(Directories.CSV_ANALYZED_FOLDER)
-        #
-        # if not os.path.exists(Directories.CSV_DEPARTMENT_ANALYSIS_FOLDER):
-        #     os.mkdir(Directories.CSV_DEPARTMENT_ANALYSIS_FOLDER)
-        #
-        # if not os.path.exists(Directories.CSV_PROFESSOR_ANALYSIS_FOLDER):
-        #     os.mkdir(Directories.CSV_PROFESSOR_ANALYSIS_FOLDER)
-        #
-        # if not os.path.exists(Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER):
-        #     os.mkdir(
-        #         Directories.CSV_USER_COLLECTION_OF_SENTIMENT_PER_EVALUATEE_FOLDER)
 
 
 class AllowedExtensions:

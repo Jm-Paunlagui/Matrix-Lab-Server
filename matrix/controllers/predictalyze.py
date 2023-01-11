@@ -245,10 +245,8 @@ def professor_analysis(csv_file_path: str, csv_id: int):
     evaluatee_list: The list of the professors without duplicates
     evaluatee_department: The department of the professor
     """
-
     # @desc: In this analysis we are going to automate the account creation of the professors if they don't
     # exist in the database.
-
     # @desc: Read the csv file
     csv_file = pd.read_csv(csv_file_path)
 
@@ -297,9 +295,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
 
 
 def department_analysis(csv_id: int):
-    """
-    department_list: The list of the departments without duplicates
-    """
+    """department_list: The list of the departments without duplicates"""
     # @desc: For each Department computing code
     department_list = db.session.query(User.department).filter(
         User.role == "user").distinct().all()
@@ -331,7 +327,6 @@ def course_provider(csv_id: int, csv_file_path: str):
     :desc: The course provider scans the csv file and gets the distinct course code and the department of the course
     as well as the names of the professors who taught the course.
     """
-
     # @desc: Read the csv file
     csv_file = pd.read_csv(csv_file_path)
 

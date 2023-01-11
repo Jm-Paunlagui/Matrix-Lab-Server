@@ -332,7 +332,6 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
         tuple: Tuple of the computation of the sentiment, polarity, review length, wordcloud,
         and wordcloud with sentiment.
     """
-
     # Plot the graph using matplotlib and seaborn library
     plt.figure(figsize=(8, 5))
     plt.title("Sentiment vs Polarity")
@@ -558,7 +557,6 @@ def deanlys(analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[i
     Returns:
         list[dict]: The list of the analysis.
     """
-
     # Combine all the analysis into one list each
     sentiment_converted_list = []
     polarity_list = []
