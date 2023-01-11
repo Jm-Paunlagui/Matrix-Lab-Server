@@ -553,9 +553,11 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         # @desc: Get the time taken to analyze the csv file for the user
         analysis_user_time = end_time_analysis_user - start_time_analysis_user
         # @desc: Get the time taken to analyze the csv file for the department
-        analysis_department_time = end_time_analysis_department - start_time_analysis_department
+        analysis_department_time = end_time_analysis_department - \
+            start_time_analysis_department
         # @desc: Get the time taken to analyze the csv file for the collection
-        analysis_collection_time = end_time_analysis_collection - start_time_analysis_collection
+        analysis_collection_time = end_time_analysis_collection - \
+            start_time_analysis_collection
 
         # @desc Save the time taken to evaluate the csv file to the database
         time_data = CsvTimeElapsed(csv_id=csv_file.csv_id, date_processed=date_processed, time_elapsed=overall_time,
@@ -594,9 +596,12 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         csv_id = csv_id[0]
         if csv_id is not None:
             db.session.query(CsvModelDetail).filter_by(csv_id=csv_id).delete()
-            db.session.query(CsvAnalyzedSentiment).filter_by(csv_id=csv_id).delete()
-            db.session.query(CsvProfessorSentiment).filter_by(csv_id=csv_id).delete()
-            db.session.query(CsvDepartmentSentiment).filter_by(csv_id=csv_id).delete()
+            db.session.query(CsvAnalyzedSentiment).filter_by(
+                csv_id=csv_id).delete()
+            db.session.query(CsvProfessorSentiment).filter_by(
+                csv_id=csv_id).delete()
+            db.session.query(CsvDepartmentSentiment).filter_by(
+                csv_id=csv_id).delete()
             db.session.query(CsvTimeElapsed).filter_by(csv_id=csv_id).delete()
             db.session.commit()
         db.session.close()
@@ -731,7 +736,8 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
                     User.department == name, User.role == "user").count()
             ) if type_comp == "top_dept" else 0
         if type_comp == "top_prof":
-            department_evaluatee.append(duo_raw[names.index(name)][1]) if type_comp == "top_prof" else 0
+            department_evaluatee.append(
+                duo_raw[names.index(name)][1]) if type_comp == "top_prof" else 0
 
     top = [
         {
