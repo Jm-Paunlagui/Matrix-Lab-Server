@@ -328,7 +328,15 @@ class InputTextValidation:
 
         :return: The professor name as a query
         """
-        return self.user_input.upper().split()[0] + ", " + self.user_input.upper().split()[1]
+        return self.user_input.upper()
+
+    def to_readable_professor_name(self):
+        """
+        Converts the professor name to a response.
+
+        :return: The professor name as a response
+        """
+        return self.user_input.title()
 
 
 class PasswordBcrypt:

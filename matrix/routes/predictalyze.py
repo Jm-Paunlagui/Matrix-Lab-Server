@@ -4,16 +4,15 @@ from keras.models import load_model
 from config import Directories
 from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evaluator, done_in_csv_evaluation, \
     options_read_single_data, read_overall_data_department_analysis_csv_files, \
-    read_overall_data_professor_analysis_csv_files, read_single_data_department_analysis_csv_files, \
-    read_single_data_professor_analysis_csv_files, list_csv_files_to_view_and_delete_pagination, \
+    read_overall_data_professor_analysis_csv_files, \
+    list_csv_files_to_view_and_delete_pagination, \
     list_csv_files_to_permanently_delete_pagination, list_user_collection_of_sentiment_per_evaluatee_csv_files, \
     to_view_selected_csv_file, to_delete_selected_csv_file_permanent, to_delete_all_csv_file_permanent, \
     to_delete_selected_csv_file_flagged, to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, \
     to_delete_all_csv_files_unflag, to_publish_selected_csv_file, to_unpublished_selected_csv_file, \
     to_publish_all_csv_files, to_unpublished_all_csv_files, to_download_selected_csv_file, list_csv_file_to_read, \
-    to_read_csv_file, list_evaluatees_to_create
+    to_read_csv_file, list_evaluatees_to_create, format_names, get_previous_evaluated_file
 from matrix.module import AllowedFile, InputTextValidation
-
 
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
 
@@ -98,13 +97,13 @@ def options_for_file_data():
 @predictalyze.route("/get-top-department-overall", methods=["GET"])
 def getting_top_department_overall():
     """Get the top department overall."""
-    return read_overall_data_department_analysis_csv_files()
+    return read_overall_data_department_analysis_csv_files(None, None, None)
 
 
 @predictalyze.route("/get-top-professor-overall", methods=["GET"])
 def getting_top_professor_overall():
     """Get the top professor overall."""
-    return read_overall_data_professor_analysis_csv_files()
+    return read_overall_data_professor_analysis_csv_files(None, None, None)
 
 
 @predictalyze.route("/get-top-department-by-file", methods=["POST"])
@@ -125,7 +124,7 @@ def getting_top_department_by_file():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
     if not InputTextValidation(csv_question).validate_empty_fields():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
-    return read_single_data_department_analysis_csv_files(school_year, school_semester, csv_question)
+    return read_overall_data_department_analysis_csv_files(school_year, school_semester, csv_question)
 
 
 @predictalyze.route("/get-top-professor-by-file", methods=["POST"])
@@ -146,7 +145,7 @@ def getting_top_professor_by_file():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
     if not InputTextValidation(csv_question).validate_empty_fields():
         return jsonify({"status": "error", "message": "Invalid question"}), 400
-    return read_single_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
+    return read_overall_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
 
 
 @predictalyze.route("/list-of-csv-files-to-view/<int:page>/<int:per_page>", methods=["GET"])
@@ -161,16 +160,17 @@ def getting_list_of_temporarily_deleted_csv_files(page: int, per_page: int):
     return list_csv_files_to_permanently_delete_pagination(page, per_page)
 
 
-@predictalyze.route("/list-of-csv-files-to-view-collections/<int:page>", methods=["GET"])
-def getting_collection_of_csv_files(page: int):
+@predictalyze.route("/list-of-csv-files-to-view-collections/<int:page>/<int:per_page>", methods=["GET"])
+def getting_collection_of_csv_files(page: int, per_page: int):
     """Get the collection of csv files."""
-    return list_user_collection_of_sentiment_per_evaluatee_csv_files(page)
+    return list_user_collection_of_sentiment_per_evaluatee_csv_files(page, per_page)
 
 
-@predictalyze.route("/view-csv-file/<int:csv_id>", methods=["GET"])
-def viewing_csv_file(csv_id: int):
+@predictalyze.route("/view-csv-file/<int:csv_id>/<int:page>/<int:per_page>", methods=["GET"])
+def viewing_csv_file(csv_id: int, page: int, per_page: int):
     """View the csv file."""
-    return to_view_selected_csv_file(csv_id)
+
+    return to_view_selected_csv_file(csv_id=csv_id, page=page, per_page=per_page)
 
 
 @predictalyze.route("/delete-csv-file-permanent/<int:csv_id>", methods=["DELETE"])
@@ -239,19 +239,30 @@ def downloading_csv_file(csv_id: int):
     return to_download_selected_csv_file(csv_id)
 
 
-@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>", methods=["GET"])
-def list_of_csv_files_to_view(csv_id: int, folder_name: str):
+@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>/<int:page>/<int:per_page>",
+                    methods=["GET"])
+def list_of_csv_files_to_view(csv_id: int, folder_name: str, page: int, per_page: int):
     """Get the list of csv files to view."""
-    return list_csv_file_to_read(csv_id, folder_name)
+    return list_csv_file_to_read(csv_id, folder_name, page, per_page)
 
 
-@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>", methods=["GET"])
-def reading_csv_file(csv_id: int, folder_name: str, file_name: str):
+@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>", methods=["GET"])
+def reading_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
     """Read the csv file."""
-    return to_read_csv_file(csv_id, folder_name, file_name)
+    return to_read_csv_file(csv_id, folder_name, file_name, page, per_page)
 
 
 @predictalyze.route("/list-of-users-to-view/<int:page>/<int:per_page>", methods=["GET"])
 def getting_list_of_evaluatees(page: int, per_page: int):
     """Get the list of evaluatees."""
     return list_evaluatees_to_create(page, per_page)
+
+
+@predictalyze.route("/format-names", methods=["GET"])
+def formatting_names():
+    return format_names()
+
+
+@predictalyze.route("get-previous-evaluated-file", methods=["GET"])
+def getting_previous_evaluated_file():
+    return get_previous_evaluated_file()
