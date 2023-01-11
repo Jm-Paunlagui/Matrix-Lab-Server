@@ -1489,8 +1489,10 @@ def to_download_selected_csv_file(csv_id: int):
             get_top_n_trigrams(wordcloud_list_with_sentiment, 30), columns=['id', 'word', 'sentiment', 'frequency'])
 
         # base64 to image
-        sentiment_polarity_encoded = base64.b64decode(sentiment_polarity_encoded)
-        sentiment_review_length_encoded = base64.b64decode(sentiment_review_length_encoded)
+        sentiment_polarity_encoded = base64.b64decode(
+            sentiment_polarity_encoded)
+        sentiment_review_length_encoded = base64.b64decode(
+            sentiment_review_length_encoded)
         wordcloud_encoded = base64.b64decode(wordcloud_encoded)
 
         # Create a BytesIO object to store the dataframe.
@@ -1522,7 +1524,8 @@ def to_download_selected_csv_file(csv_id: int):
 
         # Write the image into the BytesIO object.
         temp_sentiment_polarity_encoded.write(sentiment_polarity_encoded)
-        temp_sentiment_review_length_encoded.write(sentiment_review_length_encoded)
+        temp_sentiment_review_length_encoded.write(
+            sentiment_review_length_encoded)
         temp_wordcloud_encoded.write(wordcloud_encoded)
 
         # Set the cursor to the beginning of the BytesIO object.
@@ -1544,12 +1547,17 @@ def to_download_selected_csv_file(csv_id: int):
             zf.writestr("evaluated_raw_file.csv", temp_file_raw.read())
             zf.writestr("top_professors.csv", temp_file_professors.read())
             zf.writestr("top_departments.csv", temp_file_departments.read())
-            zf.writestr("distribution_of_courses_per_professors.csv", temp_file_courses.read())
-            zf.writestr("common_words_of_unigrams.csv", temp_file_unigram.read())
+            zf.writestr("distribution_of_courses_per_professors.csv",
+                        temp_file_courses.read())
+            zf.writestr("common_words_of_unigrams.csv",
+                        temp_file_unigram.read())
             zf.writestr("common_words_of_bigrams.csv", temp_file_bigram.read())
-            zf.writestr("common_words_of_trigrams.csv", temp_file_trigram.read())
-            zf.writestr("sentiment_polarity_encoded.png", temp_sentiment_polarity_encoded.read())
-            zf.writestr("sentiment_review_length_encoded.png", temp_sentiment_review_length_encoded.read())
+            zf.writestr("common_words_of_trigrams.csv",
+                        temp_file_trigram.read())
+            zf.writestr("sentiment_polarity_encoded.png",
+                        temp_sentiment_polarity_encoded.read())
+            zf.writestr("sentiment_review_length_encoded.png",
+                        temp_sentiment_review_length_encoded.read())
             zf.writestr("wordcloud_encoded.png", temp_wordcloud_encoded.read())
 
         # Set the cursor to the beginning of the BytesIO object.
