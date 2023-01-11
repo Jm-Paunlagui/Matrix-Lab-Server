@@ -1,9 +1,11 @@
+import base64
 import inspect
 import os
 import pickle
 import sys
 import time
 from io import BytesIO
+from zipfile import ZipFile
 
 import nltk
 import pandas as pd
@@ -16,6 +18,7 @@ from keras.utils import pad_sequences
 
 from config import Directories
 from extensions import db
+from matrix.controllers.dashboard import deanlys, get_top_n_words, get_top_n_bigrams, get_top_n_trigrams
 from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
     CsvDepartmentSentiment, CsvErrorModel, CsvTimeElapsed
 from matrix.models.user import User
@@ -1388,43 +1391,6 @@ def to_download_selected_csv_file(csv_id: int):
     :return: The selected csv file.
     """
     try:
-        # csv_file = CsvModelDetail.query.filter_by(csv_id=csv_id).first()
-        # professor_file = CsvProfessorModel.query.filter_by(
-        #     csv_id=csv_id).first()
-        # department_file = CsvDepartmentModel.query.filter_by(
-        #     csv_id=csv_id).first()
-        # collections_file = CsvCollectionModel.query.filter_by(
-        #     csv_id=csv_id).first()
-        #
-        # if csv_file is None and professor_file is None and department_file is None and collections_file is None:
-        #     return jsonify({"status": "error", "message": "No csv file found."}), 400
-        #
-        # temp_file = BytesIO()
-        # with ZipFile(temp_file, "w") as zip_file:
-        #     zip_file.write(csv_file.csv_file_path, arcname="Raw-Data.csv")
-        #     zip_file.write(professor_file.csv_file_path,
-        #                    arcname="Professors-Metrics.csv")
-        #     zip_file.write(department_file.csv_file_path,
-        #                    arcname="Departments-Metrics.csv")
-        #     for root, dirs, files in os.walk(collections_file.csv_file_path):
-        #         for file in files:
-        #             zip_file.write(os.path.join(
-        #                 root, file), arcname=os.path.join(os.path.basename(root), file))
-        #
-        # temp_file.seek(0)
-        # return send_file(
-        #     path_or_file=temp_file, as_attachment=True,
-        #     download_name=csv_file.csv_question + "_" +
-        #     csv_file.school_year + "_" + csv_file.school_semester + ".zip",
-        #     mimetype="application/zip",
-        # ), 200
-
-        # Now that we migrate to a database, there are two tables to join to get the file.
-        # The first table is the csv_model_detail_test table, which contains the csv_id, csv_question, school_year,
-        # school_semester, flag_delete and flag_release columns. The second table is the csv_analyzed_sentiment_test
-        # table, which contains the csv_id, evaluatee, dapartment, course code, sentence, sentiment, sentiment_converted
-        # sentence_remove_stopwords, review_len, word_count and polarity columns.
-        # We join the two tables using the csv_id column.
         sentiments = db.session.query(
             CsvModelDetail.csv_id,
             CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.department,
@@ -1435,36 +1401,165 @@ def to_download_selected_csv_file(csv_id: int):
             CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
             CsvModelDetail.csv_id == csv_id).all()
 
-        # If the csv_id is not found in the database, return an error message.
-        if sentiments is None:
-            return jsonify({"status": "error", "message": "No csv file found."}), 400
+        professors = db.session.query(
+            CsvModelDetail.csv_id,
+            CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor, CsvProfessorSentiment.evaluatee_department,
+            CsvProfessorSentiment.evaluatee_number_of_sentiments,
+            CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
+            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage, CsvProfessorSentiment.evaluatee_share
+        ).join(
+            CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).filter(
+            CsvModelDetail.csv_id == csv_id).all()
 
-        # Append the two tables into a pandas dataframe and convert it to a csv file. The csv file is then saved in the
-        # server. The csv file is then sent to the client. The csv file is then deleted from the server.
+        departments = db.session.query(
+            CsvModelDetail.csv_id,
+            CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
+            CsvDepartmentSentiment.department_evaluatee,
+            CsvDepartmentSentiment.department_number_of_sentiments,
+            CsvDepartmentSentiment.department_positive_sentiments_percentage,
+            CsvDepartmentSentiment.department_negative_sentiments_percentage, CsvDepartmentSentiment.department_share
+        ).join(
+            CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).filter(
+            CsvModelDetail.csv_id == csv_id).all()
+
+        courses = db.session.query(
+            CsvModelDetail.csv_id,
+            CsvCourses.csv_id, CsvCourses.course_code, CsvCourses.course_for_name, CsvCourses.course_for_department,
+            CsvCourses.number_of_responses
+        ).join(
+            CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).filter(
+            CsvModelDetail.csv_id == csv_id).all()
+
+        analysis = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
+            CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
+            CsvAnalyzedSentiment.review_len). \
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == csv_id).all()
+
+        # If the csv_id is not found in the database, return an error message.
+        if sentiments is None and professors is None and departments is None and courses is None and analysis is None:
+            return jsonify({"status": "error", "message": "No Evaluated file found."}), 400
+
+        # Sort form highest to lowest professor positive sentiments percentage and add the rank column to the dataframe.
+        professors = sorted(professors, key=lambda x: x[5], reverse=True)
+
+        # Sort form highest to lowest department positive sentiments percentage.
+        departments = sorted(departments, key=lambda x: x[5], reverse=True)
+
+        # Sort form highest to lowest course number of responses.
+        courses = sorted(courses, key=lambda x: x[5], reverse=True)
 
         # Append the two tables into a pandas dataframe and convert it to a list of dictionaries
         sentiments = [dict(row) for row in sentiments]
 
+        sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
+            wordcloud_list_with_sentiment = deanlys(analysis, None)
+
         # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
 
-        df = pd.DataFrame(sentiments, columns=['csv_id', 'csv_id', 'evaluatee', 'department', 'course_code', 'sentence',
-                                               'sentiment', 'sentiment_converted', 'sentence_remove_stopwords',
-                                               'review_len', 'word_count', 'polarity'])
+        dfraw = pd.DataFrame(
+            sentiments, columns=['csv_id', 'csv_id', 'evaluatee', 'department', 'course_code', 'sentence',
+                                 'sentiment', 'sentiment_converted', 'sentence_remove_stopwords', 'review_len',
+                                 'word_count', 'polarity'])
+
+        # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
+        dfprof = pd.DataFrame(
+            professors, columns=['csv_id', 'csv_id', 'professor', 'evaluatee_department',
+                                 'evaluatee_number_of_sentiments', 'evaluatee_positive_sentiments_percentage',
+                                 'evaluatee_negative_sentiments_percentage', 'evaluatee_share'])
+
+        # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
+        dfdept = pd.DataFrame(
+            departments, columns=['csv_id', 'csv_id', 'department', 'department_evaluatee',
+                                  'department_number_of_sentiments', 'department_positive_sentiments_percentage',
+                                  'department_negative_sentiments_percentage', 'department_share'])
+
+        # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
+        dfcourse = pd.DataFrame(
+            courses, columns=['csv_id', 'csv_id', 'course_code', 'course_for_name', 'course_for_department',
+                              'number_of_responses'])
+
+        dfunigram = pd.DataFrame(
+            get_top_n_words(wordcloud_list_with_sentiment, 30), columns=['id', 'word', 'sentiment', 'frequency'])
+
+        dfbigram = pd.DataFrame(
+            get_top_n_bigrams(wordcloud_list_with_sentiment, 30), columns=['id', 'word', 'sentiment', 'frequency'])
+
+        dftrigram = pd.DataFrame(
+            get_top_n_trigrams(wordcloud_list_with_sentiment, 30), columns=['id', 'word', 'sentiment', 'frequency'])
+
+        # base64 to image
+        sentiment_polarity_encoded = base64.b64decode(sentiment_polarity_encoded)
+        sentiment_review_length_encoded = base64.b64decode(sentiment_review_length_encoded)
+        wordcloud_encoded = base64.b64decode(wordcloud_encoded)
 
         # Create a BytesIO object to store the dataframe.
-        temp_file = BytesIO()
+        temp_file_raw = BytesIO()
+        temp_file_professors = BytesIO()
+        temp_file_departments = BytesIO()
+        temp_file_courses = BytesIO()
+
+        temp_file_unigram = BytesIO()
+        temp_file_bigram = BytesIO()
+        temp_file_trigram = BytesIO()
+
+        # Save the image temporarily in memory.
+        temp_sentiment_polarity_encoded = BytesIO()
+        temp_sentiment_review_length_encoded = BytesIO()
+        temp_wordcloud_encoded = BytesIO()
+
+        temp_zip_file = BytesIO()
 
         # Write the dataframe into the BytesIO object.
-        df.to_csv(temp_file, index=False)
+        dfraw.to_csv(temp_file_raw, index=False)
+        dfprof.to_csv(temp_file_professors, index=False)
+        dfdept.to_csv(temp_file_departments, index=False)
+        dfcourse.to_csv(temp_file_courses, index=False)
+
+        dfunigram.to_csv(temp_file_unigram, index=False)
+        dfbigram.to_csv(temp_file_bigram, index=False)
+        dftrigram.to_csv(temp_file_trigram, index=False)
+
+        # Write the image into the BytesIO object.
+        temp_sentiment_polarity_encoded.write(sentiment_polarity_encoded)
+        temp_sentiment_review_length_encoded.write(sentiment_review_length_encoded)
+        temp_wordcloud_encoded.write(wordcloud_encoded)
 
         # Set the cursor to the beginning of the BytesIO object.
-        temp_file.seek(0)
+        temp_file_raw.seek(0)
+        temp_file_professors.seek(0)
+        temp_file_departments.seek(0)
+        temp_file_courses.seek(0)
 
-        # Return the csv file.
+        temp_file_unigram.seek(0)
+        temp_file_bigram.seek(0)
+        temp_file_trigram.seek(0)
+
+        temp_sentiment_polarity_encoded.seek(0)
+        temp_sentiment_review_length_encoded.seek(0)
+        temp_wordcloud_encoded.seek(0)
+
+        # Create a zip file and add the csv file to it.
+        with ZipFile(temp_zip_file, "w") as zf:
+            zf.writestr("evaluated_raw_file.csv", temp_file_raw.read())
+            zf.writestr("top_professors.csv", temp_file_professors.read())
+            zf.writestr("top_departments.csv", temp_file_departments.read())
+            zf.writestr("distribution_of_courses_per_professors.csv", temp_file_courses.read())
+            zf.writestr("common_words_of_unigrams.csv", temp_file_unigram.read())
+            zf.writestr("common_words_of_bigrams.csv", temp_file_bigram.read())
+            zf.writestr("common_words_of_trigrams.csv", temp_file_trigram.read())
+            zf.writestr("sentiment_polarity_encoded.png", temp_sentiment_polarity_encoded.read())
+            zf.writestr("sentiment_review_length_encoded.png", temp_sentiment_review_length_encoded.read())
+            zf.writestr("wordcloud_encoded.png", temp_wordcloud_encoded.read())
+
+        # Set the cursor to the beginning of the BytesIO object.
+        temp_zip_file.seek(0)
+
+        # Return the csv files to the client.
         return send_file(
-            path_or_file=temp_file, as_attachment=True,
-            download_name=f"evaluated_file_no.{csv_id}.csv",
-            mimetype="text/csv",
+            path_or_file=temp_zip_file, as_attachment=True,
+            download_name=f"evaluated_file_no.{csv_id}.zip",
+            mimetype="application/zip",
         ), 200
 
     except Exception as e:
