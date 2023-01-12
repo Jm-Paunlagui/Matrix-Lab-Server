@@ -60,7 +60,7 @@ def check_email_exists_by_username(username: str):
             "sub": is_email.email,
             "recovery_email": is_email.recovery_email,
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
-            "jti": str(uuid.uuid4())
+            "jti": Timezone("Asia/Manila").get_timezone_current_time()
         }
         emails = PayloadSignature(payload=payload).encode_payload()
         return emails
@@ -687,7 +687,7 @@ def authenticate_user(username: str, password: str):
                 "sub": name,
                 "iat": Timezone("Asia/Manila").get_timezone_current_time(),
                 "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
-                "jti": str(uuid.uuid4())
+                "jti": Timezone("Asia/Manila").get_timezone_current_time()
             }
 
             unlock_token = PayloadSignature(payload=payload).encode_payload()
@@ -765,7 +765,7 @@ def send_tfa(email: str):
             "username": is_email[2],
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
-            "jti": str(uuid.uuid4())
+            "jti": Timezone("Asia/Manila").get_timezone_current_time()
         }
         link = PayloadSignature(payload=payload).encode_payload()
 
@@ -865,7 +865,7 @@ def send_email_verification(email: str):
             "username": is_email[2],
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(hours=24)),
-            "jti": str(uuid.uuid4())
+            "jti": Timezone("Asia/Manila").get_timezone_current_time()
         }
         link = PayloadSignature(payload=payload).encode_payload()
 
@@ -1005,7 +1005,7 @@ def authenticated_user():
         "username": user_data.username, "role": user_data.role, "path": redirect_to(),
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=24)),
-        "jti": str(uuid.uuid4())
+        "jti": Timezone("Asia/Manila").get_timezone_current_time()
     }
     user_data_token = PayloadSignature(payload=payload).encode_payload()
     db.session.close()
@@ -1028,7 +1028,7 @@ def password_reset_link(email: str):
         "sub": email,
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(minutes=5)),
-        "jti": str(uuid.uuid4())
+        "jti": Timezone("Asia/Manila").get_timezone_current_time()
     }
     password_reset_token = PayloadSignature(payload=payload).encode_payload()
     source = get_os_browser_versions()
