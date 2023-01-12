@@ -118,21 +118,28 @@ def forgot_password():
 @user.route("/get_user", methods=["GET"])
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
-    token: str = request.headers["Authorization"]
-
     user_id: int = session.get("user_id")
+    if user_id is None:
+        remove_session()
+        return jsonify({"status": "error", "message": "You are not logged in."}), 401
 
+    token: str = request.headers["Authorization"]
     if not token:
         return jsonify({"status": "error", "message": "Invalid request!"}), 400
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
-
     verified_token: dict = verify_authenticated_token(token)
+
     if not verified_token:
         return jsonify({"status": "error", "message": "Invalid token!"}), 401
-    return jsonify({"status": "success", "message": "User retrieved successfully.",
-                    "user": verified_token}), 200
+
+    if bool(verified_token["id"] == user_id):
+        return jsonify({"status": "success", "message": "User retrieved successfully.",
+                        "user": verified_token}), 200
+    remove_session()
+    return jsonify({
+        "status": "error",
+        "message": "Token and User ID did not match"
+    }), 401
 
 
 @user.route("/remove-email-from-account", methods=["POST"])
