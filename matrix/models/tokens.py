@@ -30,7 +30,8 @@ def verify_jwt(jwt_string, public_key):
             jwt.used = True
             db.session.commit()
         else:
-            new_jwt = JWT(jti=payload["jti"], expires_at=datetime.fromtimestamp(payload["exp"]))
+            new_jwt = JWT(
+                jti=payload["jti"], expires_at=datetime.fromtimestamp(payload["exp"]))
             db.session.add(new_jwt)
             db.session.commit()
         return payload
