@@ -438,7 +438,7 @@ def get_starting_ending_year(csv_files: list) -> tuple[str, str]:
 
 
 def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
-           starting_year: str, ending_year: str, evaluatee_name: str | None) -> list[dict]:
+                    starting_year: str, ending_year: str, evaluatee_name: str | None) -> list[dict]:
     """
     Calculate the total number of sentiments.
 
@@ -473,16 +473,20 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
             [sentiment[3] for sentiment in sentiments if sentiment[2] == evaluatee_name])
 
         positive_sentiment = round(
-            sum([sentiment[4] for sentiment in sentiments if sentiment[2] == evaluatee_name]) / total_distinct_ids,
+            sum([sentiment[4] for sentiment in sentiments if sentiment[2]
+                == evaluatee_name]) / total_distinct_ids,
             2) if total_distinct_ids != 0 else 0
 
         negative_sentiment = round(
-            sum([sentiment[5] for sentiment in sentiments if sentiment[2] == evaluatee_name]) / total_distinct_ids,
+            sum([sentiment[5] for sentiment in sentiments if sentiment[2]
+                == evaluatee_name]) / total_distinct_ids,
             2) if total_distinct_ids != 0 else 0
 
-        total_positive_sentiments = round(total_sentiments * positive_sentiment / 100, 2)
+        total_positive_sentiments = round(
+            total_sentiments * positive_sentiment / 100, 2)
 
-        total_negative_sentiments = round(total_sentiments * negative_sentiment / 100, 2)
+        total_negative_sentiments = round(
+            total_sentiments * negative_sentiment / 100, 2)
 
     if evaluatee_name is None:
         total_distinct_ids = len(sentiments)
@@ -496,9 +500,11 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
         negative_sentiment = round(
             sum([sentiment[5] for sentiment in sentiments]) / total_distinct_ids, 2) if total_distinct_ids != 0 else 0
 
-        total_positive_sentiments = round(total_sentiments * positive_sentiment / 100, 2)
+        total_positive_sentiments = round(
+            total_sentiments * positive_sentiment / 100, 2)
 
-        total_negative_sentiments = round(total_sentiments * negative_sentiment / 100, 2)
+        total_negative_sentiments = round(
+            total_sentiments * negative_sentiment / 100, 2)
 
     sentiment_details = [
         {
@@ -559,7 +565,7 @@ def remove_none_values(sentiment_converted_list: list, polarity_list: list, revi
 
 
 def core_analysis(analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[int, int, str, int, float, str, int]],
-            evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
+                  evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
     Generate the analysis of the sentiments.
 
@@ -636,7 +642,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_number_of_sentiments,
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
-            join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).all()
+            join(CsvDepartmentSentiment, CsvModelDetail.csv_id ==
+                 CsvDepartmentSentiment.csv_id).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -873,7 +880,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).all()
 
-    sentiment_details = pancore_compute(sentiments, starting_year, ending_year, None)
+    sentiment_details = pancore_compute(
+        sentiments, starting_year, ending_year, None)
 
     analysis = db.session.query(
         CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -936,7 +944,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
-            join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).all()
+            join(CsvProfessorSentiment, CsvModelDetail.csv_id ==
+                 CsvProfessorSentiment.csv_id).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1172,11 +1181,11 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         db.session.query(CsvModelDetail.school_year).filter(
             CsvModelDetail.school_year == school_year).all())
     sentiments = db.session.query(
-            CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
-            CsvProfessorSentiment.evaluatee_number_of_sentiments,
-            CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
-            join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
+        CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
+        CsvProfessorSentiment.evaluatee_number_of_sentiments,
+        CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
+        CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
+        join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).all()
 
@@ -1192,7 +1201,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                CsvModelDetail.csv_question == csv_question).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, converted_full_name)
+        wordcloud_list_with_sentiment = core_analysis(
+            analysis, converted_full_name)
     db.session.close()
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
