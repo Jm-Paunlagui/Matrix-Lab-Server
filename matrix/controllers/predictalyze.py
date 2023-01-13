@@ -18,7 +18,7 @@ from keras.utils import pad_sequences
 
 from config import Directories
 from extensions import db
-from matrix.controllers.dashboard import deanlys, get_top_n_words, get_top_n_bigrams, get_top_n_trigrams
+from matrix.controllers.dashboard import core_analysis, get_top_n_words, get_top_n_bigrams, get_top_n_trigrams
 from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
     CsvDepartmentSentiment, CsvErrorModel, CsvTimeElapsed
 from matrix.models.user import User
@@ -1453,7 +1453,7 @@ def to_download_selected_csv_file(csv_id: int):
         sentiments = [dict(row) for row in sentiments]
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = deanlys(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
 
