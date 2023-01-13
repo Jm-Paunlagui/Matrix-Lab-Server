@@ -1820,7 +1820,7 @@ def list_evaluatees_to_create(page: int, per_page: int):
                     "is_deleted": user.flag_deleted,
                     "created_at": user.created_at,
                     "updated_at": user.updated_at,
-                } for user in users
+                } for user in sorted(users.items, key=lambda x: x.flag_active == 1, reverse=True)
             ]
 
             return jsonify({
