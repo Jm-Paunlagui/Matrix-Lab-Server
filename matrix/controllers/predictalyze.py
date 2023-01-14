@@ -1505,60 +1505,78 @@ def download_analysis(professors=None, departments=None, courses=None, sentiment
     with ZipFile(temp_zip_file, "w") as zf:
         if bulk_download is False:
             if type_of_download == "csv" and csv_id is not None:
-                zf.writestr(f"evaluated_file_no.{csv_id}_evaluated_raw_file.csv", temp_file_raw.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_top_professors.csv", temp_file_professors.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_top_departments.csv", temp_file_departments.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_evaluated_raw_file.csv", temp_file_raw.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_top_professors.csv", temp_file_professors.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_top_departments.csv", temp_file_departments.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_distribution_of_courses_per_professors.csv",
                             temp_file_courses.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_unigrams.csv",
                             temp_file_unigram.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_bigrams.csv", temp_file_bigram.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_common_words_in_bigrams.csv", temp_file_bigram.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_trigrams.csv",
                             temp_file_trigram.read())
             if type_of_download == "excel" and csv_id is not None:
-                zf.writestr(f"evaluated_file_no.{csv_id}_evaluated_raw_file.xlsx", temp_file_raw.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_top_professors.xlsx", temp_file_professors.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_top_departments.xlsx", temp_file_departments.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_evaluated_raw_file.xlsx", temp_file_raw.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_top_professors.xlsx", temp_file_professors.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_top_departments.xlsx", temp_file_departments.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_distribution_of_courses_per_professors.xlsx",
                             temp_file_courses.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_unigrams.xlsx",
                             temp_file_unigram.read())
-                zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_bigrams.xlsx", temp_file_bigram.read())
+                zf.writestr(
+                    f"evaluated_file_no.{csv_id}_common_words_in_bigrams.xlsx", temp_file_bigram.read())
                 zf.writestr(f"evaluated_file_no.{csv_id}_common_words_in_trigrams.xlsx",
                             temp_file_trigram.read())
             zf.writestr(f"evaluated_image_no.{csv_id}_sentiment_polarity_encoded.png",
                         temp_sentiment_polarity_encoded.read())
             zf.writestr(f"evaluated_image_no.{csv_id}_sentiment_review_length_encoded.png",
                         temp_sentiment_review_length_encoded.read())
-            zf.writestr(f"evaluated_image_no.{csv_id}_wordcloud_encoded.png", temp_wordcloud_encoded.read())
+            zf.writestr(
+                f"evaluated_image_no.{csv_id}_wordcloud_encoded.png", temp_wordcloud_encoded.read())
         if bulk_download is True:
             if type_of_download == "csv" and csv_id is None:
-                zf.writestr(f"all_in_one_file_evaluated_raw_file.csv", temp_file_raw.read())
-                zf.writestr(f"all_in_one_file_top_professors.csv", temp_file_professors.read())
-                zf.writestr(f"all_in_one_file_top_departments.csv", temp_file_departments.read())
+                zf.writestr(f"all_in_one_file_evaluated_raw_file.csv",
+                            temp_file_raw.read())
+                zf.writestr(f"all_in_one_file_top_professors.csv",
+                            temp_file_professors.read())
+                zf.writestr(f"all_in_one_file_top_departments.csv",
+                            temp_file_departments.read())
                 zf.writestr(f"all_in_one_file_distribution_of_courses_per_professors.csv",
                             temp_file_courses.read())
                 zf.writestr(f"all_in_one_file_common_words_in_unigrams.csv",
                             temp_file_unigram.read())
-                zf.writestr(f"all_in_one_file_common_words_in_bigrams.csv", temp_file_bigram.read())
+                zf.writestr(
+                    f"all_in_one_file_common_words_in_bigrams.csv", temp_file_bigram.read())
                 zf.writestr(f"all_in_one_file_common_words_in_trigrams.csv",
                             temp_file_trigram.read())
             if type_of_download == "excel" and csv_id is None:
-                zf.writestr(f"all_in_one_file_evaluated_raw_file.xlsx", temp_file_raw.read())
-                zf.writestr(f"all_in_one_file_top_professors.xlsx", temp_file_professors.read())
-                zf.writestr(f"all_in_one_file_top_departments.xlsx", temp_file_departments.read())
+                zf.writestr(
+                    f"all_in_one_file_evaluated_raw_file.xlsx", temp_file_raw.read())
+                zf.writestr(f"all_in_one_file_top_professors.xlsx",
+                            temp_file_professors.read())
+                zf.writestr(f"all_in_one_file_top_departments.xlsx",
+                            temp_file_departments.read())
                 zf.writestr(f"all_in_one_file_distribution_of_courses_per_professors.xlsx",
                             temp_file_courses.read())
                 zf.writestr(f"all_in_one_file_common_words_in_unigrams.xlsx",
                             temp_file_unigram.read())
-                zf.writestr(f"all_in_one_file_common_words_in_bigrams.xlsx", temp_file_bigram.read())
+                zf.writestr(
+                    f"all_in_one_file_common_words_in_bigrams.xlsx", temp_file_bigram.read())
                 zf.writestr(f"all_in_one_file_common_words_in_trigrams.xlsx",
                             temp_file_trigram.read())
             zf.writestr(f"all_in_one_image_sentiment_polarity_encoded.png",
                         temp_sentiment_polarity_encoded.read())
             zf.writestr(f"all_in_one_image_sentiment_review_length_encoded.png",
                         temp_sentiment_review_length_encoded.read())
-            zf.writestr(f"all_in_one_image_wordcloud_encoded.png", temp_wordcloud_encoded.read())
+            zf.writestr(f"all_in_one_image_wordcloud_encoded.png",
+                        temp_wordcloud_encoded.read())
 
     # Set the cursor to the beginning of the BytesIO object.
     temp_zip_file.seek(0)
@@ -1699,7 +1717,8 @@ def to_download_all_csv_files(type_of_download: str | None):
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
-            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
+            join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
+                 CsvAnalyzedSentiment.csv_id).all()
 
         # If the csv_id is not found in the database, return an error message.
         if sentiments is None and professors is None and departments is None and courses is None and analysis is None:
