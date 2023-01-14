@@ -9,7 +9,7 @@ from matrix.routes.predictalyze import predictalyze
 from matrix.routes.dashboard import dashboard
 from matrix.models.user import User
 from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
-    CsvDepartmentSentiment, CsvErrorModel, CsvTimeElapsed
+    CsvDepartmentSentiment, CsvProfessorSentimentOverall, CsvDepartmentSentimentOverall, CsvErrorModel, CsvTimeElapsed
 
 app = Flask(__name__)
 
