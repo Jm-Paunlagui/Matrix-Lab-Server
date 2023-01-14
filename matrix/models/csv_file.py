@@ -128,6 +128,39 @@ class CsvProfessorSentiment(db.Model):
                f"evaluatee_share={self.evaluatee_share})"
 
 
+class CsvProfessorSentimentOverall(db.Model):
+    """
+    Csv professor sentiment overall model class attributes
+    csv_professor_sentiment_overall_id: Csv professor sentiment overall id number (primary key) (auto increment) bigint
+    csv_id: Csv id number bigint
+    professor: Professor varchar(255) evaluatee
+    evaluatee_department: Evaluatee department varchar(255)
+    evaluatee_number_of_sentiments: Evaluatee number of sentiments integer
+    evaluatee_positive_sentiments_percentage: Evaluatee positive sentiments percentage float
+    evaluatee_negative_sentiments_percentage: Evaluatee negative sentiments percentage float
+    evaluatee_share: Evaluatee share float
+    """
+
+    __tablename__ = 'csv_professor_sentiment_overall'
+    csv_professor_sentiment_overall_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger)
+    professor = db.Column(db.String(255))
+    evaluatee_department = db.Column(db.String(255))
+    evaluatee_number_of_sentiments = db.Column(db.Integer)
+    evaluatee_positive_sentiments_percentage = db.Column(db.Float)
+    evaluatee_negative_sentiments_percentage = db.Column(db.Float)
+    evaluatee_share = db.Column(db.Float)
+
+    def __repr__(self):
+        return f"CsvProfessorSentimentOverall(csv_professor_sentiment_overall_id={self.csv_professor_sentiment_overall_id}, " \
+               f"csv_id={self.csv_id}, professor={self.professor}, evaluatee_department={self.evaluatee_department}, " \
+               f"evaluatee_number_of_sentiments={self.evaluatee_number_of_sentiments}, " \
+               f"evaluatee_positive_sentiments_percentage={self.evaluatee_positive_sentiments_percentage}, " \
+               f"evaluatee_negative_sentiments_percentage={self.evaluatee_negative_sentiments_percentage}, " \
+               f"evaluatee_share={self.evaluatee_share})"
+
+
 class CsvDepartmentSentiment(db.Model):
     """
     Csv department sentiment model class attributes
@@ -154,6 +187,39 @@ class CsvDepartmentSentiment(db.Model):
 
     def __repr__(self):
         return f"CsvDepartmentSentiment(csv_department_sentiment_id={self.csv_department_sentiment_id}, " \
+               f"csv_id={self.csv_id}, department={self.department}, department_evaluatee={self.department_evaluatee}, " \
+               f"department_number_of_sentiments={self.department_number_of_sentiments}, " \
+               f"department_positive_sentiments_percentage={self.department_positive_sentiments_percentage}, " \
+               f"department_negative_sentiments_percentage={self.department_negative_sentiments_percentage}, " \
+               f"department_share={self.department_share})"
+
+
+class CsvDepartmentSentimentOverall(db.Model):
+    """
+    Csv department sentiment overall model class attributes
+    csv_department_sentiment_overall_id: Csv department sentiment overall id number (primary key) (auto increment) bigint
+    csv_id: Csv id number bigint
+    department: Department varchar(255)
+    department_evaluatee: Department evaluatee varchar(255)
+    department_number_of_sentiments: Department number of sentiments integer
+    department_positive_sentiments_percentage: Department positive sentiments percentage float
+    department_negative_sentiments_percentage: Department negative sentiments percentage float
+    department_share: Department share float
+    """
+
+    __tablename__ = 'csv_department_sentiment_overall'
+    csv_department_sentiment_overall_id = db.Column(
+        db.BigInteger, primary_key=True, autoincrement=True)
+    csv_id = db.Column(db.BigInteger)
+    department = db.Column(db.String(255))
+    department_evaluatee = db.Column(db.Integer)
+    department_number_of_sentiments = db.Column(db.Integer)
+    department_positive_sentiments_percentage = db.Column(db.Float)
+    department_negative_sentiments_percentage = db.Column(db.Float)
+    department_share = db.Column(db.Float)
+
+    def __repr__(self):
+        return f"CsvDepartmentSentimentOverall(csv_department_sentiment_overall_id={self.csv_department_sentiment_overall_id}, " \
                f"csv_id={self.csv_id}, department={self.department}, department_evaluatee={self.department_evaluatee}, " \
                f"department_number_of_sentiments={self.department_number_of_sentiments}, " \
                f"department_positive_sentiments_percentage={self.department_positive_sentiments_percentage}, " \
