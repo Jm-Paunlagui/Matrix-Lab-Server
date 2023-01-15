@@ -17,13 +17,13 @@ from matrix.module import AllowedFile, InputTextValidation
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
 
 
-@predictalyze.record_once
-def load_keras_model(state):
-    global model
-    model = state.app.predictalyze_model = load_model(
-        Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
-
-    print("Model loaded.")
+# @predictalyze.record_once
+# def load_keras_model(state):
+#     global model
+#     model = state.app.predictalyze_model = load_model(
+#         Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
+#
+#     print("Model loaded.")
 
 
 @predictalyze.route("/view-columns", methods=["POST"])
@@ -72,7 +72,7 @@ def analyze_save_csv():
         return jsonify({"status": "error", "message": "Invalid school year"}), 400
     if not InputTextValidation(school_semester).validate_school_semester():
         return jsonify({"status": "error", "message": "Invalid school semester"}), 400
-    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question, model)
+    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
 
 
 @predictalyze.route("/delete-uploaded-csv-file", methods=["POST"])
