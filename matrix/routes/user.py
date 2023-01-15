@@ -288,7 +288,7 @@ def delete_user_account_by_id(user_id: int):
     return jsonify({"status": "success", "message": "User account deleted successfully."}), 200
 
 
-@user.route("/mass-delete-account", methods=["DELETE"])
+@user.route("/mass-delete-account", methods=["PUT"])
 def delete_all_user_account():
     """Deletes all user accounts."""
     return delete_all_user_accounts()

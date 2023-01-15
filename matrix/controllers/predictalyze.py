@@ -73,7 +73,6 @@ def error_handler(error_occurred: str, name_of: str):
     """
     db.session.add(CsvErrorModel(csv_error=error_occurred, name_of=name_of))
     db.session.commit()
-    db.session.close()
     return jsonify({"status": "error", "message": error_occurred}), 500
 
 
@@ -544,7 +543,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         db.session.commit()
         # @desc: Delete the reformatted csv file from the reformatted folder
         os.remove(os.path.join(Directories.CSV_REFORMATTED_FOLDER, file_name))
-        db.session.close()
         return jsonify({"status": "success",
                         "message": "CSV file evaluated successfully",
                         "csv_file": "Analyzed_" + csv_question + "_" + school_year + ".csv",
@@ -575,7 +573,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                 csv_id=csv_id).delete()
             db.session.query(CsvTimeElapsed).filter_by(csv_id=csv_id).delete()
             db.session.commit()
-        db.session.close()
         error_handler(
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
@@ -1114,7 +1111,6 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
             csv_id=csv_id).delete()
         db.session.query(CsvCourses).filter_by(csv_id=csv_id).delete()
         db.session.commit()
-        db.session.close()
         return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1173,7 +1169,6 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
         csv_file.flag_deleted = True
 
         db.session.commit()
-        db.session.close()
         return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1205,7 +1200,6 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
         csv_file.flag_deleted = False
 
         db.session.commit()
-        db.session.close()
         return jsonify({"status": "success", "message": "Successfully restored the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
@@ -1291,7 +1285,6 @@ def to_publish_selected_csv_file(csv_id: int):
         csv_file.flag_release = True
 
         db.session.commit()
-        db.session.close()
         return jsonify({"status": "success", "message": "Successfully published the selected csv file with id: "
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
@@ -1323,7 +1316,7 @@ def to_unpublished_selected_csv_file(csv_id: int):
         csv_file.flag_release = False
 
         db.session.commit()
-        db.session.close()
+
         return jsonify({"status": "success", "message": "Successfully unpublished the selected csv file with id: "
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
@@ -2075,7 +2068,7 @@ def format_names():
         course_for_name=func.replace(CsvCourses.course_for_name, ',', ''))
     db.session.execute(bulk_up)
     db.session.commit()
-    db.session.close()
+
     return jsonify({"status": "success", "message": "Successfully formatted the names."}), 200
 
 
@@ -2091,7 +2084,6 @@ def get_previous_evaluated_file():
             CsvModelDetail.csv_question,
             CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
             CsvModelDetail.csv_id.desc()).first()
-        db.session.close()
 
         if previous_evaluated_file:
             return jsonify({

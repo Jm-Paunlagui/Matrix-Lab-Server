@@ -149,7 +149,6 @@ def dashboard_data_professor():
     # Count the number of users that has password in the database
     total_professors_without_password = User.query.filter_by(
         role="user", password=None).count()
-    db.session.close()
     data_professor = [
         {"id": 1, "title": "Total Professors",
          "value": total_users, "icon": "fas fa-user-tie", "color": "bg-blue-500"},
@@ -657,7 +656,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -690,7 +689,6 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -722,7 +720,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -755,7 +753,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -789,7 +787,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -824,7 +822,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -859,7 +857,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -893,7 +891,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(analysis, None)
-    db.session.close()
+
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                     "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -960,7 +958,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -994,7 +992,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1027,7 +1025,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1061,7 +1059,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1096,7 +1094,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1132,7 +1130,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1168,7 +1166,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
                 analysis, converted_full_name)
-        db.session.close()
+
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
@@ -1203,7 +1201,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
             analysis, converted_full_name)
-    db.session.close()
+
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                     "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
