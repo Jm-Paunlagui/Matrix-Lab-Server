@@ -425,7 +425,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # @desc: Load the model
         start_time_model = time.time()
-        model = load_model(Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
+        model = load_model(
+            Directories.DEEP_LEARNING_MODEL_FOLDER + "/model.h5")
         end_time_model = time.time()
 
         # @desc: Predict the sentiment of the sentences
