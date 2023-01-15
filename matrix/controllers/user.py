@@ -176,7 +176,6 @@ def create_user_auto_generated_password(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
-    db.session.close()
     return False
 
 
@@ -249,7 +248,6 @@ def deactivate_user(user_id: int):
         mail.send(msg)
         db.session.commit()
         return True
-    db.session.close()
     return False
 
 
@@ -322,9 +320,7 @@ def lock_user_account(user_id: int):
 
         mail.send(msg)
         db.session.commit()
-        db.session.close()
         return True
-    db.session.close()
     return False
 
 
@@ -398,7 +394,6 @@ def unlock_user_account(user_id: int):
 
         mail.send(msg)
         return True
-    db.session.close()
     return False
 
 
@@ -473,7 +468,6 @@ def delete_user_account(user_id: int):
 
         mail.send(msg)
         return True
-    db.session.close()
     return False
 
 
@@ -546,7 +540,6 @@ def restore_user_account(user_id: int):
 
         mail.send(msg)
         return True
-    db.session.close()
     return False
 
 
