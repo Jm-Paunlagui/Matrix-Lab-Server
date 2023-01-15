@@ -730,8 +730,14 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
 
     if bulk_download is None or False:
         return top
-    return department_evaluatee, number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, \
-        share
+
+    # return like this format for bulk download [(1, 1, 'LOPEZ TRISHA', 'DTE', 31, 74.19, 25.81, 0.38) .. ] but with the calculated data
+    return [
+        (index + 1, index + 1, name, department_evaluatee[names.index(name)], number_of_sentiments[names.index(name)],
+            positive_sentiments_percentage[names.index(name)], negative_sentiments_percentage[names.index(name)],
+            share[names.index(name)]) for index, name in enumerate(
+                sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
+                    reverse=True), start=0)] if positive_sentiments_percentage else []
 
 
 def read_overall_data_department_analysis_csv_files(school_year: str | None, school_semester: str | None,
@@ -1389,7 +1395,6 @@ def to_unpublished_all_csv_files():
 
 def download_analysis(professors=None, departments=None, courses=None, sentiments=None, analysis=None,
                       type_of_download=None, csv_id=None, file_name=None, bulk_download=False):
-    print(professors)
     # Sort form highest to lowest professor positive sentiments percentage and add the rank column to the dataframe.
 
     professors = sorted(professors, key=lambda x: x[5], reverse=True)
@@ -1678,7 +1683,8 @@ def to_download_all_csv_files(type_of_download: str | None):
         file_name = AllowedFile(
             f"All_Evaluated_Files_In").secure_filename()
 
-        sentiments = db.session.query(
+        # Raw Evaluated File
+        raw_evaluated_file = db.session.query(
             CsvModelDetail.csv_id,
             CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee, CsvAnalyzedSentiment.department,
             CsvAnalyzedSentiment.course_code, CsvAnalyzedSentiment.sentence, CsvAnalyzedSentiment.sentiment,
@@ -1687,31 +1693,47 @@ def to_download_all_csv_files(type_of_download: str | None):
         ).join(
             CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
 
-        professors = db.session.query(
-            CsvModelDetail.csv_id,
-            CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor, CsvProfessorSentiment.evaluatee_department,
-            CsvProfessorSentiment.evaluatee_number_of_sentiments,
+        # Overall Professor Sentiment
+        user_list = db.session.query(User.full_name, User.department).filter(User.role == "user").all()
+        users = [user[0].upper() for user in user_list]
+        no_of_evaluated = db.session.query(CsvModelDetail).count()
+
+        sentiment_professor = db.session.query(
+            CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
+            CsvProfessorSentiment.evaluatee_department, CsvProfessorSentiment.evaluatee_number_of_sentiments,
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage, CsvProfessorSentiment.evaluatee_share
-        ).join(
+            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage,
+            CsvProfessorSentiment.evaluatee_share).join(
             CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).all()
 
-        departments = db.session.query(
-            CsvModelDetail.csv_id,
-            CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
-            CsvDepartmentSentiment.department_evaluatee,
-            CsvDepartmentSentiment.department_number_of_sentiments,
+        sentiment_professor_cal = computed(
+            sentiment_list=sentiment_professor, many=True, type_comp="top_prof", names=users,
+            no_of_evaluated=no_of_evaluated, duo_raw=user_list, bulk_download=True)
+
+        # Overall Department Sentiment
+        department_list = db.session.query(User.department).filter(
+            User.role == "user").distinct().all()
+        departments = [department[0] for department in department_list]
+
+        sentiment_department = db.session.query(
+            CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
+            CsvDepartmentSentiment.department_evaluatee, CsvDepartmentSentiment.department_number_of_sentiments,
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
-            CsvDepartmentSentiment.department_negative_sentiments_percentage, CsvDepartmentSentiment.department_share
-        ).join(
+            CsvDepartmentSentiment.department_negative_sentiments_percentage,
+            CsvDepartmentSentiment.department_share).join(
             CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).all()
 
-        courses = db.session.query(
-            CsvModelDetail.csv_id,
-            CsvCourses.csv_id, CsvCourses.course_code, CsvCourses.course_for_name, CsvCourses.course_for_department,
-            CsvCourses.number_of_responses
-        ).join(
-            CsvCourses, CsvModelDetail.csv_id == CsvCourses.csv_id).all()
+        sentiment_department_cal = computed(
+            sentiment_list=sentiment_department, many=True, type_comp="top_dept", names=departments,
+            no_of_evaluated=no_of_evaluated, bulk_download=True)
+
+        courses = (db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvCourses.course_code, CsvCourses.course_for_name,
+                                   CsvCourses.course_for_department,
+                                   db.func.sum(CsvCourses.number_of_responses))
+                  .join(CsvModelDetail, CsvCourses.csv_id == CsvModelDetail.csv_id)
+                  .group_by(CsvCourses.course_code, CsvCourses.course_for_name,
+                            CsvCourses.course_for_department)
+                  .all())
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -1721,13 +1743,16 @@ def to_download_all_csv_files(type_of_download: str | None):
                  CsvAnalyzedSentiment.csv_id).all()
 
         # If the csv_id is not found in the database, return an error message.
-        if sentiments is None and professors is None and departments is None and courses is None and analysis is None:
+        if raw_evaluated_file is None and sentiment_professor is None and sentiment_department is None \
+                and courses is None and analysis is None:
             return jsonify({"status": "error", "message": "No Evaluated file found."}), 400
 
         return download_analysis(
-            professors=professors, departments=departments, courses=courses, sentiments=sentiments, analysis=analysis,
-            type_of_download=type_of_download, csv_id=None, file_name=file_name, bulk_download=True
+            professors=sentiment_professor_cal, departments=sentiment_department_cal, courses=courses,
+            sentiments=raw_evaluated_file, analysis=analysis, type_of_download=type_of_download,
+            csv_id=None, file_name=file_name, bulk_download=True
         )
+
     except Exception as e:
         error_handler(
             name_of=f"Cause of error: {e}",
@@ -1899,7 +1924,6 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
                 "prev_page": sentiments.prev_num,
                 "total_items": sentiments.total,
             }), 200
-        print(user_fullname, folder_name)
         if user_data.role == "user" and user_fullname == folder_name:
             # Join to CsvModel to check if its flag_release is True and not deleted.
             sentiments = db.session.query(
