@@ -734,10 +734,11 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
     # return like this format for bulk download [(1, 1, 'LOPEZ TRISHA', 'DTE', 31, 74.19, 25.81, 0.38) .. ] but with the calculated data
     return [
         (index + 1, index + 1, name, department_evaluatee[names.index(name)], number_of_sentiments[names.index(name)],
-            positive_sentiments_percentage[names.index(name)], negative_sentiments_percentage[names.index(name)],
+            positive_sentiments_percentage[names.index(
+                name)], negative_sentiments_percentage[names.index(name)],
             share[names.index(name)]) for index, name in enumerate(
                 sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
-                    reverse=True), start=0)] if positive_sentiments_percentage else []
+                       reverse=True), start=0)] if positive_sentiments_percentage else []
 
 
 def read_overall_data_department_analysis_csv_files(school_year: str | None, school_semester: str | None,
@@ -1694,7 +1695,8 @@ def to_download_all_csv_files(type_of_download: str | None):
             CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).all()
 
         # Overall Professor Sentiment
-        user_list = db.session.query(User.full_name, User.department).filter(User.role == "user").all()
+        user_list = db.session.query(User.full_name, User.department).filter(
+            User.role == "user").all()
         users = [user[0].upper() for user in user_list]
         no_of_evaluated = db.session.query(CsvModelDetail).count()
 
@@ -1728,12 +1730,12 @@ def to_download_all_csv_files(type_of_download: str | None):
             no_of_evaluated=no_of_evaluated, bulk_download=True)
 
         courses = (db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvCourses.course_code, CsvCourses.course_for_name,
-                                   CsvCourses.course_for_department,
-                                   db.func.sum(CsvCourses.number_of_responses))
-                  .join(CsvModelDetail, CsvCourses.csv_id == CsvModelDetail.csv_id)
-                  .group_by(CsvCourses.course_code, CsvCourses.course_for_name,
-                            CsvCourses.course_for_department)
-                  .all())
+                                    CsvCourses.course_for_department,
+                                    db.func.sum(CsvCourses.number_of_responses))
+                   .join(CsvModelDetail, CsvCourses.csv_id == CsvModelDetail.csv_id)
+                   .group_by(CsvCourses.course_code, CsvCourses.course_for_name,
+                             CsvCourses.course_for_department)
+                   .all())
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
