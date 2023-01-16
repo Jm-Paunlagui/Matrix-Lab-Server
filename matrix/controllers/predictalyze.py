@@ -72,7 +72,8 @@ def error_handler(error_occurred: str, name_of: str, category_error: str):
     :param name_of: The name of the error
     :param category_error: The category of the error
     """
-    db.session.add(ErrorModel(category_error=category_error, error=error_occurred, name_of=name_of))
+    db.session.add(ErrorModel(category_error=category_error,
+                   error=error_occurred, name_of=name_of))
     db.session.commit()
     return jsonify({"status": "error", "message": error_occurred}), 500
 
@@ -194,7 +195,8 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
     """
     try:
         # @desc: Read the csv file and return a pandas dataframe object
-        csv_file = pd.read_csv(Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
+        csv_file = pd.read_csv(
+            Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
 
         # @desc: Get all the columns of the csv file
         csv_columns = csv_file.columns
@@ -362,6 +364,7 @@ def department_analysis(csv_id: int):
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the departments analysis",
                         "error": f"{e}"}), 500
+
 
 def course_provider(csv_id: int, csv_file_path: str):
     """
@@ -843,7 +846,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
                 "top_department": top_department if len(top_department) > 0 else 0
             }), 200
         if school_year is not None and school_semester is not None and csv_question is not None:
-            school_year = InputTextValidation(school_year).to_query_school_year()
+            school_year = InputTextValidation(
+                school_year).to_query_school_year()
             school_semester = InputTextValidation(
                 school_semester).to_query_space_under()
             csv_question = InputTextValidation(
@@ -911,7 +915,8 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
                 "top_professors": top_professor if len(top_professor) > 0 else 0
             }), 200
         if school_year is not None and school_semester is not None and csv_question is not None:
-            school_year = InputTextValidation(school_year).to_query_school_year()
+            school_year = InputTextValidation(
+                school_year).to_query_school_year()
             school_semester = InputTextValidation(
                 school_semester).to_query_space_under()
             csv_question = InputTextValidation(

@@ -270,6 +270,7 @@ def deactivate_user(user_id: int):
                         "error": f"{e}"}), 500
     return False
 
+
 def deactivate_all_users():
     """Deactivates a user in the database."""
     try:
@@ -748,7 +749,8 @@ def authenticate_user(username: str, password: str):
                     "jti": str(uuid.uuid4())
                 }
 
-                unlock_token = PayloadSignature(payload=payload).encode_payload()
+                unlock_token = PayloadSignature(
+                    payload=payload).encode_payload()
                 msg = Message('Matrix Lab Admin Account Locked',
                               sender="service.matrix.ai@gmail.com", recipients=[email])
 
@@ -919,7 +921,7 @@ def send_tfa(email: str):
             category_error="2FA_EMAIL",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                             function_name=inspect.stack()[0][3], file_name=__name__)
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while sending the email. Please try again later.",
@@ -929,7 +931,7 @@ def send_tfa(email: str):
 
 def send_email_verification(email: str):
     """Sends a verification to the email that is provided by the user. either primary email or recovery email"""
-        # Check if the email is primary or recovery
+    # Check if the email is primary or recovery
     try:
         is_email: User = User.query.with_entities(User.email, User.recovery_email,
                                                   User.username).filter(
@@ -1119,7 +1121,8 @@ def password_reset_link(email: str):
         is_user: User = User.query.with_entities(User.full_name).filter(
             (User.email == email) | (User.recovery_email == email)
         ).first()
-        name = is_user.full_name.split()[0] + " " + is_user.full_name.split()[1]
+        name = is_user.full_name.split(
+        )[0] + " " + is_user.full_name.split()[1]
         payload = {
             "iss": "http://127.0.0.1:5000",
             "sub": email,
@@ -1127,7 +1130,8 @@ def password_reset_link(email: str):
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(minutes=5)),
             "jti": str(uuid.uuid4())
         }
-        password_reset_token = PayloadSignature(payload=payload).encode_payload()
+        password_reset_token = PayloadSignature(
+            payload=payload).encode_payload()
         source = get_os_browser_versions()
         ip_address = get_ip_address()
         msg = Message('Password Reset Link - Matrix Lab',
