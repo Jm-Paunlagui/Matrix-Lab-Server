@@ -21,7 +21,7 @@ from config import Directories
 from extensions import db
 from matrix.controllers.dashboard import core_analysis, get_top_n_words, get_top_n_bigrams, get_top_n_trigrams
 from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
-    CsvDepartmentSentiment, CsvErrorModel, CsvTimeElapsed
+    CsvDepartmentSentiment, ErrorModel, CsvTimeElapsed
 from matrix.models.user import User
 from matrix.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
     Timezone, get_starting_ending_year
@@ -64,14 +64,15 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     return bool(csv)
 
 
-def error_handler(error_occurred: str, name_of: str):
+def error_handler(error_occurred: str, name_of: str, category_error: str):
     """
     Log the error to the database.
 
     :param error_occurred: The error occurred
     :param name_of: The name of the error
+    :param category_error: The category of the error
     """
-    db.session.add(CsvErrorModel(csv_error=error_occurred, name_of=name_of))
+    db.session.add(ErrorModel(category_error=category_error, error=error_occurred, name_of=name_of))
     db.session.commit()
     return jsonify({"status": "error", "message": error_occurred}), 500
 
@@ -83,38 +84,49 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     :param csv_file_to_view: The csv file to view
     :return: The status and message
     """
-    csv_file_to_view.save(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
-        csv_file_to_view.filename).secure_filename()))
-    csv_file_ = pd.read_csv(
-        Directories.CSV_UPLOADED_FOLDER + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
-    csv_columns = csv_file_.columns
-
-    # desc: Check if the first 4 headers are evaluatee, email, department and course code
-    if csv_columns[0] != "evaluatee" or csv_columns[1] != "email" or csv_columns[2] != \
-            "department" or csv_columns[3] != "course_code":
-        # @desc: Delete the csv file if it does not follow the required format
-        os.remove(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
+    try:
+        csv_file_to_view.save(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
             csv_file_to_view.filename).secure_filename()))
-        return jsonify({"status": "error", "message": "Invalid header format"}), 400
+        csv_file_ = pd.read_csv(
+            Directories.CSV_UPLOADED_FOLDER + "/" + AllowedFile(csv_file_to_view.filename).secure_filename())
+        csv_columns = csv_file_.columns
 
-    csv_columns_to_return = []
-    # @desc: Do not return the first 4 headers since they are not questions to be evaluated
-    for i in range(4, len(csv_columns)):
-        csv_columns_to_return.append({"id": i, "name": csv_columns[i]})
+        # desc: Check if the first 4 headers are evaluatee, email, department and course code
+        if csv_columns[0] != "evaluatee" or csv_columns[1] != "email" or csv_columns[2] != \
+                "department" or csv_columns[3] != "course_code":
+            # @desc: Delete the csv file if it does not follow the required format
+            os.remove(os.path.join(Directories.CSV_UPLOADED_FOLDER, AllowedFile(
+                csv_file_to_view.filename).secure_filename()))
+            return jsonify({"status": "error", "message": "Invalid header format"}), 400
 
-    csv_columns_payload = {
-        "iss": "http://127.0.0.1:5000",
-        "sub": "Columns of the csv file",
-        "csv_file_name": AllowedFile(csv_file_to_view.filename).secure_filename(),
-        "csv_columns": csv_columns_to_return
-    }
+        csv_columns_to_return = []
+        # @desc: Do not return the first 4 headers since they are not questions to be evaluated
+        for i in range(4, len(csv_columns)):
+            csv_columns_to_return.append({"id": i, "name": csv_columns[i]})
 
-    csv_columns_token = PayloadSignature(
-        payload=csv_columns_payload).encode_payload()
+        csv_columns_payload = {
+            "iss": "http://127.0.0.1:5000",
+            "sub": "Columns of the csv file",
+            "csv_file_name": AllowedFile(csv_file_to_view.filename).secure_filename(),
+            "csv_columns": csv_columns_to_return
+        }
 
-    return jsonify({"status": "success",
-                    "message": "File columns viewed successfully",
-                    "token_columns": csv_columns_token}), 200
+        csv_columns_token = PayloadSignature(
+            payload=csv_columns_payload).encode_payload()
+
+        return jsonify({"status": "success",
+                        "message": "File columns viewed successfully",
+                        "token_columns": csv_columns_token}), 200
+    except Exception as e:
+        error_handler(
+            category_error="VIEW_COLUMNS",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while viewing the csv file columns",
+                        "error": f"{e}"}), 500
 
 
 def csv_formatter(file_name: str, sentence_index: int, evaluatee_index: int, department_index: int,
@@ -180,44 +192,55 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
     :param sentence_index: The sentence index
     :return: The formatted csv file
     """
-    # @desc: Read the csv file and return a pandas dataframe object
-    csv_file = pd.read_csv(Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
+    try:
+        # @desc: Read the csv file and return a pandas dataframe object
+        csv_file = pd.read_csv(Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
 
-    # @desc: Get all the columns of the csv file
-    csv_columns = csv_file.columns
+        # @desc: Get all the columns of the csv file
+        csv_columns = csv_file.columns
 
-    reformatted_csv = csv_file.rename(columns={
-        csv_columns[sentence_index]: "sentence"
-    })
+        reformatted_csv = csv_file.rename(columns={
+            csv_columns[sentence_index]: "sentence"
+        })
 
-    # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
-    columns_to_not_drop = ["evaluatee", "email",
-                           "department", "course_code", "sentence"]
+        # @desc: Drop the rest of the columns from the csv file that are not required for the evaluation
+        columns_to_not_drop = ["evaluatee", "email",
+                               "department", "course_code", "sentence"]
 
-    # @desc: Get the columns that are not required for the evaluation with a seperator of comma
-    columns_to_drop = [
-        column for column in reformatted_csv if column not in columns_to_not_drop]
+        # @desc: Get the columns that are not required for the evaluation with a seperator of comma
+        columns_to_drop = [
+            column for column in reformatted_csv if column not in columns_to_not_drop]
 
-    reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
+        reformatted_csv.drop(columns_to_drop, axis=1, inplace=True)
 
-    # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
-    reformatted_csv.dropna(subset=["sentence"], inplace=True)
+        # desc: Pass 1 is to drop na values and null values in the csv file even if there are values in the other columns
+        reformatted_csv.dropna(subset=["sentence"], inplace=True)
 
-    # desc: Pass 2 is to remove the text if it's a single character like 'a', 'b', 'c', etc.
-    reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
-    ) > 1]
+        # desc: Pass 2 is to remove the text if it's a single character like 'a', 'b', 'c', etc.
+        reformatted_csv = reformatted_csv[reformatted_csv["sentence"].str.len(
+        ) > 1]
 
-    # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
-    for index, row in reformatted_csv.iterrows():
-        reformatted_csv.at[index, "sentence"] = TextPreprocessing(
-            row["sentence"]).clean_text()
+        # desc: Pass 3 is to Clean the sentences in the csv file and return a list of cleaned sentences
+        for index, row in reformatted_csv.iterrows():
+            reformatted_csv.at[index, "sentence"] = TextPreprocessing(
+                row["sentence"]).clean_text()
 
-    # @desc: Save the reformatted csv file to the database
-    reformatted_csv.to_csv(
-        Directories.CSV_REFORMATTED_FOLDER + "/" + file_name, index=False)
+        # @desc: Save the reformatted csv file to the database
+        reformatted_csv.to_csv(
+            Directories.CSV_REFORMATTED_FOLDER + "/" + file_name, index=False)
 
-    # @desc: Delete the csv file from the uploaded folder
-    # os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+        # @desc: Delete the csv file from the uploaded folder
+        # os.remove(os.path.join(app.config["CSV_UPLOADED_FOLDER"], file_name))
+    except Exception as e:
+        error_handler(
+            category_error="CSV_FORMATTER",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while formatting the csv file",
+                        "error": f"{e}"}), 500
 
 
 def done_in_csv_evaluation(file_name: str):
@@ -236,6 +259,7 @@ def done_in_csv_evaluation(file_name: str):
         })
     except Exception as e:
         error_handler(
+            category_error="FILE_DELETE",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__))
@@ -248,75 +272,96 @@ def professor_analysis(csv_file_path: str, csv_id: int):
     evaluatee_list: The list of the professors without duplicates
     evaluatee_department: The department of the professor
     """
-    # @desc: In this analysis we are going to automate the account creation of the professors if they don't
-    # exist in the database.
-    # @desc: Read the csv file
-    csv_file = pd.read_csv(csv_file_path)
+    try:
+        # @desc: In this analysis we are going to automate the account creation of the professors if they don't
+        # exist in the database.
+        # @desc: Read the csv file
+        csv_file = pd.read_csv(csv_file_path)
 
-    # @desc: Get the list of the professors with their department and email address from the csv file and save it in
-    # a list of tuples with the format (evaluatee, department, email) and remove the duplicates from the list of
-    # tuples
-    evaluatee_list = \
-        list(set([(row["evaluatee"], row["department"], row["email"])
-                  for index, row in csv_file.iterrows()]))
+        # @desc: Get the list of the professors with their department and email address from the csv file and save it in
+        # a list of tuples with the format (evaluatee, department, email) and remove the duplicates from the list of
+        # tuples
+        evaluatee_list = \
+            list(set([(row["evaluatee"], row["department"], row["email"])
+                      for index, row in csv_file.iterrows()]))
 
-    # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
-    for index, evaluatee in enumerate(evaluatee_list):
-        if not User.query.filter_by(email=evaluatee[2]).first():
-            email = evaluatee[2].lower()
-            username = evaluatee[2].split("@")[0]
-            department = evaluatee[1]
-            full_name = evaluatee[0].replace(",", "").title()
+        # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
+        for index, evaluatee in enumerate(evaluatee_list):
+            if not User.query.filter_by(email=evaluatee[2]).first():
+                email = evaluatee[2].lower()
+                username = evaluatee[2].split("@")[0]
+                department = evaluatee[1]
+                full_name = evaluatee[0].replace(",", "").title()
 
-            # @desc: Create the user account
-            user = User(username=username, email=email,
-                        full_name=full_name, department=department, role="user")
-            db.session.add(user)
-            db.session.commit()
+                # @desc: Create the user account
+                user = User(username=username, email=email,
+                            full_name=full_name, department=department, role="user")
+                db.session.add(user)
+                db.session.commit()
 
-        continue
+            continue
 
-    # @desc: For each Professor computing code
-    sentiment_list = db.session.query(
-        CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
-        CsvAnalyzedSentiment.sentiment_converted).join(
-        CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
-        CsvAnalyzedSentiment.csv_id == csv_id).all()
+        # @desc: For each Professor computing code
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.evaluatee,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
+            CsvAnalyzedSentiment.csv_id == csv_id).all()
 
-    user_list = db.session.query(User.full_name, User.department).filter(
-        User.role == "user").all()
+        user_list = db.session.query(User.full_name, User.department).filter(
+            User.role == "user").all()
 
-    users = [user[0].upper() for user in user_list]
+        users = [user[0].upper() for user in user_list]
 
-    quad(
-        names=users,
-        sentiment_list=sentiment_list,
-        type_comp="professor_computing",
-        duo_raw=user_list,
-        csv_id=csv_id
-    )
+        quad(
+            names=users,
+            sentiment_list=sentiment_list,
+            type_comp="professor_computing",
+            duo_raw=user_list,
+            csv_id=csv_id
+        )
+    except Exception as e:
+        error_handler(
+            category_error="COMPUTING",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while computing the professors analysis",
+                        "error": f"{e}"}), 500
 
 
 def department_analysis(csv_id: int):
     """department_list: The list of the departments without duplicates"""
-    # @desc: For each Department computing code
-    department_list = db.session.query(User.department).filter(
-        User.role == "user").distinct().all()
-    departments = [department[0] for department in department_list]
+    try:
+        # @desc: For each Department computing code
+        department_list = db.session.query(User.department).filter(
+            User.role == "user").distinct().all()
+        departments = [department[0] for department in department_list]
 
-    sentiment_list = db.session.query(
-        CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.department,
-        CsvAnalyzedSentiment.sentiment_converted).join(
-        CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
-        CsvAnalyzedSentiment.csv_id == csv_id).all()
+        sentiment_list = db.session.query(
+            CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.department,
+            CsvAnalyzedSentiment.sentiment_converted).join(
+            CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id).filter(
+            CsvAnalyzedSentiment.csv_id == csv_id).all()
 
-    quad(
-        names=departments,
-        sentiment_list=sentiment_list,
-        type_comp="department_computing",
-        csv_id=csv_id
-    )
-
+        quad(
+            names=departments,
+            sentiment_list=sentiment_list,
+            type_comp="department_computing",
+            csv_id=csv_id
+        )
+    except Exception as e:
+        error_handler(
+            category_error="COMPUTING",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while computing the departments analysis",
+                        "error": f"{e}"}), 500
 
 def course_provider(csv_id: int, csv_file_path: str):
     """
@@ -330,26 +375,37 @@ def course_provider(csv_id: int, csv_file_path: str):
     :desc: The course provider scans the csv file and gets the distinct course code and the department of the course
     as well as the names of the professors who taught the course.
     """
-    # @desc: Read the csv file
-    csv_file = pd.read_csv(csv_file_path)
+    try:
+        # @desc: Read the csv file
+        csv_file = pd.read_csv(csv_file_path)
 
-    course_code_sentence_per_professor = csv_file.groupby(["course_code", "evaluatee", "department"]).\
-        size().reset_index(name="count")
+        course_code_sentence_per_professor = csv_file.groupby(["course_code", "evaluatee", "department"]).\
+            size().reset_index(name="count")
 
-    for index, row in course_code_sentence_per_professor.iterrows():
-        if not CsvCourses.query.filter_by(
-            csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
-                course_for_department=row["department"], number_of_responses=row["count"]).first():
-            # @desc: Removes the , in the evaluatee name
-            course_for_name = row["evaluatee"].replace(",", "")
-            csv_course = CsvCourses(csv_id=csv_id, course_code=row["course_code"],
-                                    course_for_name=course_for_name,
-                                    course_for_department=row["department"],
-                                    number_of_responses=row["count"])
-            db.session.add(csv_course)
-            db.session.commit()
+        for index, row in course_code_sentence_per_professor.iterrows():
+            if not CsvCourses.query.filter_by(
+                csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
+                    course_for_department=row["department"], number_of_responses=row["count"]).first():
+                # @desc: Removes the , in the evaluatee name
+                course_for_name = row["evaluatee"].replace(",", "")
+                csv_course = CsvCourses(csv_id=csv_id, course_code=row["course_code"],
+                                        course_for_name=course_for_name,
+                                        course_for_department=row["department"],
+                                        number_of_responses=row["count"])
+                db.session.add(csv_course)
+                db.session.commit()
 
-        continue
+            continue
+    except Exception as e:
+        error_handler(
+            category_error="CREATE",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while creating the course provider",
+                        "error": f"{e}"}), 500
 
 
 def remove_stopwords(response):
@@ -575,6 +631,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             db.session.query(CsvTimeElapsed).filter_by(csv_id=csv_id).delete()
             db.session.commit()
         error_handler(
+            category_error="CORE",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__))
@@ -583,71 +640,82 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
 
 def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=None):
-    number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, share, \
-        department_evaluatee = [], [], [], [], []
-    total = len(sentiment_list)
-    for name in names:
-        number_of_sentiments.append(
-            len([sentiment for sentiment in sentiment_list if sentiment[2] == name])
-            if len(sentiment_list) > 0 else 0)
+    try:
+        number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, share, \
+            department_evaluatee = [], [], [], [], []
+        total = len(sentiment_list)
+        for name in names:
+            number_of_sentiments.append(
+                len([sentiment for sentiment in sentiment_list if sentiment[2] == name])
+                if len(sentiment_list) > 0 else 0)
 
-        positive_sentiments_percentage.append(
-            round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 1]) /
-                  number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
+            positive_sentiments_percentage.append(
+                round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 1]) /
+                      number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
 
-        negative_sentiments_percentage.append(
-            round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 0]) /
-                  number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
+            negative_sentiments_percentage.append(
+                round(len([sentiment for sentiment in sentiment_list if sentiment[2] == name and sentiment[3] == 0]) /
+                      number_of_sentiments[-1] * 100, 2) if number_of_sentiments[-1] > 0 else 0)
 
-        share.append(
-            round(number_of_sentiments[-1] / total * 100, 2) if total > 0 else 0)
+            share.append(
+                round(number_of_sentiments[-1] / total * 100, 2) if total > 0 else 0)
 
-        if type_comp == "department_computing":
-            department_evaluatee.append(
-                db.session.query(User.department).filter(
-                    User.department == name, User.role == "user").count()
-            )
+            if type_comp == "department_computing":
+                department_evaluatee.append(
+                    db.session.query(User.department).filter(
+                        User.department == name, User.role == "user").count()
+                )
+            if type_comp == "professor_computing":
+                department_evaluatee.append(duo_raw[names.index(name)][1])
+
+        # Top department with the highest number of positive sentiments percentage
         if type_comp == "professor_computing":
-            department_evaluatee.append(duo_raw[names.index(name)][1])
-
-    # Top department with the highest number of positive sentiments percentage
-    if type_comp == "professor_computing":
-        # Insert the professor's name and the number of sentiments to the database CsvProfessorSentiment
-        for index, professor in enumerate(
-                sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
-            db.session.add(CsvProfessorSentiment(
-                csv_id=csv_id,
-                professor=professor,
-                evaluatee_department=department_evaluatee[names.index(
-                    professor)],
-                evaluatee_number_of_sentiments=number_of_sentiments[names.index(
-                    professor)],
-                evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
-                    professor)],
-                evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
-                    professor)],
-                evaluatee_share=share[names.index(professor)],
-            ))
-        db.session.commit()
-    if type_comp == "department_computing":
-        # Insert the department's name and the number of sentiments to the database CsvDepartmentSentiment
-        for index, department in enumerate(
-                sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
-            db.session.add(CsvDepartmentSentiment(
-                csv_id=csv_id,
-                department=department,
-                department_evaluatee=department_evaluatee[names.index(
-                    department)],
-                department_number_of_sentiments=number_of_sentiments[names.index(
-                    department)],
-                department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
-                    department)],
-                department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
-                    department)],
-                department_share=share[names.index(department)],
-            ))
-        db.session.commit()
-    return None
+            # Insert the professor's name and the number of sentiments to the database CsvProfessorSentiment
+            for index, professor in enumerate(
+                    sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
+                db.session.add(CsvProfessorSentiment(
+                    csv_id=csv_id,
+                    professor=professor,
+                    evaluatee_department=department_evaluatee[names.index(
+                        professor)],
+                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(
+                        professor)],
+                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        professor)],
+                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        professor)],
+                    evaluatee_share=share[names.index(professor)],
+                ))
+            db.session.commit()
+        if type_comp == "department_computing":
+            # Insert the department's name and the number of sentiments to the database CsvDepartmentSentiment
+            for index, department in enumerate(
+                    sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
+                db.session.add(CsvDepartmentSentiment(
+                    csv_id=csv_id,
+                    department=department,
+                    department_evaluatee=department_evaluatee[names.index(
+                        department)],
+                    department_number_of_sentiments=number_of_sentiments[names.index(
+                        department)],
+                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        department)],
+                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        department)],
+                    department_share=share[names.index(department)],
+                ))
+            db.session.commit()
+        return None
+    except Exception as e:
+        error_handler(
+            category_error="CREATE",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while computing the data in the database.",
+                        "error": f"{e}"}), 500
 
 
 def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_evaluated=None, duo_raw=None,
@@ -660,194 +728,224 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
     negative_sentiments_percentage: negative sentiments percentage float
     share: share of the number of sentiments float
     """
-    # Already computed, therefore return the data from the database
-    if not many and type_comp == "NNTC":
-        total = [sum([sentiment[4] for sentiment in sentiment_list])][0]
-        return [{
-            "id": index,
-            "name": sentiment[2],
-            "positive_sentiments_percentage":
-                f"{sentiment[5]}%",
-            "negative_sentiments_percentage":
-                f"{sentiment[6]}%",
-            "number_of_sentiments":
-                f"{sentiment[4]:,} / {total}",
-            "share": f"{sentiment[7]}%",
-            "department": sentiment[3]
-        } for index, sentiment in enumerate(sentiment_list, start=0)]
+    try:
+        # Already computed, therefore return the data from the database
+        if not many and type_comp == "NNTC":
+            total = [sum([sentiment[4] for sentiment in sentiment_list])][0]
+            return [{
+                "id": index,
+                "name": sentiment[2],
+                "positive_sentiments_percentage":
+                    f"{sentiment[5]}%",
+                "negative_sentiments_percentage":
+                    f"{sentiment[6]}%",
+                "number_of_sentiments":
+                    f"{sentiment[4]:,} / {total}",
+                "share": f"{sentiment[7]}%",
+                "department": sentiment[3]
+            } for index, sentiment in enumerate(sentiment_list, start=0)]
 
-    department_evaluatee, number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, \
-        share = [], [], [], [], []
-    total = sum([sentiment[4] for sentiment in sentiment_list])
-    for name in names:
-        number_of_sentiments.append(
-            sum([sentiment[4]
-                 for sentiment in sentiment_list if sentiment[2] == name])
-        )
-        # Recalculate the percentage of positive and negative sentiments by department and divide by the number of
-        # evaluated files
-        positive_sentiments_percentage.append(
-            round(
-                sum([sentiment[5] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
-        ) if no_of_evaluated > 0 else 0
-        negative_sentiments_percentage.append(
-            round(
-                sum([sentiment[6] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
-        ) if no_of_evaluated > 0 else 0
-        share.append(
-            round(
-                sum([sentiment[4] for sentiment in sentiment_list if sentiment[2] == name]) / total * 100, 2)
-        ) if total > 0 else 0
-        if type_comp == "top_dept":
-            department_evaluatee.append(
-                db.session.query(User.department).filter(
-                    User.department == name, User.role == "user").count()
-            ) if type_comp == "top_dept" else 0
-        if type_comp == "top_prof":
-            department_evaluatee.append(
-                duo_raw[names.index(name)][1]) if type_comp == "top_prof" else 0
+        department_evaluatee, number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage, \
+            share = [], [], [], [], []
+        total = sum([sentiment[4] for sentiment in sentiment_list])
+        for name in names:
+            number_of_sentiments.append(
+                sum([sentiment[4]
+                     for sentiment in sentiment_list if sentiment[2] == name])
+            )
+            # Recalculate the percentage of positive and negative sentiments by department and divide by the number of
+            # evaluated files
+            positive_sentiments_percentage.append(
+                round(
+                    sum([sentiment[5] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
+            ) if no_of_evaluated > 0 else 0
+            negative_sentiments_percentage.append(
+                round(
+                    sum([sentiment[6] for sentiment in sentiment_list if sentiment[2] == name]) / no_of_evaluated, 2)
+            ) if no_of_evaluated > 0 else 0
+            share.append(
+                round(
+                    sum([sentiment[4] for sentiment in sentiment_list if sentiment[2] == name]) / total * 100, 2)
+            ) if total > 0 else 0
+            if type_comp == "top_dept":
+                department_evaluatee.append(
+                    db.session.query(User.department).filter(
+                        User.department == name, User.role == "user").count()
+                ) if type_comp == "top_dept" else 0
+            if type_comp == "top_prof":
+                department_evaluatee.append(
+                    duo_raw[names.index(name)][1]) if type_comp == "top_prof" else 0
 
-    top = [
-        {
-            "id": index,
-            "name": name,
-            "positive_sentiments_percentage":
-                f"{positive_sentiments_percentage[names.index(name)]}%",
-            "negative_sentiments_percentage":
-                f"{negative_sentiments_percentage[names.index(name)]}%",
-            "number_of_sentiments": f"{number_of_sentiments[names.index(name)]:,} / {total:,}",
-            "share": f"{share[names.index(name)]}%",
-            "department": department_evaluatee[names.index(name)]
-        } for index, name in enumerate(
-            sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
-                   reverse=True), start=0)] if positive_sentiments_percentage else []
-
-    if bulk_download is None or False:
-        return top
-
-    # return like this format for bulk download [(1, 1, 'LOPEZ TRISHA', 'DTE', 31, 74.19, 25.81, 0.38) .. ] but with the calculated data
-    return [
-        (index + 1, index + 1, name, department_evaluatee[names.index(name)], number_of_sentiments[names.index(name)],
-            positive_sentiments_percentage[names.index(
-                name)], negative_sentiments_percentage[names.index(name)],
-            share[names.index(name)]) for index, name in enumerate(
+        top = [
+            {
+                "id": index,
+                "name": name,
+                "positive_sentiments_percentage":
+                    f"{positive_sentiments_percentage[names.index(name)]}%",
+                "negative_sentiments_percentage":
+                    f"{negative_sentiments_percentage[names.index(name)]}%",
+                "number_of_sentiments": f"{number_of_sentiments[names.index(name)]:,} / {total:,}",
+                "share": f"{share[names.index(name)]}%",
+                "department": department_evaluatee[names.index(name)]
+            } for index, name in enumerate(
                 sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
                        reverse=True), start=0)] if positive_sentiments_percentage else []
+
+        if bulk_download is None or False:
+            return top
+
+        return [
+            (index + 1, index + 1, name, department_evaluatee[names.index(name)], number_of_sentiments[names.index(name)],
+                positive_sentiments_percentage[names.index(
+                    name)], negative_sentiments_percentage[names.index(name)],
+                share[names.index(name)]) for index, name in enumerate(
+                    sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
+                           reverse=True), start=0)] if positive_sentiments_percentage else []
+    except Exception as e:
+        error_handler(
+            category_error="COMPUTATION",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while computing the already computed data.",
+                        "error": f"{e}"}), 500
 
 
 def read_overall_data_department_analysis_csv_files(school_year: str | None, school_semester: str | None,
                                                     csv_question: str | None):
     """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
+    try:
+        department_list = db.session.query(User.department).filter(
+            User.role == "user").distinct().all()
+        departments = [department[0] for department in department_list]
+        if school_year is None and school_semester is None and csv_question is None:
+            no_of_evaluated = db.session.query(CsvModelDetail).count()
 
-    department_list = db.session.query(User.department).filter(
-        User.role == "user").distinct().all()
-    departments = [department[0] for department in department_list]
-    if school_year is None and school_semester is None and csv_question is None:
-        no_of_evaluated = db.session.query(CsvModelDetail).count()
+            sentiment = db.session.query(
+                CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
+                CsvDepartmentSentiment.department_evaluatee, CsvDepartmentSentiment.department_number_of_sentiments,
+                CsvDepartmentSentiment.department_positive_sentiments_percentage,
+                CsvDepartmentSentiment.department_negative_sentiments_percentage,
+                CsvDepartmentSentiment.department_share).join(
+                CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).all()
 
-        sentiment = db.session.query(
-            CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
-            CsvDepartmentSentiment.department_evaluatee, CsvDepartmentSentiment.department_number_of_sentiments,
-            CsvDepartmentSentiment.department_positive_sentiments_percentage,
-            CsvDepartmentSentiment.department_negative_sentiments_percentage,
-            CsvDepartmentSentiment.department_share).join(
-            CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).all()
+            top_department = computed(sentiment_list=sentiment, many=True, type_comp="top_dept", names=departments,
+                                      no_of_evaluated=no_of_evaluated)
 
-        top_department = computed(sentiment_list=sentiment, many=True, type_comp="top_dept", names=departments,
-                                  no_of_evaluated=no_of_evaluated)
+            starting_year, ending_year = get_starting_ending_year(
+                db.session.query(CsvModelDetail.school_year).distinct().all())
 
-        starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).distinct().all())
+            return jsonify({
+                "status": "success",
+                "year": f"{starting_year} - {ending_year}",
+                "top_department": top_department if len(top_department) > 0 else 0
+            }), 200
+        if school_year is not None and school_semester is not None and csv_question is not None:
+            school_year = InputTextValidation(school_year).to_query_school_year()
+            school_semester = InputTextValidation(
+                school_semester).to_query_space_under()
+            csv_question = InputTextValidation(
+                csv_question).to_query_csv_question()
 
-        return jsonify({
-            "status": "success",
-            "year": f"{starting_year} - {ending_year}",
-            "top_department": top_department if len(top_department) > 0 else 0
-        }), 200
-    if school_year is not None and school_semester is not None and csv_question is not None:
-        school_year = InputTextValidation(school_year).to_query_school_year()
-        school_semester = InputTextValidation(
-            school_semester).to_query_space_under()
-        csv_question = InputTextValidation(
-            csv_question).to_query_csv_question()
+            sentiment_list = db.session.query(
+                CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
+                CsvDepartmentSentiment.department_evaluatee, CsvDepartmentSentiment.department_number_of_sentiments,
+                CsvDepartmentSentiment.department_positive_sentiments_percentage,
+                CsvDepartmentSentiment.department_negative_sentiments_percentage,
+                CsvDepartmentSentiment.department_share).join(
+                CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).filter(
+                CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
+                CsvModelDetail.csv_question == csv_question).all()
 
-        sentiment_list = db.session.query(
-            CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
-            CsvDepartmentSentiment.department_evaluatee, CsvDepartmentSentiment.department_number_of_sentiments,
-            CsvDepartmentSentiment.department_positive_sentiments_percentage,
-            CsvDepartmentSentiment.department_negative_sentiments_percentage,
-            CsvDepartmentSentiment.department_share).join(
-            CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).filter(
-            CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
-            CsvModelDetail.csv_question == csv_question).all()
-
-        top_department = computed(
-            sentiment_list=sentiment_list, type_comp="NNTC")
-        starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
-        return jsonify({
-            "status": "success",
-            "year": f"{starting_year} - {ending_year}",
-            "top_department": top_department if len(top_department) > 0 else 0
-        }), 200
+            top_department = computed(
+                sentiment_list=sentiment_list, type_comp="NNTC")
+            starting_year, ending_year = get_starting_ending_year(
+                db.session.query(CsvModelDetail.school_year).filter(
+                    CsvModelDetail.school_year == school_year).all())
+            return jsonify({
+                "status": "success",
+                "year": f"{starting_year} - {ending_year}",
+                "top_department": top_department if len(top_department) > 0 else 0
+            }), 200
+    except Exception as e:
+        error_handler(
+            category_error="GET",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while reading overall data of department analysis csv files.",
+                        "error": f"{e}"}), 500
 
 
 def read_overall_data_professor_analysis_csv_files(school_year: str | None, school_semester: str | None,
                                                    csv_question: str | None):
     """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
+    try:
+        user_list = db.session.query(User.full_name, User.department).filter(
+            User.role == "user").all()
+        users = [user[0].upper() for user in user_list]
+        if school_year is None and school_semester is None and csv_question is None:
+            no_of_evaluated = db.session.query(CsvModelDetail).count()
 
-    user_list = db.session.query(User.full_name, User.department).filter(
-        User.role == "user").all()
-    users = [user[0].upper() for user in user_list]
-    if school_year is None and school_semester is None and csv_question is None:
-        no_of_evaluated = db.session.query(CsvModelDetail).count()
+            sentiment = db.session.query(
+                CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
+                CsvProfessorSentiment.evaluatee_department, CsvProfessorSentiment.evaluatee_number_of_sentiments,
+                CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
+                CsvProfessorSentiment.evaluatee_negative_sentiments_percentage,
+                CsvProfessorSentiment.evaluatee_share).join(
+                CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).all()
 
-        sentiment = db.session.query(
-            CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
-            CsvProfessorSentiment.evaluatee_department, CsvProfessorSentiment.evaluatee_number_of_sentiments,
-            CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_share).join(
-            CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).all()
+            starting_year, ending_year = get_starting_ending_year(
+                db.session.query(CsvModelDetail.school_year).distinct().all())
 
-        starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).distinct().all())
+            top_professor = computed(sentiment_list=sentiment, many=True, type_comp="top_prof", names=users,
+                                     no_of_evaluated=no_of_evaluated, duo_raw=user_list)
 
-        top_professor = computed(sentiment_list=sentiment, many=True, type_comp="top_prof", names=users,
-                                 no_of_evaluated=no_of_evaluated, duo_raw=user_list)
+            return jsonify({
+                "status": "success",
+                "year": f"{starting_year} - {ending_year}",
+                "top_professors": top_professor if len(top_professor) > 0 else 0
+            }), 200
+        if school_year is not None and school_semester is not None and csv_question is not None:
+            school_year = InputTextValidation(school_year).to_query_school_year()
+            school_semester = InputTextValidation(
+                school_semester).to_query_space_under()
+            csv_question = InputTextValidation(
+                csv_question).to_query_csv_question()
+            sentiment_list = db.session.query(
+                CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
+                CsvProfessorSentiment.evaluatee_department, CsvProfessorSentiment.evaluatee_number_of_sentiments,
+                CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
+                CsvProfessorSentiment.evaluatee_negative_sentiments_percentage,
+                CsvProfessorSentiment.evaluatee_share).join(
+                CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).filter(
+                CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
+                CsvModelDetail.csv_question == csv_question).all()
 
-        return jsonify({
-            "status": "success",
-            "year": f"{starting_year} - {ending_year}",
-            "top_professors": top_professor if len(top_professor) > 0 else 0
-        }), 200
-    if school_year is not None and school_semester is not None and csv_question is not None:
-        school_year = InputTextValidation(school_year).to_query_school_year()
-        school_semester = InputTextValidation(
-            school_semester).to_query_space_under()
-        csv_question = InputTextValidation(
-            csv_question).to_query_csv_question()
-        sentiment_list = db.session.query(
-            CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
-            CsvProfessorSentiment.evaluatee_department, CsvProfessorSentiment.evaluatee_number_of_sentiments,
-            CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_negative_sentiments_percentage,
-            CsvProfessorSentiment.evaluatee_share).join(
-            CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).filter(
-            CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
-            CsvModelDetail.csv_question == csv_question).all()
-
-        top_professor = computed(
-            sentiment_list=sentiment_list, type_comp="NNTC")
-        starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
-        return jsonify({
-            "status": "success",
-            "year": f"{starting_year} - {ending_year}",
-            "top_professors": top_professor if len(top_professor) > 0 else 0
-        }), 200
+            top_professor = computed(
+                sentiment_list=sentiment_list, type_comp="NNTC")
+            starting_year, ending_year = get_starting_ending_year(
+                db.session.query(CsvModelDetail.school_year).filter(
+                    CsvModelDetail.school_year == school_year).all())
+            return jsonify({
+                "status": "success",
+                "year": f"{starting_year} - {ending_year}",
+                "top_professors": top_professor if len(top_professor) > 0 else 0
+            }), 200
+    except Exception as e:
+        error_handler(
+            category_error="GET",
+            name_of=f"Cause of error: {e}",
+            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                         function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while reading the overall data of the professor analysis csv files.",
+                        "error": f"{e}"}), 500
 
 
 def options_read_single_data():
@@ -947,6 +1045,7 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 403
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1001,6 +1100,7 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 403
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1087,6 +1187,7 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not allowed to view this page."}), 403
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1116,6 +1217,7 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
         error_handler(
+            category_error="DELETE",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1143,6 +1245,7 @@ def to_delete_all_csv_file_permanent():
         return jsonify({"status": "success", "message": "Successfully deleted all csv files."}), 200
     except Exception as e:
         error_handler(
+            category_error="DELETE",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1174,6 +1277,7 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1205,6 +1309,7 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1232,6 +1337,7 @@ def to_delete_all_csv_files_flag():
         return jsonify({"status": "success", "message": "Successfully flagged all csv files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1259,6 +1365,7 @@ def to_delete_all_csv_files_unflag():
         return jsonify({"status": "success", "message": "Successfully unflagged all csv files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1290,6 +1397,7 @@ def to_publish_selected_csv_file(csv_id: int):
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1322,6 +1430,7 @@ def to_unpublished_selected_csv_file(csv_id: int):
                                                         + str(csv_id) + "."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1349,6 +1458,7 @@ def to_publish_all_csv_files():
         return jsonify({"status": "success", "message": "Successfully published all csv files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1376,6 +1486,7 @@ def to_unpublished_all_csv_files():
         return jsonify({"status": "success", "message": "Successfully unpublished all csv files."}), 200
     except Exception as e:
         error_handler(
+            category_error="PUT",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1661,6 +1772,7 @@ def to_download_selected_csv_file(csv_id: int, type_of_download: str | None):
 
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1747,6 +1859,7 @@ def to_download_all_csv_files(type_of_download: str | None):
 
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1855,6 +1968,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
         return jsonify({"status": "error", "message": "You are not authorized to access this file."}), 401
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -1952,6 +2066,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
                         "message": "You are not authorized to view this file."}), 401
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -2011,6 +2126,7 @@ def list_evaluatees_to_create(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -2055,6 +2171,7 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int, per_pag
         }), 200
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
@@ -2103,6 +2220,7 @@ def get_previous_evaluated_file():
                         "p_csv_question": "", "p_flag_deleted": "", "p_flag_release": ""}), 200
     except Exception as e:
         error_handler(
+            category_error="GET",
             name_of=f"Cause of error: {e}",
             error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)

@@ -161,10 +161,11 @@ class CsvDepartmentSentiment(db.Model):
                f"department_share={self.department_share})"
 
 
-class CsvErrorModel(db.Model):
+class ErrorModel(db.Model):
     """
     Csv error model class attributes
     csv_error_id: Csv error id number (primary key) (auto increment) bigint
+    type_of_error: Type of error varchar(255)
     name_of: Name varchar(255)
     csv_error: Csv error text
     date_occurred: Csv error date occurred timestamp
@@ -173,6 +174,7 @@ class CsvErrorModel(db.Model):
     __tablename__ = 'csvs_error'
     csv_error_id: int = db.Column(
         db.Integer, primary_key=True, autoincrement=True)
+    category_error: str = db.Column(db.String(255))
     name_of: str = db.Column(db.String(255), nullable=False)
     csv_error: str = db.Column(db.Text, nullable=False)
     date_occurred: str = db.Column(db.DateTime, nullable=False,
@@ -180,8 +182,8 @@ class CsvErrorModel(db.Model):
 
     def __repr__(self):
         """Csv error model class representation."""
-        return f"CsvErrorModel(csv_error_id={self.csv_error_id}, name_of={self.name_of}, csv_error={self.csv_error}, " \
-               f"date_occurred={self.date_occurred})"
+        return f"CsvErrorModel(csv_error_id={self.csv_error_id}, type_of_error={self.category_error}, " \
+               f"name_of={self.name_of}, csv_error={self.csv_error}, date_occurred={self.date_occurred})"
 
     # @desc: For Descending Order (newest to oldest) in the csvs_error table
     def __lt__(self, other):
