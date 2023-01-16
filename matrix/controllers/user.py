@@ -393,6 +393,7 @@ def unlock_user_account(user_id: int):
         """
 
         mail.send(msg)
+        db.session.commit()
         return True
     return False
 
@@ -467,6 +468,7 @@ def delete_user_account(user_id: int):
         """
 
         mail.send(msg)
+        db.session.commit()
         return True
     return False
 
@@ -539,6 +541,7 @@ def restore_user_account(user_id: int):
         """
 
         mail.send(msg)
+        db.session.commit()
         return True
     return False
 
@@ -576,7 +579,7 @@ def delete_user_permanently(user_id: int):
             user_id=user_id).first()
         db.session.delete(permanently_delete_user)
         return True
-
+    db.session.commit()
     return False
 
 
@@ -751,7 +754,6 @@ def send_tfa(email: str):
         (User.email == email) | (User.recovery_email == email)).first()
 
     if email in (is_email.email, is_email.recovery_email):
-        print(datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time()))
         # Generate a link for removing the user's email if not recognized by the user using jwt
         payload = {
             "iss": "http://127.0.0.1:5000",
@@ -1067,7 +1069,7 @@ def password_reset_link(email: str):
     Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table>
     </td></tr></table></body></html> """
     mail.send(msg)
-
+    db.session.commit()
     return True
 
 
@@ -1271,7 +1273,7 @@ def update_password(old_password: str, new_password: str):
                 password=new_password).password_hasher()
         })
         return True
-
+    db.session.commit()
     return False
 
 
