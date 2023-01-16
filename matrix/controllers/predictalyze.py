@@ -263,9 +263,9 @@ def professor_analysis(csv_file_path: str, csv_id: int):
     # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
     for index, evaluatee in enumerate(evaluatee_list):
         if not User.query.filter_by(email=evaluatee[2]).first():
+            email = evaluatee[2].lower()
             username = evaluatee[2].split("@")[0]
             department = evaluatee[1]
-            email = evaluatee[2]
             full_name = evaluatee[0].replace(",", "").title()
 
             # @desc: Create the user account
