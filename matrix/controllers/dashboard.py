@@ -1002,7 +1002,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1036,7 +1036,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1069,7 +1069,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1103,7 +1103,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1138,7 +1138,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1174,7 +1174,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1210,7 +1210,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+                analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1245,7 +1245,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
-        analysis, converted_full_name)
+            analysis, converted_full_name)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
