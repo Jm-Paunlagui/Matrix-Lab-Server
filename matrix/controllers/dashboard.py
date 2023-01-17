@@ -437,7 +437,7 @@ def get_starting_ending_year(csv_files: list) -> tuple[str, str]:
 
 
 def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
-                    starting_year: str, ending_year: str, evaluatee_name: str | None) -> list[dict]:
+                    starting_year: str, ending_year: str, evaluatee_name: str | None):
     """
     Calculate the total number of sentiments.
 
@@ -473,12 +473,12 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
 
         positive_sentiment = round(
             sum([sentiment[4] for sentiment in sentiments if sentiment[2]
-                == evaluatee_name]) / total_distinct_ids,
+                 == evaluatee_name]) / total_distinct_ids,
             2) if total_distinct_ids != 0 else 0
 
         negative_sentiment = round(
             sum([sentiment[5] for sentiment in sentiments if sentiment[2]
-                == evaluatee_name]) / total_distinct_ids,
+                 == evaluatee_name]) / total_distinct_ids,
             2) if total_distinct_ids != 0 else 0
 
         total_positive_sentiments = round(
@@ -522,9 +522,45 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
         }
     ]
 
+    # Top departments
+    number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage = [], [], []
+    no_of_evaluated = db.session.query(CsvModelDetail).count()
+    # Distinct departments
+    names = list(set([sentiment[2] for sentiment in sentiments]))
+
+    for name in names:
+        number_of_sentiments.append(
+            sum([sentiment[3]
+                 for sentiment in sentiments if sentiment[2] == name])
+        )
+        # Recalculate the percentage of positive and negative sentiments by department and divide by the number of
+        # evaluated files
+        positive_sentiments_percentage.append(
+            round(
+                sum([sentiment[4] for sentiment in sentiments if sentiment[2] == name]) / no_of_evaluated, 2)
+        ) if no_of_evaluated > 0 else 0
+        negative_sentiments_percentage.append(
+            round(
+                sum([sentiment[5] for sentiment in sentiments if sentiment[2] == name]) / no_of_evaluated, 2)
+        ) if no_of_evaluated > 0 else 0
+
+    department_details = [
+        {
+            "id": index,
+            "name": name,
+            "positive_sentiments_percentage":
+                f"{positive_sentiments_percentage[names.index(name)]}%",
+            "negative_sentiments_percentage":
+                f"{negative_sentiments_percentage[names.index(name)]}%",
+            "number_of_sentiments": f"{number_of_sentiments[names.index(name)]:,} / {total_sentiments:,}",
+        } for index, name in enumerate(
+            sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
+                   reverse=True), start=0)] if positive_sentiments_percentage else []
+    print(department_details)
+
     if evaluatee_name is not None:
         return sentiment_details
-    return sentiment_details
+    return sentiment_details, department_details
 
 
 def remove_none_values(sentiment_converted_list: list, polarity_list: list, review_length_list: list,
@@ -563,8 +599,9 @@ def remove_none_values(sentiment_converted_list: list, polarity_list: list, revi
     return sentiment_converted_list, polarity_list, review_length_list, wordcloud_list, wordcloud_list_with_sentiment
 
 
-def core_analysis(analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[int, int, str, int, float, str, int]],
-                  evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
+def core_analysis(
+        analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[int, int, str, int, float, str, int]],
+        evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
     Generate the analysis of the sentiments.
 
@@ -644,7 +681,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id ==
                  CsvDepartmentSentiment.csv_id).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -658,6 +695,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -677,7 +715,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -690,6 +728,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -708,7 +747,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -722,6 +761,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -741,7 +781,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -755,6 +795,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -774,7 +815,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.csv_question == csv_question,
                    CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -789,6 +830,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -809,7 +851,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.csv_question == csv_question,
                    CsvModelDetail.school_year == school_year).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -824,6 +866,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -844,7 +887,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             filter(CsvModelDetail.school_year == school_year,
                    CsvModelDetail.school_semester == school_semester).all()
 
-        sentiment_details = pancore_compute(
+        sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
 
         analysis = db.session.query(
@@ -859,6 +902,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                        "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                         "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                         "image_path_wordcloud": wordcloud_encoded,
@@ -878,7 +922,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).all()
 
-    sentiment_details = pancore_compute(
+    sentiment_details, department_details = pancore_compute(
         sentiments, starting_year, ending_year, None)
 
     analysis = db.session.query(
@@ -893,6 +937,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         wordcloud_list_with_sentiment = core_analysis(analysis, None)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
+                    "overall_departments": department_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
                     "image_path_review_length_v_sentiment": sentiment_review_length_encoded,
                     "image_path_wordcloud": wordcloud_encoded,
@@ -957,7 +1002,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -991,7 +1036,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1024,7 +1069,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1058,7 +1103,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1093,7 +1138,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1129,7 +1174,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1165,7 +1210,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+            analysis, converted_full_name)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1200,7 +1245,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+        analysis, converted_full_name)
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
