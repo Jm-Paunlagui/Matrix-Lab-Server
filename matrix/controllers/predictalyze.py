@@ -719,7 +719,11 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the data in the database.",
                         "error": f"{e}"}), 500
-=======
+
+
+== == == =
+
+
 def read_overall_data_department_analysis_csv_files():
     """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
     # @desc: Get the csv files that are department analysis csv files
@@ -819,7 +823,6 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the already computed data.",
                         "error": f"{e}"}), 500
-
 
                 "department": department,
                 "overall_sentiment": sentiment_each_department[department],
