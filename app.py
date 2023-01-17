@@ -7,6 +7,7 @@ from extensions import db, bcrypt, mail, session
 from matrix.routes.user import user
 from matrix.routes.predictalyze import predictalyze
 from matrix.routes.dashboard import dashboard
+
 from matrix.models.user import User
 from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCourses, CsvProfessorSentiment, \
     CsvDepartmentSentiment, ErrorModel, CsvTimeElapsed
