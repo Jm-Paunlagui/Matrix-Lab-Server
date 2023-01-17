@@ -7,7 +7,7 @@ from matrix.controllers.user import authenticate_user, send_tfa, check_email_exi
     unlock_user_account, unlock_all_user_accounts, delete_user_account, delete_all_user_accounts, \
     restore_user_account, restore_all_user_accounts, update_password, update_personal_info, update_security_info, \
     update_username, verify_tfa, redirect_to, authenticated_user, verify_verification_code_to_unlock, \
-    verify_remove_token, verify_token
+    verify_remove_token, verify_token, send_username_to_email
 from matrix.module import InputTextValidation
 
 user = Blueprint("user", __name__, url_prefix="/user")
@@ -66,7 +66,24 @@ def send_security_code():
         return jsonify({"status": "error", "message": "Choose an email!"}), 400
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not send_tfa(email):
+    if not send_tfa(email=email, type_of_tfa="default"):
+        return jsonify({"status": "error", "message": "Security code not sent!"}), 500
+    return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+
+
+@user.route("/checkpoint-2fa-email", methods=["POST"])
+def send_security_code_email():
+    """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    email = request.json["email"]
+
+    if not InputTextValidation().validate_empty_fields(email):
+        return jsonify({"status": "error", "message": "Choose an email!"}), 400
+    if not InputTextValidation(email).validate_email():
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    if not send_tfa(email=email, type_of_tfa="email"):
         return jsonify({"status": "error", "message": "Security code not sent!"}), 500
     return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
 
@@ -390,6 +407,24 @@ def verify_security_code():
                     "path": redirect_to(),
                     "token": authenticated_user(),
                     }), 200
+
+
+@user.route("/verify-2fa-email", methods=["POST"])
+def verify_security_code_email():
+    """Verifies the security code that was sent to the user's email address."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    code = request.json["code"]
+    email = request.json["email"]
+
+    if not InputTextValidation().validate_empty_fields(code):
+        return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
+    if not InputTextValidation().validate_empty_fields(email):
+        return jsonify({"status": "error", "message": "Email is required!"}), 400
+    if not InputTextValidation(code).validate_number() and len(code) != 7:
+        return jsonify({"status": "error", "message": "Invalid 2FA Code!"}), 400
+    return send_username_to_email(code, email)
 
 
 @user.route("/verify-verification-code-to-unlock", methods=["POST"])
