@@ -14,8 +14,6 @@ from matrix.module import AllowedFile, InputTextValidation
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
 
 
-
-
 @predictalyze.route("/view-columns", methods=["POST"])
 def view_columns():
     """

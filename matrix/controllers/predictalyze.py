@@ -285,7 +285,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
         # tuples
         evaluatee_list = \
             list({(row["evaluatee"], row["department"], row["email"])
-                      for index, row in csv_file.iterrows()})
+                  for index, row in csv_file.iterrows()})
 
         # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
         for index, evaluatee in enumerate(evaluatee_list):
