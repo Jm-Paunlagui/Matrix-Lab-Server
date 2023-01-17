@@ -464,7 +464,7 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
         print(sentiments)
         # Depending on the evaluatee name, get the total number of sentiments
         total_distinct_ids = len(
-            set([sentiment[0] for sentiment in sentiments if sentiment[2] == evaluatee_name]))
+            {sentiment[0] for sentiment in sentiments if sentiment[2] == evaluatee_name})
 
         print(total_distinct_ids)
 
@@ -526,7 +526,7 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
     number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage = [], [], []
     no_of_evaluated = db.session.query(CsvModelDetail).count()
     # Distinct departments
-    names = list(set([sentiment[2] for sentiment in sentiments]))
+    names = list({sentiment[2] for sentiment in sentiments})
 
     for name in names:
         number_of_sentiments.append(
