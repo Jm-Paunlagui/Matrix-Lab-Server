@@ -461,12 +461,9 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
     positive_sentiment = 0
     negative_sentiment = 0
     if evaluatee_name is not None:
-        print(sentiments)
         # Depending on the evaluatee name, get the total number of sentiments
         total_distinct_ids = len(
             {sentiment[0] for sentiment in sentiments if sentiment[2] == evaluatee_name})
-
-        print(total_distinct_ids)
 
         total_sentiments = sum(
             [sentiment[3] for sentiment in sentiments if sentiment[2] == evaluatee_name])
@@ -556,7 +553,6 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
         } for index, name in enumerate(
             sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)],
                    reverse=True), start=0)] if positive_sentiments_percentage else []
-    print(department_details)
 
     if evaluatee_name is not None:
         return sentiment_details
