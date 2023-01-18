@@ -80,12 +80,10 @@ def send_security_code_email():
     email = request.json["email"]
 
     if not InputTextValidation().validate_empty_fields(email):
-        return jsonify({"status": "error", "message": "Choose an email!"}), 400
+        return jsonify({"status": "error", "message": "Email required!"}), 400
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not send_tfa(email=email, type_of_tfa="email"):
-        return jsonify({"status": "error", "message": "Security code not sent!"}), 500
-    return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+    return send_tfa(email=email, type_of_tfa="email")
 
 
 @user.route("/send-verification-code", methods=["POST"])

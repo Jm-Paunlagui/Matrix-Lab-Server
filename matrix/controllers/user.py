@@ -179,8 +179,8 @@ def create_user_auto_generated_password(user_id: int):
     except Exception as e:
         error_handler(
             category_error="CREATE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -206,8 +206,8 @@ def create_all_users_auto_generated_password():
     except Exception as e:
         error_handler(
             category_error="CREATE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -261,8 +261,8 @@ def deactivate_user(user_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -289,8 +289,8 @@ def deactivate_all_users():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -345,8 +345,8 @@ def lock_user_account(user_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -373,8 +373,8 @@ def lock_all_user_accounts():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -430,8 +430,8 @@ def unlock_user_account(user_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -459,8 +459,8 @@ def unlock_all_user_accounts():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -516,8 +516,8 @@ def delete_user_account(user_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -545,8 +545,8 @@ def delete_all_user_accounts():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -601,8 +601,8 @@ def restore_user_account(user_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -629,8 +629,8 @@ def restore_all_user_accounts():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -811,8 +811,8 @@ def authenticate_user(username: str, password: str):
     except Exception as e:
         error_handler(
             category_error="AUTHENTICATION",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -883,7 +883,7 @@ def send_tfa(email: str, type_of_tfa: str):
                 City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
                 </td></tr></table></body></html> """
                 mail.send(msg)
-                return True
+                return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
             if email == is_email.recovery_email:
                 msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
                 http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
@@ -919,12 +919,12 @@ def send_tfa(email: str, type_of_tfa: str):
                 City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
                 </td></tr></table></body></html> """
                 mail.send(msg)
-                return True
+                return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
     except Exception as e:
         error_handler(
             category_error="2FA_EMAIL",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1000,8 +1000,8 @@ def send_email_verification(email: str):
     except Exception as e:
         error_handler(
             category_error="EMAIL_VERIFICATION",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1084,8 +1084,8 @@ def verify_verification_code_to_unlock(code: str, email: str):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1183,8 +1183,8 @@ def send_username_to_email(code: str, email: str):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1282,8 +1282,8 @@ def password_reset_link(email: str):
     except Exception as e:
         error_handler(
             category_error="PASSWORD_RESET_REQUEST",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1351,8 +1351,8 @@ def password_reset(password_reset_token: str, password: str):
     except jwt.exceptions.InvalidTokenError:
         error_handler(
             category_error="PASSWORD_RESET",
-            name_of=f"Cause of error: {jwt.exceptions.InvalidTokenError}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {jwt.exceptions.InvalidTokenError}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1488,8 +1488,8 @@ def remove_email(option: str, email: str, username: str):
     except Exception as e:
         error_handler(
             category_error="REMOVE_EMAIL",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",

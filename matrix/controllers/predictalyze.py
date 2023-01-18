@@ -64,18 +64,18 @@ def check_csv_name_exists(csv_question: str, school_year: str, school_semester: 
     return bool(csv)
 
 
-def error_handler(error_occurred: str, name_of: str, category_error: str):
+def error_handler(error_type: str, cause_of: str, category_error: str):
     """
     Log the error to the database.
 
-    :param error_occurred: The error occurred
-    :param name_of: The name of the error
+    :param error_type: The error occurred
+    :param cause_of: The name of the error
     :param category_error: The category of the error
     """
     db.session.add(ErrorModel(category_error=category_error,
-                   error=error_occurred, name_of=name_of))
+                   error_type=error_type, cause_of=cause_of))
     db.session.commit()
-    return jsonify({"status": "error", "message": error_occurred}), 500
+    return jsonify({"status": "error", "message": error_type}), 500
 
 
 def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, int]:
@@ -121,8 +121,8 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
     except Exception as e:
         error_handler(
             category_error="VIEW_COLUMNS",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -236,8 +236,8 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
     except Exception as e:
         error_handler(
             category_error="CSV_FORMATTER",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -262,8 +262,8 @@ def done_in_csv_evaluation(file_name: str):
     except Exception as e:
         error_handler(
             category_error="FILE_DELETE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__))
         return jsonify({"status": "error",
                         "message": "Error in the process of deleting the csv file with the error: " + str(e)}), 500
@@ -325,8 +325,8 @@ def professor_analysis(csv_file_path: str, csv_id: int):
     except Exception as e:
         error_handler(
             category_error="COMPUTING",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -357,8 +357,8 @@ def department_analysis(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="COMPUTING",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -402,8 +402,8 @@ def course_provider(csv_id: int, csv_file_path: str):
     except Exception as e:
         error_handler(
             category_error="CREATE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -635,8 +635,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             db.session.commit()
         error_handler(
             category_error="CORE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__))
         return jsonify({"status": "error",
                         "message": "Error in the process of evaluating the csv file with the error: " + str(e)}), 500
@@ -712,8 +712,8 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
     except Exception as e:
         error_handler(
             category_error="CREATE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -807,8 +807,8 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
     except Exception as e:
         error_handler(
             category_error="COMPUTATION",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -876,8 +876,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -944,8 +944,8 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1051,8 +1051,8 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1106,8 +1106,8 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
 
@@ -1193,8 +1193,8 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1223,8 +1223,8 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="DELETE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1251,8 +1251,8 @@ def to_delete_all_csv_file_permanent():
     except Exception as e:
         error_handler(
             category_error="DELETE",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1283,8 +1283,8 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1315,8 +1315,8 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1343,8 +1343,8 @@ def to_delete_all_csv_files_flag():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1371,8 +1371,8 @@ def to_delete_all_csv_files_unflag():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1403,8 +1403,8 @@ def to_publish_selected_csv_file(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1436,8 +1436,8 @@ def to_unpublished_selected_csv_file(csv_id: int):
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1464,8 +1464,8 @@ def to_publish_all_csv_files():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1492,8 +1492,8 @@ def to_unpublished_all_csv_files():
     except Exception as e:
         error_handler(
             category_error="PUT",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1778,8 +1778,8 @@ def to_download_selected_csv_file(csv_id: int, type_of_download: str | None):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1865,8 +1865,8 @@ def to_download_all_csv_files(type_of_download: str | None):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -1974,8 +1974,8 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -2072,8 +2072,8 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -2132,8 +2132,8 @@ def list_evaluatees_to_create(page: int, per_page: int):
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -2177,8 +2177,8 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int, per_pag
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
@@ -2226,8 +2226,8 @@ def get_previous_evaluated_file():
     except Exception as e:
         error_handler(
             category_error="GET",
-            name_of=f"Cause of error: {e}",
-            error_occurred=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
                                          function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
