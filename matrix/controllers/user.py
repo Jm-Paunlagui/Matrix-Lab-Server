@@ -181,7 +181,7 @@ def create_user_auto_generated_password(user_id: int):
             category_error="CREATE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to activate the user account. Please try again later.",
@@ -208,7 +208,7 @@ def create_all_users_auto_generated_password():
             category_error="CREATE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to create the user account. Please try again later.",
@@ -263,7 +263,7 @@ def deactivate_user(user_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to deactivate the user account. Please try again later.",
@@ -291,7 +291,7 @@ def deactivate_all_users():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error has occurred while deactivating all users.",
@@ -347,7 +347,7 @@ def lock_user_account(user_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while locking the user's account.",
@@ -375,7 +375,7 @@ def lock_all_user_accounts():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while locking all user accounts.",
@@ -432,7 +432,7 @@ def unlock_user_account(user_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while unlocking the user account.",
@@ -461,7 +461,7 @@ def unlock_all_user_accounts():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while unlocking all user accounts.",
@@ -518,7 +518,7 @@ def delete_user_account(user_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while deleting the user account.",
@@ -547,7 +547,7 @@ def delete_all_user_accounts():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while deleting all user accounts.",
@@ -603,7 +603,7 @@ def restore_user_account(user_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while restoring the user account.",
@@ -631,7 +631,7 @@ def restore_all_user_accounts():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while restoring all user accounts.",
@@ -813,7 +813,7 @@ def authenticate_user(username: str, password: str):
             category_error="AUTHENTICATION",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while authenticating the user.",
@@ -925,7 +925,7 @@ def send_tfa(email: str, type_of_tfa: str):
             category_error="2FA_EMAIL",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while sending the email. Please try again later.",
@@ -1002,7 +1002,7 @@ def send_email_verification(email: str):
             category_error="EMAIL_VERIFICATION",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while sending the email verification code. Please try again later.",
@@ -1086,7 +1086,7 @@ def verify_verification_code_to_unlock(code: str, email: str):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while unlocking your account. Please try again later.",
@@ -1185,7 +1185,7 @@ def send_username_to_email(code: str, email: str):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while unlocking your account. Please try again later.",
@@ -1284,7 +1284,7 @@ def password_reset_link(email: str):
             category_error="PASSWORD_RESET_REQUEST",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while sending the email. Please try again later.",
@@ -1353,7 +1353,7 @@ def password_reset(password_reset_token: str, password: str):
             category_error="PASSWORD_RESET",
             cause_of=f"Cause of error: {jwt.exceptions.InvalidTokenError}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while resetting your password. Please try again later.",
@@ -1490,7 +1490,7 @@ def remove_email(option: str, email: str, username: str):
             category_error="REMOVE_EMAIL",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while removing the email address. Please try again later.",
