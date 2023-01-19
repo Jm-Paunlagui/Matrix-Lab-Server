@@ -123,7 +123,7 @@ def view_columns_with_pandas(csv_file_to_view: FileStorage) -> tuple[Response, i
             category_error="VIEW_COLUMNS",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while viewing the csv file columns",
@@ -238,7 +238,7 @@ def csv_formatter_to_evaluate(file_name: str, sentence_index: int):
             category_error="CSV_FORMATTER",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while formatting the csv file",
@@ -264,7 +264,7 @@ def done_in_csv_evaluation(file_name: str):
             category_error="FILE_DELETE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__))
+                                     function_name=inspect.stack()[0][3], file_name=__name__))
         return jsonify({"status": "error",
                         "message": "Error in the process of deleting the csv file with the error: " + str(e)}), 500
 
@@ -327,7 +327,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
             category_error="COMPUTING",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the professors analysis",
@@ -359,7 +359,7 @@ def department_analysis(csv_id: int):
             category_error="COMPUTING",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the departments analysis",
@@ -404,7 +404,7 @@ def course_provider(csv_id: int, csv_file_path: str):
             category_error="CREATE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while creating the course provider",
@@ -637,7 +637,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
             category_error="CORE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__))
+                                     function_name=inspect.stack()[0][3], file_name=__name__))
         return jsonify({"status": "error",
                         "message": "Error in the process of evaluating the csv file with the error: " + str(e)}), 500
 
@@ -714,7 +714,7 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
             category_error="CREATE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the data in the database.",
@@ -809,7 +809,7 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
             category_error="COMPUTATION",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while computing the already computed data.",
@@ -878,7 +878,7 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while reading overall data of department analysis csv files.",
@@ -946,7 +946,7 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while reading the overall data of the professor analysis csv files.",
@@ -1053,7 +1053,7 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to list the csv files."}), 500
@@ -1108,7 +1108,7 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
 
 
@@ -1195,7 +1195,7 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to view the selected csv file."}), 500
@@ -1225,7 +1225,7 @@ def to_delete_selected_csv_file_permanent(csv_id: int):
             category_error="DELETE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to delete the selected csv file."}), 500
@@ -1253,7 +1253,7 @@ def to_delete_all_csv_file_permanent():
             category_error="DELETE",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to delete all csv files."}), 500
@@ -1285,7 +1285,7 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to flag the selected csv file."}), 500
@@ -1317,7 +1317,7 @@ def to_delete_selected_csv_file_unflagged(csv_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to unflag the selected csv file."}), 500
@@ -1345,7 +1345,7 @@ def to_delete_all_csv_files_flag():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to flag all csv files."}), 500
@@ -1373,7 +1373,7 @@ def to_delete_all_csv_files_unflag():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to unflag all csv files."}), 500
@@ -1405,7 +1405,7 @@ def to_publish_selected_csv_file(csv_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to publish the selected csv file."}), 500
@@ -1438,7 +1438,7 @@ def to_unpublished_selected_csv_file(csv_id: int):
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to unpublished the selected csv file."}), 500
@@ -1466,7 +1466,7 @@ def to_publish_all_csv_files():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to publish all csv files."}), 500
@@ -1494,7 +1494,7 @@ def to_unpublished_all_csv_files():
             category_error="PUT",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to unpublished all csv files."}), 500
@@ -1780,7 +1780,7 @@ def to_download_selected_csv_file(csv_id: int, type_of_download: str | None):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to download the selected csv file."}), 500
@@ -1867,7 +1867,7 @@ def to_download_all_csv_files(type_of_download: str | None):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to download all csv files."}), 500
@@ -1976,7 +1976,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to view the directory."}), 500
@@ -2074,7 +2074,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to read the csv file."}), 500
@@ -2134,7 +2134,7 @@ def list_evaluatees_to_create(page: int, per_page: int):
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to list the evaluatees to create."}), 500
@@ -2179,7 +2179,7 @@ def list_user_collection_of_sentiment_per_evaluatee_csv_files(page: int, per_pag
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to list the user collection of sentiment per "
@@ -2228,7 +2228,7 @@ def get_previous_evaluated_file():
             category_error="GET",
             cause_of=f"Cause of error: {e}",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                         function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "An error occurred while trying to get the previous evaluated file."}), 500
