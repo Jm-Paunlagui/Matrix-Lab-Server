@@ -7,7 +7,9 @@ class User(db.Model):
     User model class attributes
     user_id: User id number (primary key) (auto increment) bigint
     email: User email address (unique) varchar(255)
-    recovery_email: User recovery email address (unique) varchar(255) default "Recovery Email"
+    recovery_email: User recovery email address (unique) varchar(255) default "Recovery Email",
+    verified_email: User verified email address (unique) varchar(255) default "Unverified Email",
+    verified_recovery_email: User verified recovery email address (unique) varchar(255) default "Unverified Email",
     full_name: User full name (unique) varchar(255)
     username: User username (unique) varchar(255)
     password: User password varchar(255)
@@ -38,10 +40,13 @@ class User(db.Model):
     flag_locked = db.Column(db.Boolean, nullable=False, default=False)
     flag_active = db.Column(db.Boolean, nullable=False, default=False)
     login_attempts = db.Column(db.Integer, nullable=False, default=0)
+    verified_email = db.Column(db.String(255), unique=True, nullable=True, default="Unverified")
+    verified_recovery_email = db.Column(db.String(255), unique=True, nullable=True, default="Unverified")
 
     def __repr__(self):
         """User model class representation."""
         return f"User('{self.user_id}', '{self.email}', '{self.recovery_email}', '{self.full_name}', " \
                f"'{self.username}', '{self.password}', '{self.role}', '{self.department}', " \
                f"'{self.created_at}', '{self.updated_at}', '{self.flag_deleted}', '{self.flag_locked}', " \
-               f"'{self.flag_active}', '{self.login_attempts}')"
+               f"'{self.flag_active}', '{self.login_attempts}', '{self.verified_email}', " \
+                f"'{self.verified_recovery_email}')"

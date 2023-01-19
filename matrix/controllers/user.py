@@ -1,4 +1,5 @@
 import inspect
+import re
 import sys
 import uuid
 from datetime import datetime, timedelta
@@ -564,7 +565,7 @@ def restore_user_account(user_id: int):
             email = user.email
             user.flag_deleted = False
             # Send the Unlock Account Email
-            msg = Message('Matrix Lab Account Unlocked',
+            msg = Message('Matrix Lab Account Restored',
                           sender="service.matrix.ai@gmail.com", recipients=[email])
 
             msg.html = f""" <!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
@@ -1205,6 +1206,7 @@ def authenticated_user():
         "email": user_data.email,
         "recovery_email": user_data.recovery_email, "full_name": user_data.full_name,
         "username": user_data.username, "role": user_data.role, "path": redirect_to(),
+        "verified_email": user_data.verified_email, "verified_recovery_email": user_data.verified_recovery_email,
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
         "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=24)),
         "jti": str(uuid.uuid4())
@@ -1570,3 +1572,138 @@ def update_username(username: str):
     return jsonify({"status": "success",
                     "message": "Your username has been updated successfully.",
                     "token": authenticated_user()}), 200
+
+
+def cemail():
+    all_email = User.query.with_entities(User.email).all()
+
+    regexe = re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b")
+    for email in all_email:
+        # Print valid email
+        if regexe.match(email[0]):
+            print(f"Valid Email: {email[0]}")
+        else:
+            print(f"Invalid Email: {email[0]}")
+
+    email_valid = [
+        {
+            "email": email[0],
+            "valid": bool(regexe.match(email[0]))
+        } for email in all_email
+    ]
+
+    return jsonify({
+        "status": "success",
+        "message": "All email has been checked.",
+        "data": email_valid
+    })
+
+
+def verify_email_request(email: str):
+    """Verifies the email address of the user"""
+    try:
+        is_email: User = User.query.with_entities(
+            User.email, User.recovery_email, User.username, User.verified_email, User.verified_recovery_email).filter(
+            (User.email == email) | (User.recovery_email == email)).first()
+
+        if email in (is_email.email, is_email.recovery_email):
+            # Generate a link for removing the user's email if not recognized by the user using jwt
+            payload = {
+                "iss": "http://127.0.0.1:5000",
+                "sub": email,
+                "username": is_email[2],
+                "iat": Timezone("Asia/Manila").get_timezone_current_time(),
+                "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(minutes=5)),
+                "jti": str(uuid.uuid4())
+            }
+            link = PayloadSignature(payload=payload).encode_payload()
+
+            username = is_email[2]
+            source = get_os_browser_versions()
+            ip_address = get_ip_address()
+
+            # Send the security code to the email
+            msg = Message('Verify your email address - Matrix Lab',
+                          sender="service.matrix.ai@gmail.com", recipients=[email])
+
+            msg.html = f"""<!doctype html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
+            http-equiv="Content-Type"></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin:0;
+            background-color:#f2f3f8" leftmargin="0"><table cellspacing="0" border="0" cellpadding="0" width="100%" 
+            bgcolor="#f2f3f8" style="@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;
+            400;500;600;700;800;900&display=swap');font-family:Montserrat,sans-serif"><tr><td><table 
+            style="background-color:#f2f3f8;max-width:670px;margin:0 auto;padding:auto" width="100%" border="0" 
+            align="center" cellpadding="0" cellspacing="0"><tr><td style="height:30px">&nbsp;</td></tr><tr><td 
+            style="text-align:center"><a href="https://rakeshmandal.com" title="logo" target="_blank"><img width="60" 
+            src="https://s.gravatar.com/avatar/e7315fe46c4a8a032656dae5d3952bad?s=80" title="logo" alt="logo"></a></td>
+            </tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td><table width="87%" border="0" align="center" 
+            cellpadding="0" cellspacing="0" style="max-width:670px;background:#fff;border-radius:3px;text-align:center;
+            -webkit-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);
+            box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td style="padding:35px">
+            <h2 style="color:#5d6068;font-weight:700;text-align:left">Hi {username},</h2>
+            <p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">
+            You recently requested to verify for your Matrix account email<strong> {email} </strong>. 
+            Use the button below to reset it.<strong>This verification is only valid for only 5 minutes.</strong></p>
+            <a href="{"http://localhost:3000/verify-email/" + link}" 
+            style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;
+            text-transform:uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 
+            3px rgba(0,0,0,.16)">Verify Email</a><p style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;
+            line-height:1.625;text-align:justify">For security, this request was received from a<b> 
+            {source[0]} {source[1]} </b>device using<b> {source[2]} {source[3]} </b>with the IP address of<b> 
+            {ip_address} </b>on<b> {source[4]} </b>.</p><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;
+            line-height:1.625;text-align:justify">If you did not request a email verification, please ignore this email 
+            or contact technical support by email:<b><a style="text-decoration:none;color:#878a92" 
+            href="mailto:paunlagui.cs.jm@gmail.com">paunlagui.cs.jm@gmail.com</a></p><p 
+            style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,<br>
+            The Matrix Lab team</p><hr style="margin-top:12px;margin-bottom:12px"><p style="color:#878a92;
+            margin:.4em 0 1.1875em;font-size:13px;line-height:1.625;text-align:left">If you&#39;re having trouble with 
+            the button above, copy and paste the URL below into your web browser.</p><p style="color:#878a92;margin:.4em
+             0 1.1875em;font-size:13px;line-height:1.625;text-align:left">{"http://localhost:3000/verify-email/" + link}
+             </p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
+             style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;
+             margin:0 0 0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
+             Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body>
+             </html>"""
+            mail.send(msg)
+            return jsonify({"status": "success", "message": "Verification sent successfully"}), 200
+    except Exception as e:
+        error_handler(
+            category_error="EMAIL_VERIFICATION",
+            cause_of=f"Cause of error: {e}",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "An error occurred while sending the email verification code. Please try again later.",
+                        "error": f"{e}"}), 500
+    return False
+
+
+def verify_email(token: str):
+    try:
+        user_info: dict = PayloadSignature(encoded=token).decode_payload()
+        is_email: User = User.query.filter((User.email == user_info["sub"]) | (User.recovery_email == user_info["sub"])).first()
+        if is_email:
+            if is_email.email == user_info["sub"] and is_email.email_verified == "Verified":
+                return jsonify({"status": "error",
+                                "message": "The email address is already verified."}), 400
+            elif is_email.recovery_email == user_info["sub"] and is_email.verified_recovery_email == "Verified":
+                return jsonify({"status": "error",
+                                "message": "The recovery email address is already verified."}), 400
+
+            if is_email.email == user_info["sub"]:
+                is_email.verified_email = "Verified"
+            elif is_email.recovery_email == user_info["sub"]:
+                is_email.verified_recovery_email = "Verified"
+            db.session.commit()
+            return jsonify({"status": "success",
+                            "message": "The email address is verified.", "token": authenticated_user()}), 200
+    except jwt.exceptions.InvalidTokenError:
+        error_handler(
+            category_error="EMAIL_VERIFICATION",
+            cause_of="Cause of error: Invalid token",
+            error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
+                                        function_name=inspect.stack()[0][3], file_name=__name__)
+        )
+        return jsonify({"status": "error",
+                        "message": "The token is invalid. Please try again later.",
+                        "error": "Invalid token"}), 500

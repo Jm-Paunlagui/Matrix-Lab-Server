@@ -7,7 +7,7 @@ from matrix.controllers.user import authenticate_user, send_tfa, check_email_exi
     unlock_user_account, unlock_all_user_accounts, delete_user_account, delete_all_user_accounts, \
     restore_user_account, restore_all_user_accounts, update_password, update_personal_info, update_security_info, \
     update_username, verify_tfa, redirect_to, authenticated_user, verify_verification_code_to_unlock, \
-    verify_remove_token, verify_token, send_username_to_email
+    verify_remove_token, verify_token, send_username_to_email, cemail, verify_email_request, verify_email
 from matrix.module import InputTextValidation
 
 user = Blueprint("user", __name__, url_prefix="/user")
@@ -66,9 +66,7 @@ def send_security_code():
         return jsonify({"status": "error", "message": "Choose an email!"}), 400
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    if not send_tfa(email=email, type_of_tfa="default"):
-        return jsonify({"status": "error", "message": "Security code not sent!"}), 500
-    return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+    return send_tfa(email=email, type_of_tfa="default")
 
 
 @user.route("/checkpoint-2fa-email", methods=["POST"])
@@ -471,3 +469,25 @@ def verify_unlock_token(token: str):
         return jsonify({"status": "error", "message": "Invalid token!"}), 498
     return jsonify({"status": "success", "message": "Token verified successfully",
                     "user_data": {"name": user_data["sub"]}}), 200
+
+
+@user.route("/verify-email", methods=["POST"])
+def verify_user_email_request():
+    """Verifies the user's email address."""
+    if not request.is_json:
+        return jsonify({"status": "error", "message": "Invalid request!"})
+
+    email = request.json["email"]
+
+    if not InputTextValidation().validate_empty_fields(email):
+        return jsonify({"status": "error", "message": "Email is required!"}), 400
+    if not InputTextValidation(email).validate_email():
+        return jsonify({"status": "error", "message": "Invalid email address!"}), 400
+    return verify_email_request(email)
+
+
+@user.route("/verify-email/<string:token>", methods=["GET"])
+def verify_user_email(token: str):
+    """Verifies the user's email address."""
+    return verify_email(token)
+

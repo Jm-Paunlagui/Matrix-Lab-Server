@@ -182,7 +182,7 @@ class ErrorModel(db.Model):
 
     def __repr__(self):
         """Csv error model class representation."""
-        return f"CsvErrorModel(error_id={self.error_id}, type_of_error={self.category_error}, " \
+        return f"ErrorModel(error_id={self.error_id}, type_of_error={self.category_error}, " \
                f"cause_of={self.cause_of}, error_type={self.error_type}, date_occurred={self.date_occurred})"
 
 
