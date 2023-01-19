@@ -101,9 +101,7 @@ def send_verification_code():
         return jsonify({"status": "error", "message": "Email addresses do not match!"}), 400
     if not check_email_exists(email):
         return jsonify({"status": "warn", "message": "Email address does not exist!"}), 404
-    if not send_email_verification(email):
-        return jsonify({"status": "error", "message": "Verification code not sent!"}), 500
-    return jsonify({"status": "success", "message": "Verification code sent successfully."}), 200
+    return send_email_verification(email)
 
 
 @user.route("/forgot-password", methods=["POST"])

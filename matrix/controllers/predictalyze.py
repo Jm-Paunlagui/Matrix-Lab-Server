@@ -297,7 +297,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
 
                 # @desc: Create the user account
                 user = User(username=username, email=email,
-                            full_name=full_name, department=department, role="user")
+                            full_name=full_name, department=department, role="user", verified_email="Verified")
                 db.session.add(user)
                 db.session.commit()
 

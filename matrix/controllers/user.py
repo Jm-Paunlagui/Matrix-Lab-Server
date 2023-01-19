@@ -74,7 +74,7 @@ def create_user(email: str, full_name: str, username: str, password: str, role: 
         return False
     hashed_password = PasswordBcrypt(password=password).password_hasher()
     new_user = User(email=email, full_name=full_name, username=username,
-                    password=hashed_password, role=role)
+                    password=hashed_password, role=role, verified_email="Verified")
     db.session.add(new_user)
     db.session.commit()
 
@@ -413,7 +413,7 @@ def unlock_user_account(user_id: int):
             rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
             style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
             </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
-            Matrix account has been restored. You can now login and view your sentiment analysis results.</p><p 
+            Matrix account has been unlocked. You can now login and view your sentiment analysis results.</p><p 
             style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
             auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
             2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you have questions, please contact technical 
@@ -825,13 +825,20 @@ def authenticate_user(username: str, password: str):
 def send_tfa(email: str, type_of_tfa: str):
     """Sends a security code to the email that is provided by the user. either primary email or recovery email"""
     username = ""
+    extra_message = "."
     try:
         # Check if the email is primary or recovery
         is_email: User = User.query.with_entities(User.email, User.recovery_email,
-                                                  User.username).filter(
+                                                  User.username, User.verified_email,
+                                                  User.verified_recovery_email).filter(
             (User.email == email) | (User.recovery_email == email)).first()
 
         if email in (is_email.email, is_email.recovery_email):
+            if email == is_email.email and is_email.verified_email == "Unverified":
+                extra_message = " to a unverified email address."
+            elif email == is_email.recovery_email and is_email.verified_recovery_email == "Unverified":
+                extra_message = " to a unverified recovery email address."
+
             # Generate a link for removing the user's email if not recognized by the user using jwt
             payload = {
                 "iss": "http://127.0.0.1:5000",
@@ -885,7 +892,7 @@ def send_tfa(email: str, type_of_tfa: str):
                 City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
                 </td></tr></table></body></html> """
                 mail.send(msg)
-                return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+                return jsonify({"status": "success", "message": f"Security code sent successfully{extra_message}"}), 200
             if email == is_email.recovery_email:
                 msg.html = f""" <!doctype html><html lang="en-US"><head> <meta content="text/html; charset=utf-8" 
                 http-equiv="Content-Type"/></head><body marginheight="0" topmargin="0" marginwidth="0" style="margin: 
@@ -921,7 +928,7 @@ def send_tfa(email: str, type_of_tfa: str):
                 City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table> 
                 </td></tr></table></body></html> """
                 mail.send(msg)
-                return jsonify({"status": "success", "message": "Security code sent successfully."}), 200
+                return jsonify({"status": "success", "message": f"Security code sent successfully{extra_message}"}), 200
     except Exception as e:
         error_handler(
             category_error="2FA_EMAIL",
@@ -938,12 +945,18 @@ def send_tfa(email: str, type_of_tfa: str):
 def send_email_verification(email: str):
     """Sends a verification to the email that is provided by the user. either primary email or recovery email"""
     # Check if the email is primary or recovery
+    extra_message = "."
     try:
         is_email: User = User.query.with_entities(User.email, User.recovery_email,
-                                                  User.username).filter(
+                                                  User.username, User.verified_email,
+                                                  User.verified_recovery_email).filter(
             (User.email == email) | (User.recovery_email == email)).first()
 
         if email in (is_email.email, is_email.recovery_email):
+            if email == is_email.email and is_email.verified_email == "Unverified":
+                extra_message = " to a unverified email address."
+            elif email == is_email.recovery_email and is_email.verified_recovery_email == "Unverified":
+                extra_message = " to a unverified recovery email address."
             # Generate a link for removing the user's email if not recognized by the user using jwt
             payload = {
                 "iss": "http://127.0.0.1:5000",
@@ -998,7 +1011,7 @@ def send_email_verification(email: str):
             Philippines</p></td></tr><tr><td style="height:20px">&nbsp;</td></tr></table></td></tr></table></body></html> 
             """
             mail.send(msg)
-            return True
+            return jsonify({"status": "success", "message": f"Security code sent{extra_message}"}), 200
     except Exception as e:
         error_handler(
             category_error="EMAIL_VERIFICATION",
@@ -1528,6 +1541,7 @@ def update_personal_info(email: str, full_name: str):
     User.query.filter_by(user_id=user_id).update({
         User.email: email,
         User.full_name: full_name,
+        User.verified_email: "Unverified"
     })
     db.session.commit()
 
@@ -1546,7 +1560,8 @@ def update_security_info(recovery_email: str):
     if user.recovery_email != recovery_email and check_email_exists(recovery_email):
         return jsonify({"status": "warn", "message": "Email already exists"}), 409
     User.query.filter_by(user_id=user_id).update({
-        User.recovery_email: recovery_email
+        User.recovery_email: recovery_email,
+        User.verified_recovery_email: "Unverified"
     })
     db.session.commit()
 
@@ -1697,7 +1712,7 @@ def verify_email(token: str):
                 is_email.verified_recovery_email = "Verified"
             db.session.commit()
             return jsonify({"status": "success",
-                            "message": "The email address is verified.", "token": authenticated_user()}), 200
+                            "message": "The email address is now verified. Please reload the profile page or Sign in again", "token": authenticated_user()}), 200
     except jwt.exceptions.InvalidTokenError:
         error_handler(
             category_error="EMAIL_VERIFICATION",
