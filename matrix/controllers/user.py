@@ -1702,7 +1702,7 @@ def verify_email(token: str):
             if is_email.email == user_info["sub"] and is_email.verified_email == "Verified":
                 return jsonify({"status": "error",
                                 "message": "The email address is already verified."}), 400
-            elif is_email.recovery_email == user_info["sub"] and is_email.verified_recovery_email == "Verified":
+            if is_email.recovery_email == user_info["sub"] and is_email.verified_recovery_email == "Verified":
                 return jsonify({"status": "error",
                                 "message": "The recovery email address is already verified."}), 400
 
