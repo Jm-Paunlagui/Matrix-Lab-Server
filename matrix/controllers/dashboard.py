@@ -17,7 +17,9 @@ from matrix.module import InputTextValidation
 
 def options_read_single_data_dashboard():
     """Options for the read single data route."""
-    csv_file = CsvModelDetail.query.all()
+    csv_file = CsvModelDetail.query.filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     # @desc: Do not return duplicate school_year, school_semester, and csv_question
     school_year = []
@@ -86,7 +88,9 @@ def dashboard_data_csv():
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     # @desc: Get the total number of csv files in the database
-    csv_files = CsvModelDetail.query.all()
+    csv_files = CsvModelDetail.query.filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     total_csv_files = len(csv_files)
 
@@ -667,7 +671,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -675,7 +681,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id ==
-                 CsvDepartmentSentiment.csv_id).all()
+                 CsvDepartmentSentiment.csv_id).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -685,7 +693,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
-                 CsvAnalyzedSentiment.csv_id).all()
+                 CsvAnalyzedSentiment.csv_id).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -701,7 +711,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         }), 200
     if school_year == "All" and school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -709,7 +721,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question).all()
+            filter(CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -719,7 +733,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question).all()
+            filter(CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -734,14 +750,18 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         }), 200
     if school_year == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
-            filter(CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -751,7 +771,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -768,14 +790,18 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
             CsvDepartmentSentiment.department_positive_sentiments_percentage,
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -785,7 +811,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.polarity, CsvAnalyzedSentiment.sentence_remove_stopwords,
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -801,7 +829,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         }), 200
     if school_year == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -809,7 +839,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -820,7 +852,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -837,7 +871,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -845,7 +881,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_year == school_year).all()
+                   CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -856,7 +894,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_year == school_year).all()
+                   CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -873,7 +913,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -881,7 +923,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvDepartmentSentiment.department_negative_sentiments_percentage). \
             join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details, department_details = pancore_compute(
             sentiments, starting_year, ending_year, None)
@@ -892,7 +936,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -908,7 +954,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                         }), 200
     starting_year, ending_year = get_starting_ending_year(
         db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.school_year == school_year).all())
+            CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
     sentiments = db.session.query(
         CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
         CsvDepartmentSentiment.department_number_of_sentiments,
@@ -916,7 +964,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         CsvDepartmentSentiment.department_negative_sentiments_percentage). \
         join(CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id). \
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
-               CsvModelDetail.csv_question == csv_question).all()
+               CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     sentiment_details, department_details = pancore_compute(
         sentiments, starting_year, ending_year, None)
@@ -927,7 +977,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         CsvAnalyzedSentiment.review_len). \
         join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
         filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester,
-               CsvModelDetail.csv_question == csv_question).all()
+               CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -976,7 +1028,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
@@ -984,7 +1038,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id ==
-                 CsvProfessorSentiment.csv_id).all()
+                 CsvProfessorSentiment.csv_id).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -994,7 +1050,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
-                 CsvAnalyzedSentiment.csv_id).all()
+                 CsvAnalyzedSentiment.csv_id).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1010,7 +1068,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     if school_year == "All" and school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
@@ -1018,7 +1078,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question).all()
+            filter(CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1028,7 +1090,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.csv_question == csv_question).all()
+            filter(CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1044,14 +1108,18 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     if school_year == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
-            filter(CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1061,7 +1129,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_semester == school_semester).all()
+            filter(CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1078,14 +1148,18 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
             CsvProfessorSentiment.evaluatee_positive_sentiments_percentage,
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1095,7 +1169,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentiment_converted, CsvAnalyzedSentiment.polarity,
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
-            filter(CsvModelDetail.school_year == school_year).all()
+            filter(CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1111,7 +1187,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     if school_year == "All":
         starting_year, ending_year = get_starting_ending_year(
-            db.session.query(CsvModelDetail.school_year).all())
+            db.session.query(CsvModelDetail.school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1119,7 +1197,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1130,7 +1210,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1147,7 +1229,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1155,7 +1239,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_year == school_year).all()
+                   CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1166,7 +1252,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.csv_question == csv_question,
-                   CsvModelDetail.school_year == school_year).all()
+                   CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1183,7 +1271,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-                CsvModelDetail.school_year == school_year).all())
+                CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1191,7 +1281,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
             join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_details = pancore_compute(
             sentiments, starting_year, ending_year, converted_full_name)
@@ -1202,7 +1294,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
             CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
             filter(CsvModelDetail.school_year == school_year,
-                   CsvModelDetail.school_semester == school_semester).all()
+                   CsvModelDetail.school_semester == school_semester).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
@@ -1218,7 +1312,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
                         }), 200
     starting_year, ending_year = get_starting_ending_year(
         db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.school_year == school_year).all())
+            CsvModelDetail.school_year == school_year).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all())
     sentiments = db.session.query(
         CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
         CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1226,7 +1322,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         CsvProfessorSentiment.evaluatee_negative_sentiments_percentage). \
         join(CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id). \
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
-               CsvModelDetail.csv_question == csv_question).all()
+               CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     sentiment_details = pancore_compute(
         sentiments, starting_year, ending_year, converted_full_name)
@@ -1237,7 +1335,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         CsvAnalyzedSentiment.sentence_remove_stopwords, CsvAnalyzedSentiment.review_len). \
         join(CsvAnalyzedSentiment, CsvModelDetail.csv_id == CsvAnalyzedSentiment.csv_id). \
         filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester,
-               CsvModelDetail.csv_question == csv_question).all()
+               CsvModelDetail.csv_question == csv_question).filter(
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
