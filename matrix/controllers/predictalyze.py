@@ -833,16 +833,16 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
                 CsvDepartmentSentiment.department_negative_sentiments_percentage,
                 CsvDepartmentSentiment.department_share).join(
                 CsvDepartmentSentiment, CsvModelDetail.csv_id == CsvDepartmentSentiment.csv_id).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all()
+                CsvModelDetail.flag_deleted == False
+            ).all()
 
             top_department = computed(sentiment_list=sentiment, many=True, type_comp="top_dept", names=departments,
                                       no_of_evaluated=no_of_evaluated)
 
             starting_year, ending_year = get_starting_ending_year(
                 db.session.query(CsvModelDetail.school_year).distinct().filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                    CsvModelDetail.flag_deleted == False
+                ).all())
 
             return jsonify({
                 "status": "success",
@@ -907,12 +907,12 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
                 CsvProfessorSentiment.evaluatee_share).join(
                 CsvProfessorSentiment, CsvModelDetail.csv_id == CsvProfessorSentiment.csv_id).filter(
                     CsvModelDetail.flag_deleted == False
-                ).all()
+            ).all()
 
             starting_year, ending_year = get_starting_ending_year(
                 db.session.query(CsvModelDetail.school_year).distinct().filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                    CsvModelDetail.flag_deleted == False
+                ).all())
 
             top_professor = computed(sentiment_list=sentiment, many=True, type_comp="top_prof", names=users,
                                      no_of_evaluated=no_of_evaluated, duo_raw=user_list)
@@ -1860,9 +1860,9 @@ def to_download_all_csv_files(type_of_download: str | None):
                    .group_by(CsvCourses.course_code, CsvCourses.course_for_name,
                              CsvCourses.course_for_department)
                    .filter(
-                            CsvModelDetail.flag_deleted == False
-                        ).all()
-                   )
+            CsvModelDetail.flag_deleted == False
+        ).all()
+        )
 
         analysis = db.session.query(
             CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.sentiment_converted,
@@ -1870,8 +1870,8 @@ def to_download_all_csv_files(type_of_download: str | None):
             CsvAnalyzedSentiment.review_len). \
             join(CsvAnalyzedSentiment, CsvModelDetail.csv_id ==
                  CsvAnalyzedSentiment.csv_id).filter(
-                        CsvModelDetail.flag_deleted == False
-                ).all()
+            CsvModelDetail.flag_deleted == False
+        ).all()
 
         # If the csv_id is not found in the database, return an error message.
         if raw_evaluated_file is None and sentiment_professor is None and sentiment_department is None \

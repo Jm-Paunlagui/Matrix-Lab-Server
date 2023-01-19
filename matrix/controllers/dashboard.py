@@ -18,8 +18,8 @@ from matrix.module import InputTextValidation
 def options_read_single_data_dashboard():
     """Options for the read single data route."""
     csv_file = CsvModelDetail.query.filter(
-            CsvModelDetail.flag_deleted == False
-        ).all()
+        CsvModelDetail.flag_deleted == False
+    ).all()
 
     # @desc: Do not return duplicate school_year, school_semester, and csv_question
     school_year = []
@@ -89,8 +89,8 @@ def dashboard_data_csv():
 
     # @desc: Get the total number of csv files in the database
     csv_files = CsvModelDetail.query.filter(
-            CsvModelDetail.flag_deleted == False
-        ).all()
+        CsvModelDetail.flag_deleted == False
+    ).all()
 
     total_csv_files = len(csv_files)
 
@@ -672,8 +672,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -712,8 +712,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_year == "All" and school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -751,8 +751,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_year == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -791,8 +791,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -830,8 +830,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     if school_year == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -872,8 +872,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -914,8 +914,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
             CsvDepartmentSentiment.department_number_of_sentiments,
@@ -966,7 +966,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).filter(
             CsvModelDetail.flag_deleted == False
-        ).all()
+    ).all()
 
     sentiment_details, department_details = pancore_compute(
         sentiments, starting_year, ending_year, None)
@@ -979,7 +979,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).filter(
             CsvModelDetail.flag_deleted == False
-        ).all()
+    ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(analysis, None)
@@ -1029,8 +1029,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
@@ -1069,8 +1069,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_year == "All" and school_semester == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
 
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
@@ -1109,8 +1109,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_year == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1149,8 +1149,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1188,8 +1188,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     if school_year == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1230,8 +1230,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1272,8 +1272,8 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
                 CsvModelDetail.school_year == school_year).filter(
-            CsvModelDetail.flag_deleted == False
-        ).all())
+                CsvModelDetail.flag_deleted == False
+            ).all())
         sentiments = db.session.query(
             CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
             CsvProfessorSentiment.evaluatee_number_of_sentiments,
@@ -1324,7 +1324,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         filter(CsvModelDetail.school_year == school_year, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).filter(
             CsvModelDetail.flag_deleted == False
-        ).all()
+    ).all()
 
     sentiment_details = pancore_compute(
         sentiments, starting_year, ending_year, converted_full_name)
@@ -1337,7 +1337,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         filter(CsvModelDetail.csv_question == csv_question, CsvModelDetail.school_semester == school_semester,
                CsvModelDetail.csv_question == csv_question).filter(
             CsvModelDetail.flag_deleted == False
-        ).all()
+    ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
