@@ -490,4 +490,3 @@ def verify_user_email_request():
 def verify_user_email(token: str):
     """Verifies the user's email address."""
     return verify_email(token)
-
