@@ -40,8 +40,8 @@ class User(db.Model):
     flag_locked = db.Column(db.Boolean, nullable=False, default=False)
     flag_active = db.Column(db.Boolean, nullable=False, default=False)
     login_attempts = db.Column(db.Integer, nullable=False, default=0)
-    verified_email = db.Column(db.String(255), unique=True, nullable=True, default="Unverified")
-    verified_recovery_email = db.Column(db.String(255), unique=True, nullable=True, default="Unverified")
+    verified_email = db.Column(db.String(255), nullable=True, default="Unverified")
+    verified_recovery_email = db.Column(db.String(255), nullable=True, default="Unverified")
 
     def __repr__(self):
         """User model class representation."""

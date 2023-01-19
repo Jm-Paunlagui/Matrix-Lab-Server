@@ -1683,7 +1683,7 @@ def verify_email(token: str):
         user_info: dict = PayloadSignature(encoded=token).decode_payload()
         is_email: User = User.query.filter((User.email == user_info["sub"]) | (User.recovery_email == user_info["sub"])).first()
         if is_email:
-            if is_email.email == user_info["sub"] and is_email.email_verified == "Verified":
+            if is_email.email == user_info["sub"] and is_email.verified_email == "Verified":
                 return jsonify({"status": "error",
                                 "message": "The email address is already verified."}), 400
             elif is_email.recovery_email == user_info["sub"] and is_email.verified_recovery_email == "Verified":
