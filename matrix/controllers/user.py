@@ -1681,7 +1681,8 @@ def verify_email_request(email: str):
 def verify_email(token: str):
     try:
         user_info: dict = PayloadSignature(encoded=token).decode_payload()
-        is_email: User = User.query.filter((User.email == user_info["sub"]) | (User.recovery_email == user_info["sub"])).first()
+        is_email: User = User.query.filter((User.email == user_info["sub"]) | (
+            User.recovery_email == user_info["sub"])).first()
         if is_email:
             if is_email.email == user_info["sub"] and is_email.verified_email == "Verified":
                 return jsonify({"status": "error",
@@ -1702,7 +1703,7 @@ def verify_email(token: str):
             category_error="EMAIL_VERIFICATION",
             cause_of="Cause of error: Invalid token",
             error_type=error_message(error_class=sys.exc_info()[0], line_error=sys.exc_info()[-1].tb_lineno,
-                                        function_name=inspect.stack()[0][3], file_name=__name__)
+                                     function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
                         "message": "The token is invalid. Please try again later.",
