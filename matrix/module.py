@@ -213,9 +213,7 @@ class InputTextValidation:
 
         :return: True if the email is valid, False otherwise
         """
-        return bool(re.compile(r"([-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\"([]!#-[^-~ \t]|(\\[\t -~]))+\")@(["
-                               r"-!#-'*+/-9=?A-Z^-~]+(\.[-!#-'*+/-9=?A-Z^-~]+)*|\[[\t -Z^-~]*])")
-                    .match(self.user_input))
+        return bool(re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b").match(self.user_input))
 
     def validate_password(self):
         """
@@ -328,7 +326,15 @@ class InputTextValidation:
 
         :return: The professor name as a query
         """
-        return self.user_input.upper().split()[0] + ", " + self.user_input.upper().split()[1]
+        return self.user_input.upper()
+
+    def to_readable_professor_name(self):
+        """
+        Converts the professor name to a response.
+
+        :return: The professor name as a response
+        """
+        return self.user_input.title()
 
 
 class PasswordBcrypt:
