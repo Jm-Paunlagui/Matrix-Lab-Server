@@ -1026,10 +1026,10 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not logged in."}), 401
 
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     try:
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             csv_files = db.session.query(CsvModelDetail).order_by(
                 CsvModelDetail.csv_id.desc()).filter(
                 CsvModelDetail.flag_deleted == 0).paginate(page=page, per_page=per_page)
@@ -1042,7 +1042,7 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
                     "flag_deleted": csv_file.flag_deleted,
                     "flag_release": csv_file.flag_release,
                 } for csv_file in csv_files.items
-            ]
+            ] if csv_files.items else []
 
             return jsonify({
                 "status": "success",
@@ -1081,10 +1081,10 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not logged in."}), 401
 
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     try:
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             csv_files = db.session.query(CsvModelDetail).filter_by(flag_deleted=True).order_by(
                 CsvModelDetail.csv_id.desc()).paginate(page=page, per_page=per_page)
 
@@ -1097,7 +1097,7 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
                     "flag_deleted": csv_file.flag_deleted,
                     "flag_release": csv_file.flag_release,
                 } for csv_file in csv_files.items
-            ]
+            ] if csv_files.items else []
 
             return jsonify({
                 "status": "success",
@@ -1136,7 +1136,7 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
 
     # Get only the full_name of the user and role to the database.
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     try:
         professor_file = CsvProfessorSentiment.query.filter_by(
@@ -1152,7 +1152,7 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
                 "department": professor.evaluatee_department,
             } for index, professor in enumerate(professor_file, start=0)
         ]
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             department_file = CsvDepartmentSentiment.query.filter_by(
                 csv_id=csv_id).all()
 
@@ -1169,7 +1169,7 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
                     "share": department.department_share,
                     "department": department.department_evaluatee
                 } for index, department in enumerate(department_file, start=0)
-            ]
+            ] if department_file else []
 
             return jsonify({
                 "status": "success",
@@ -1183,12 +1183,12 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
                 "prev_page": professor_file.prev_num,
                 "total_items": professor_file.total,
             }), 200
-        if user_data.role == "professor":
+        if user_data.role == "professor" and user_data.verified_email == "Verified":
             if professor_file is None:
                 return jsonify({"status": "error", "message": "No csv file found."}), 400
             return jsonify({
                 "status": "success",
-                "professor_file": professor_file,
+                "professor_file": professor_file if professor_file else [],
                 "total_pages": professor_file.pages,
                 "current_page": professor_file.page,
                 "has_next": professor_file.has_next,
@@ -1912,13 +1912,13 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
 
     # Get only the full_name of the user and role to the database.
     user_data: User = User.query.with_entities(
-        User.full_name, User.role).filter_by(user_id=user_id).first()
+        User.full_name, User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper()
     folder_name = folder_name.replace("_", " ").upper()
     try:
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
                                               CsvModelDetail.school_year, CsvModelDetail.school_semester,
                                               CsvCourses.course_for_name,
@@ -1938,7 +1938,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
             ]
             return jsonify({
                 "status": "success",
-                "file_list": file_list_to_read,
+                "file_list": file_list_to_read if len(file_list_to_read) > 0 else [],
                 "topic": InputTextValidation(main_directory.items[2][2]).to_readable_csv_question(),
                 "school_year": InputTextValidation(main_directory.items[3][3]).to_readable_school_year(),
                 "school_semester": InputTextValidation(main_directory.items[4][4]).to_readable_school_semester(),
@@ -1950,7 +1950,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
                 "prev_page": main_directory.prev_num,
                 "total_items": main_directory.total,
             }), 200
-        if user_data.role == "user" and user_fullname == folder_name:
+        if user_data.role == "user" and user_fullname == folder_name and user_data.verified_email == "Verified":
             # Join to CsvModelDetail to check if its flag_release is True and not deleted.
             main_directory = db.session.query(CsvModelDetail.csv_id, CsvCourses.csv_id, CsvModelDetail.csv_question,
                                               CsvModelDetail.school_year, CsvModelDetail.school_semester,
@@ -1980,7 +1980,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
             ]
             return jsonify({
                 "status": "success",
-                "file_list": file_list_to_read,
+                "file_list": file_list_to_read if len(file_list_to_read) > 0 else [],
                 "topic": InputTextValidation(main_directory.items[2][2]).to_readable_csv_question(),
                 "school_year": InputTextValidation(main_directory.items[3][3]).to_readable_school_year(),
                 "school_semester": InputTextValidation(main_directory.items[4][4]).to_readable_school_semester(),
@@ -2022,14 +2022,14 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
 
     # Get only the full_name of the user and role to the database.
     user_data: User = User.query.with_entities(
-        User.full_name, User.role).filter_by(user_id=user_id).first()
+        User.full_name, User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper()
     folder_name = folder_name.replace("_", " ").upper()
     file_name = file_name.replace("_", " ").title()
     try:
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             sentiments = db.session.query(
                 CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.course_code,
                 CsvAnalyzedSentiment.sentence, CsvAnalyzedSentiment.sentiment) \
@@ -2048,7 +2048,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
             ]
             return jsonify({
                 "status": "success",
-                "sentiments_list": sentiments_list,
+                "sentiments_list": sentiments_list if len(sentiments_list) > 0 else [],
                 "total_pages": sentiments.pages,
                 "current_page": sentiments.page,
                 "has_next": sentiments.has_next,
@@ -2057,7 +2057,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
                 "prev_page": sentiments.prev_num,
                 "total_items": sentiments.total,
             }), 200
-        if user_data.role == "user" and user_fullname == folder_name:
+        if user_data.role == "user" and user_fullname == folder_name and user_data.verified_email == "Verified":
             # Join to CsvModel to check if its flag_release is True and not deleted.
             sentiments = db.session.query(
                 CsvModelDetail.csv_id, CsvAnalyzedSentiment.csv_id, CsvAnalyzedSentiment.course_code,
@@ -2080,7 +2080,7 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
             ]
             return jsonify({
                 "status": "success",
-                "sentiments_list": sentiments_list,
+                "sentiments_list": sentiments_list if len(sentiments_list) > 0 else [],
                 "total_pages": sentiments.pages,
                 "current_page": sentiments.page,
                 "has_next": sentiments.has_next,
@@ -2114,10 +2114,10 @@ def list_evaluatees_to_create(page: int, per_page: int):
         return jsonify({"status": "error", "message": "You are not logged in."}), 401
 
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=user_id).first()
 
     try:
-        if user_data.role == "admin":
+        if user_data.role == "admin" and user_data.verified_email == "Verified":
             # @desc: Get users where role is user
             users = User.query.filter_by(role="user").paginate(
                 page=page, per_page=per_page, error_out=False)
@@ -2141,7 +2141,7 @@ def list_evaluatees_to_create(page: int, per_page: int):
 
             return jsonify({
                 "status": "success",
-                "evaluatees_to_create": evaluatees_to_create,
+                "evaluatees_to_create": evaluatees_to_create if len(evaluatees_to_create) > 0 else [],
                 "total_pages": users.pages,
                 "current_page": users.page,
                 "has_next": users.has_next,

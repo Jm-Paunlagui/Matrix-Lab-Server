@@ -669,6 +669,20 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    user_data: User = User.query.with_entities(
+        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    if user_data.verified_email != "Verified":
+        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
+
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
             db.session.query(CsvModelDetail.school_year).filter(
@@ -1018,13 +1032,16 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
     user_data: User = User.query.with_entities(
-        User.role, User.full_name).filter_by(user_id=user_id).first()
+        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
 
     if user_data.role != "user":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     converted_full_name = InputTextValidation(
         user_data.full_name).to_csv_professor_name()
+
+    if user_data.verified_email != "Verified":
+        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
