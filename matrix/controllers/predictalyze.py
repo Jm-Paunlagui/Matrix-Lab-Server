@@ -436,6 +436,20 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
+    user_id: int = session.get('user_id')
+
+    if user_id is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    user_data: User = User.query.with_entities(
+        User.role, User.verified_email).filter_by(user_id=user_id).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    if user_data.verified_email != "Verified":
+        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
+
     # @desc: Check if the csv file has already been evaluated by csv_question and school_year
     if check_csv_name_exists(csv_question, school_year, school_semester):
         return jsonify({"status": "error", "message": "File already evaluated"}), 409
