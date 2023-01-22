@@ -1541,7 +1541,7 @@ def update_personal_info(email: str, full_name: str):
     User.query.filter_by(user_id=user_id).update({
         User.email: email,
         User.full_name: full_name,
-        User.verified_email: "Unverified"
+        User.verified_email: "Verified" if user.email == email else "Unverified"
     })
     db.session.commit()
 
@@ -1561,7 +1561,7 @@ def update_security_info(recovery_email: str):
         return jsonify({"status": "warn", "message": "Email already exists"}), 409
     User.query.filter_by(user_id=user_id).update({
         User.recovery_email: recovery_email,
-        User.verified_recovery_email: "Unverified"
+        User.verified_recovery_email: "Verified" if user.recovery_email == recovery_email else "Unverified"
     })
     db.session.commit()
 
