@@ -284,12 +284,12 @@ def professor_analysis(csv_file_path: str, csv_id: int):
         # a list of tuples with the format (evaluatee, department, email) and remove the duplicates from the list of
         # tuples
         evaluatee_list = \
-            list({(row["evaluatee"], row["department"], row["email"])
+            list({(row["evaluatee"].replace(",", "").title(), row["department"], row["email"])
                   for index, row in csv_file.iterrows()})
 
         # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
         for index, evaluatee in enumerate(evaluatee_list):
-            if not User.query.filter_by(email=evaluatee[2]).first():
+            if not User.query.filter_by(full_name=evaluatee[0]).first():
                 email = evaluatee[2].lower()
                 username = evaluatee[2].split("@")[0]
                 department = evaluatee[1]
