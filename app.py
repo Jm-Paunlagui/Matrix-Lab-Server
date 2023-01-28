@@ -35,7 +35,8 @@ if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
     with app.app_context():
         db.create_all()
 
-        hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
+        hashed_password = bcrypt.generate_password_hash(
+            "123@Qwer").decode("utf-8")
 
         default_user = User(
             email="paunlagui.jm.cs@gmail.com",
@@ -50,7 +51,6 @@ if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
         db.session.commit()
 
     print("Default user created")
-
 
 
 app.register_blueprint(user)
