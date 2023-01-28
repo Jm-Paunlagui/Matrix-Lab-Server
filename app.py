@@ -35,6 +35,24 @@ if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
     with app.app_context():
         db.create_all()
 
+        hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
+
+        default_user = User(
+            email="paunlagui.jm.cs@gmail.com",
+            full_name="John Moises E. Paunlagui",
+            username="admin-jm",
+            password=hashed_password,
+            role="admin",
+            verified_email="Verified"
+        )
+
+        db.session.add(default_user)
+        db.session.commit()
+
+    print("Default user created")
+
+
+
 app.register_blueprint(user)
 app.register_blueprint(predictalyze)
 app.register_blueprint(dashboard)

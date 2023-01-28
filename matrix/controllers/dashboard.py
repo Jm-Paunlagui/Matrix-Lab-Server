@@ -336,12 +336,14 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
         tuple: Tuple of the computation of the sentiment, polarity, review length, wordcloud,
         and wordcloud with sentiment.
     """
+
     # Plot the graph using matplotlib and seaborn library
     plt.figure(figsize=(8, 5))
     plt.title("Sentiment vs Polarity")
     plt.xlabel("Sentiment")
     plt.ylabel("Polarity")
     sns.set_style("whitegrid")
+    sns.set_palette(['#ef4444', '#22c55e'])
     if len(sentiment_converted_list) == 0 or len(polarity_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:
@@ -366,6 +368,7 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     plt.xlabel("Sentiment")
     plt.ylabel("Review Length")
     sns.set_style("whitegrid")
+    sns.set_palette(['#3b82f6'])
     if len(sentiment_converted_list) == 0 or len(review_length_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:

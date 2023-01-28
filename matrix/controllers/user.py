@@ -1221,7 +1221,7 @@ def authenticated_user():
         "username": user_data.username, "role": user_data.role, "path": redirect_to(),
         "verified_email": user_data.verified_email, "verified_recovery_email": user_data.verified_recovery_email,
         "iat": Timezone("Asia/Manila").get_timezone_current_time(),
-        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=24)),
+        "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(days=30)),
         "jti": str(uuid.uuid4())
     }
     user_data_token = PayloadSignature(payload=payload).encode_payload()
