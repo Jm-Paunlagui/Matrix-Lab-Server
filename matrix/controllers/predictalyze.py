@@ -1523,7 +1523,7 @@ def to_unpublished_all_csv_files():
 
 
 def download_analysis(professors=None, departments=None, courses=None, sentiments=None, analysis=None,
-                      type_of_download=None, csv_id=None, file_name=None, bulk_download=False):
+                      type_of_download=None, csv_id=None, file_name=None, bulk_download=False, title=None):
     # Sort form highest to lowest professor positive sentiments percentage and add the rank column to the dataframe.
 
     professors = sorted(professors, key=lambda x: x[5], reverse=True)
@@ -1537,7 +1537,7 @@ def download_analysis(professors=None, departments=None, courses=None, sentiment
     sentiments = [dict(row) for row in sentiments]
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, None)
+        wordcloud_list_with_sentiment = core_analysis(analysis, None, title=title)
 
     # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
     dfraw = pd.DataFrame(
@@ -1794,7 +1794,10 @@ def to_download_selected_csv_file(csv_id: int, type_of_download: str | None):
 
         return download_analysis(
             professors=professors, departments=departments, courses=courses, sentiments=sentiments, analysis=analysis,
-            type_of_download=type_of_download, csv_id=csv_id, file_name=file_name, bulk_download=False
+            type_of_download=type_of_download, csv_id=csv_id, file_name=file_name, bulk_download=False,
+            title=f"{InputTextValidation(for_file_name.school_year).to_readable_school_year()} - "
+                  f"{InputTextValidation(for_file_name.school_semester).to_readable_school_semester()} for "
+                  f"{InputTextValidation(for_file_name.csv_question).to_readable_csv_question()}"
         )
 
     except Exception as e:
@@ -1895,7 +1898,7 @@ def to_download_all_csv_files(type_of_download: str | None):
         return download_analysis(
             professors=sentiment_professor_cal, departments=sentiment_department_cal, courses=courses,
             sentiments=raw_evaluated_file, analysis=analysis, type_of_download=type_of_download,
-            csv_id=None, file_name=file_name, bulk_download=True
+            csv_id=None, file_name=file_name, bulk_download=True, title="Overall"
         )
 
     except Exception as e:

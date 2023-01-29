@@ -1,9 +1,12 @@
 import base64
 from io import BytesIO
 
+import numpy as np
 import seaborn as sns
 from flask import Response, jsonify, session
 from matplotlib import pyplot as plt
+from matplotlib.lines import Line2D
+from matplotlib.ticker import FixedLocator, FixedFormatter
 from sklearn.feature_extraction.text import CountVectorizer
 from wordcloud import WordCloud
 
@@ -321,7 +324,7 @@ def get_top_n_trigrams(corpus, n=None):
 
 
 def computation(sentiment_converted_list=None, polarity_list=None, review_length_list=None, wordcloud_list=None,
-                wordcloud_list_with_sentiment=None) -> tuple[str, str, str, list[tuple[str, str]]]:
+                wordcloud_list_with_sentiment=None, title=None) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
     @desc: Get the computation of the sentiment, polarity, review length, wordcloud, and wordcloud with sentiment.
 
@@ -331,6 +334,7 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
         review_length_list (list): List of review length.
         wordcloud_list (list): List of wordcloud.
         wordcloud_list_with_sentiment (list): List of wordcloud with sentiment.
+        title (str): Title of the computation.
 
     Returns:
         tuple: Tuple of the computation of the sentiment, polarity, review length, wordcloud,
@@ -339,7 +343,7 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
 
     # Plot the graph using matplotlib and seaborn library
     plt.figure(figsize=(8, 5))
-    plt.title("Sentiment vs Polarity")
+    plt.title(f"Sentiment vs Polarity ({title})")
     plt.xlabel("Sentiment")
     plt.ylabel("Polarity")
     sns.set_style("whitegrid")
@@ -347,7 +351,42 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     if len(sentiment_converted_list) == 0 or len(polarity_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:
-        sns.boxplot(x=sentiment_converted_list, y=polarity_list)
+        ax = sns.boxplot(
+            x=sentiment_converted_list,
+            y=polarity_list,
+            showfliers=True, showmeans=True,
+            flierprops=dict(marker='d', markerfacecolor='black', markersize=5, linestyle='none'),
+            medianprops=dict(color='yellow'),
+            meanprops=dict(marker='o', markerfacecolor='#06b6d4', markersize=5),
+            capprops=dict(color='black'),
+            notch=True,
+        )
+
+        # Legend for the ylabels of the boxplot graph
+        xticks = [0, 1]
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(["Negative", "Positive"])
+        ax.xaxis.set_major_locator(FixedLocator(xticks))
+        ax.xaxis.set_major_formatter(FixedFormatter(["Negative", "Positive"]))
+
+        # Add the legend for the boxplot components
+        flier_elements = [
+            Line2D([0], [0], marker='d', color='w', markerfacecolor='black', markersize=5, label='Outliers'),
+        ]
+        median_elements = [
+            Line2D([0], [0], color='yellow', label='Median')]
+        min_max_elements = [
+            Line2D([0], [0], color='black', label='Min/Max')]
+        quartile_elements = [
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#ef4444', label='25%-75% Negative'),
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#22c55e', label='25%-75% Positive')]
+
+        mean_elements = [
+            Line2D([0], [0], marker='o', color='w', markerfacecolor='#06b6d4', label='Mean')]
+
+
+        ax.legend(handles=flier_elements + median_elements + min_max_elements + quartile_elements + mean_elements,
+                  title="Legend", loc="best")
 
     # Save the figure to a BytesIO object
     buf_sentiment_polarity = BytesIO()
@@ -364,15 +403,28 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
 
     # @desc: Get the Sentiment vs Review Length of the csv files using matplotlib and seaborn library
     plt.figure(figsize=(8, 5))
-    plt.title("Sentiment vs Review Length")
+    plt.title(f"Sentiment vs Review Length ({title})")
     plt.xlabel("Sentiment")
     plt.ylabel("Review Length")
     sns.set_style("whitegrid")
-    sns.set_palette(['#3b82f6'])
+    sns.set_palette(['#ef4444', '#22c55e'])
     if len(sentiment_converted_list) == 0 or len(review_length_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:
-        sns.pointplot(x=sentiment_converted_list, y=review_length_list)
+        ax = sns.pointplot(x=sentiment_converted_list, y=review_length_list, hue=sentiment_converted_list, dodge=False,)
+
+        xticks = [0, 1]
+        ax.set_xticks(xticks)
+        ax.set_xticklabels(["Negative", "Positive"])
+        ax.xaxis.set_major_locator(FixedLocator(xticks))
+        ax.xaxis.set_major_formatter(FixedFormatter(["Negative", "Positive"]))
+
+        elements = [
+            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#ef4444', label='Negative'),
+            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#22c55e', label='Positive'),
+            ]
+
+        ax.legend(handles=elements, title="Legend", loc="best", bbox_to_anchor=(1, 1))
 
     # Save the figure to a BytesIO object
     buf_sentiment_review_length = BytesIO()
@@ -395,7 +447,8 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     # @desc: Get the overall word cloud 540 × 338 text color is only green and red and the background color is white
     if len(wordcloud_list) == 0:
         wordcloud = WordCloud(width=540, height=338, background_color="white",
-                              colormap="tab10", collocations=False).generate("No Word Cloud")
+                              colormap="tab10", collocations=False
+                              ).generate("No Word Cloud")
     else:
         wordcloud = WordCloud(width=540, height=338, random_state=21, max_font_size=110, colormap="RdYlGn",
                               background_color="white").generate(" ".join(wordcloud_list))
@@ -403,6 +456,7 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     # Save the figure to a BytesIO object
     buf_wordcloud = BytesIO()
     plt.figure(figsize=(8, 5))
+    plt.title(f"Word Cloud ({title})")
     plt.tight_layout(pad=0)
     plt.imshow(wordcloud, interpolation="bilinear")
     plt.axis("off")
@@ -604,13 +658,14 @@ def remove_none_values(sentiment_converted_list: list, polarity_list: list, revi
 
 def core_analysis(
         analysis: list[tuple[int, int, int, float, str, int]] | list[tuple[int, int, str, int, float, str, int]],
-        evaluatee_name: str | None) -> tuple[str, str, str, list[tuple[str, str]]]:
+        evaluatee_name: str | None, title=None) -> tuple[str, str, str, list[tuple[str, str]]]:
     """
     Generate the analysis of the sentiments.
 
     Args:
         analysis (list[tuple[int, int, int, float, str, int]]): The list of the analysis.
         evaluatee_name (str): The name of the professor.
+        title (str): additional
 
     Returns:
         list[dict]: The list of the analysis.
@@ -649,7 +704,7 @@ def core_analysis(
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment = \
         computation(sentiment_converted_list=sentiment_converted_list, polarity_list=polarity_list,
                     review_length_list=review_length_list, wordcloud_list=wordcloud_list,
-                    wordcloud_list_with_sentiment=wordcloud_list_with_sentiment)
+                    wordcloud_list_with_sentiment=wordcloud_list_with_sentiment, title=title)
 
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
@@ -667,6 +722,9 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     Returns:
         tuple[Response, int]: The response and the status code and the analysis of the csv files
     """
+    school_yearr = school_year
+    school_semesterr = school_semester
+    csv_questionn = csv_question
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -715,7 +773,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -755,7 +813,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall " + csv_questionn)
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -793,7 +851,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -833,7 +891,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -874,7 +932,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for {csv_questionn}")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -916,7 +974,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for {csv_questionn} ")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -958,7 +1016,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None)
+            wordcloud_list_with_sentiment = core_analysis(
+            analysis, None, title=f"{school_year} - {school_semesterr} for Overall Topics")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -999,7 +1058,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, None)
+        wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "overall_departments": department_details,
@@ -1024,6 +1083,9 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     Returns:
         tuple[Response, int]: The response and the status code and the analysis of the csv files
     """
+    school_yearr = school_year
+    school_semesterr = school_semester
+    csv_questionn = csv_question
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
@@ -1076,7 +1138,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title="Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1116,7 +1178,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title="Overall " + csv_questionn)
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1155,7 +1217,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title=f"{school_semesterr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1195,7 +1257,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title=f"{school_yearr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1236,7 +1298,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title=f"{school_semesterr} for {csv_questionn}")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1278,7 +1340,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title=f"{school_yearr} for {csv_questionn} ")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1320,7 +1382,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-                analysis, converted_full_name)
+                analysis, converted_full_name, title=f"{school_yearr} - {school_semesterr} for Overall Topics")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -1361,7 +1423,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
-            analysis, converted_full_name)
+            analysis, converted_full_name, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
