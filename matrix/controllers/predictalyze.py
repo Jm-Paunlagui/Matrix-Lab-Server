@@ -1537,7 +1537,8 @@ def download_analysis(professors=None, departments=None, courses=None, sentiment
     sentiments = [dict(row) for row in sentiments]
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, None, title=title)
+        wordcloud_list_with_sentiment = core_analysis(
+            analysis, None, title=title)
 
     # Convert the list of dictionaries to a pandas dataframe and convert it to a csv file.
     dfraw = pd.DataFrame(
