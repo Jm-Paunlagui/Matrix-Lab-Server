@@ -735,6 +735,15 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                         "error": f"{e}"}), 500
 
 
+== == == =
+
+
+def read_overall_data_department_analysis_csv_files():
+    """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
+    # @desc: Get the csv files that are department analysis csv files
+    csv_files = CsvDepartmentModel.query.all()
+
+
 def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_evaluated=None, duo_raw=None,
              bulk_download=None):
     """
@@ -829,6 +838,21 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
                         "message": "An error occurred while computing the already computed data.",
                         "error": f"{e}"}), 500
 
+                "department": department,
+                "overall_sentiment": sentiment_each_department[department],
+                "number_of_sentiments": f"{round(department_number_of_sentiments[department], 2):,}",
+                "positive_sentiments_percentage": department_positive_sentiments_percentage[department],
+                "negative_sentiments_percentage": department_negative_sentiments_percentage[department],
+                "share": department_share[department],
+                "evaluatee": department_evaluatee[department]
+            } for index, department in enumerate(sentiment_each_department)
+        ]}), 200
+
+
+def read_overall_data_professor_analysis_csv_files():
+    """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
+    # @desc: Get the csv files that are professor analysis csv files
+    csv_files = CsvProfessorModel.query.all()
 
 def read_overall_data_department_analysis_csv_files(school_year: str | None, school_semester: str | None,
                                                     csv_question: str | None):
