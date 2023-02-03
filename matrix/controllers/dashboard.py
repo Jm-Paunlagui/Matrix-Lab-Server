@@ -3,7 +3,7 @@ from io import BytesIO
 
 import numpy as np
 import seaborn as sns
-from flask import Response, jsonify, session
+from flask import Response, jsonify, session, request
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, FixedFormatter
@@ -15,7 +15,7 @@ from matrix.models.csv_file import (CsvAnalyzedSentiment,
                                     CsvDepartmentSentiment, CsvModelDetail,
                                     CsvProfessorSentiment)
 from matrix.models.user import User
-from matrix.module import InputTextValidation
+from matrix.module import InputTextValidation, verify_authenticated_token
 
 
 def options_read_single_data_dashboard():
@@ -79,13 +79,19 @@ def options_read_single_data_dashboard():
 def dashboard_data_csv():
     """@desc: Get the data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
+    print(token)
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "admin":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
@@ -125,13 +131,18 @@ def dashboard_data_csv():
 
 def dashboard_data_professor():
     """@desc: Get the data of the professors in the database."""
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
+        User.role).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "admin":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
@@ -730,13 +741,19 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
+    print(token)
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "admin":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
@@ -1091,13 +1108,18 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "user":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401

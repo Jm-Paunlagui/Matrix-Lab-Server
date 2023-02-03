@@ -1,14 +1,16 @@
 from flask import Blueprint, request, jsonify, session
 
+from extensions import db
 from matrix.controllers.user import authenticate_user, send_tfa, check_email_exists, send_email_verification, \
-    password_reset_link, verify_authenticated_token, check_username_exists, remove_email, password_reset, \
+    password_reset_link, check_username_exists, remove_email, password_reset, \
     remove_session, create_user, create_user_auto_generated_password, create_all_users_auto_generated_password, \
     deactivate_user, deactivate_all_users, lock_user_account, lock_all_user_accounts, check_email_exists_by_username, \
     unlock_user_account, unlock_all_user_accounts, delete_user_account, delete_all_user_accounts, \
     restore_user_account, restore_all_user_accounts, update_password, update_personal_info, update_security_info, \
     update_username, verify_tfa, redirect_to, authenticated_user, verify_verification_code_to_unlock, \
     verify_remove_token, verify_token, send_username_to_email, cemail, verify_email_request, verify_email
-from matrix.module import InputTextValidation
+from matrix.models.user import User
+from matrix.module import InputTextValidation, verify_authenticated_token
 
 user = Blueprint("user", __name__, url_prefix="/user")
 
@@ -129,21 +131,17 @@ def forgot_password():
 @user.route("/get_user", methods=["GET"])
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
-    user_id: int = session.get("user_id")
-    if user_id is None:
-        remove_session()
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    token: str = request.cookies.get('token')
 
-    token: str = request.headers["Authorization"]
-    if not token:
-        return jsonify({"status": "error", "message": "Invalid request!"}), 400
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
     verified_token: dict = verify_authenticated_token(token)
 
     if not verified_token:
         return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
-    if bool(verified_token["id"] == user_id):
+    if bool(verified_token["id"]):
         return jsonify({"status": "success", "message": "User retrieved successfully.",
                         "user": verified_token}), 200
     remove_session()
@@ -389,6 +387,9 @@ def verify_security_code():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     code = request.json["code"]
+    username = request.json["username"]
+
+    user_id = User.query.filter_by(username=username).first().user_id
 
     if not InputTextValidation().validate_empty_fields(code):
         return jsonify({"status": "error", "message": "2FA Code are required!"}), 400
@@ -398,8 +399,8 @@ def verify_security_code():
         return jsonify({"status": "error", "message": "Invalid security code!"}), 401
     return jsonify({"status": "success",
                     "message": "Security code verified successfully",
-                    "path": redirect_to(),
-                    "token": authenticated_user(),
+                    "path": redirect_to(user_id=user_id),
+                    "token": authenticated_user(user_id=user_id),
                     }), 200
 
 

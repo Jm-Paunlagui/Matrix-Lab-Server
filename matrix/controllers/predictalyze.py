@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 import nltk
 import pandas as pd
-from flask import jsonify, Response, session, send_file
+from flask import jsonify, Response, session, send_file, request
 from nltk import word_tokenize
 from sqlalchemy import update, func
 from keras.models import load_model
@@ -24,7 +24,7 @@ from matrix.models.csv_file import CsvModelDetail, CsvAnalyzedSentiment, CsvCour
     CsvDepartmentSentiment, ErrorModel, CsvTimeElapsed
 from matrix.models.user import User
 from matrix.module import AllowedFile, PayloadSignature, TextPreprocessing, InputTextValidation, error_message, \
-    Timezone, get_starting_ending_year
+    Timezone, get_starting_ending_year, verify_authenticated_token
 
 nltk.download('punkt')
 nltk.download('stopwords')
@@ -436,13 +436,18 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "admin":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
@@ -1034,13 +1039,18 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
     :return: A list of csv files.
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
     user_data: User = User.query.with_entities(
-        User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     try:
         if user_data.role == "admin" and user_data.verified_email == "Verified":
@@ -1089,13 +1099,18 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
     :return: A list of csv files.
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
     user_data: User = User.query.with_entities(
-        User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     try:
         if user_data.role == "admin" and user_data.verified_email == "Verified":
@@ -1143,14 +1158,18 @@ def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
     :return: The csv file
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
-    # Get only the full_name of the user and role to the database.
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     try:
         professor_file = CsvProfessorSentiment.query.filter_by(
@@ -1922,14 +1941,19 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
     :return: The list of the csv file.
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
     # Get only the full_name of the user and role to the database.
     user_data: User = User.query.with_entities(
-        User.full_name, User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.full_name, User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper()
@@ -2032,14 +2056,19 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
     :return: The csv file.
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
     # Get only the full_name of the user and role to the database.
     user_data: User = User.query.with_entities(
-        User.full_name, User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.full_name, User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     # Convert the fullname from Rodriguez Andrea to RODRIGUEZ_ANDREA
     user_fullname: str = user_data.full_name.upper()
@@ -2125,13 +2154,18 @@ def list_evaluatees_to_create(page: int, per_page: int):
     :return: The list of the evaluatees to create.
     """
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
 
     user_data: User = User.query.with_entities(
-        User.role, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     try:
         if user_data.role == "admin" and user_data.verified_email == "Verified":

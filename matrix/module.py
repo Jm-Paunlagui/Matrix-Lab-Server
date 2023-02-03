@@ -545,3 +545,12 @@ def error_message(error_class: BaseException | BaseException | TracebackType,
     :return: The error message
     """
     return f"Error type {error_class} at line {line_error} in function {function_name} in file {file_name}."
+
+
+def verify_authenticated_token(token: str):
+    """Verifies the token for the user to access the dashboard."""
+    try:
+        user_info: dict = PayloadSignature(encoded=token).decode_payload()
+        return user_info
+    except jwt.exceptions.InvalidTokenError:
+        return False
