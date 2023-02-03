@@ -366,9 +366,11 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
             x=sentiment_converted_list,
             y=polarity_list,
             showfliers=True, showmeans=True,
-            flierprops=dict(marker='d', markerfacecolor='black', markersize=5, linestyle='none'),
+            flierprops=dict(marker='d', markerfacecolor='black',
+                            markersize=5, linestyle='none'),
             medianprops=dict(color='yellow'),
-            meanprops=dict(marker='o', markerfacecolor='#06b6d4', markersize=5),
+            meanprops=dict(
+                marker='o', markerfacecolor='#06b6d4', markersize=5),
             capprops=dict(color='black'),
             notch=True,
         )
@@ -382,19 +384,20 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
 
         # Add the legend for the boxplot components
         flier_elements = [
-            Line2D([0], [0], marker='d', color='w', markerfacecolor='black', markersize=5, label='Outliers'),
+            Line2D([0], [0], marker='d', color='w',
+                   markerfacecolor='black', markersize=5, label='Outliers'),
         ]
         median_elements = [
             Line2D([0], [0], color='yellow', label='Median')]
         min_max_elements = [
             Line2D([0], [0], color='black', label='Min/Max')]
         quartile_elements = [
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='#ef4444', label='25%-75% Negative'),
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor='#ef4444', label='25%-75% Negative'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='#22c55e', label='25%-75% Positive')]
 
         mean_elements = [
             Line2D([0], [0], marker='o', color='w', markerfacecolor='#06b6d4', label='Mean')]
-
 
         ax.legend(handles=flier_elements + median_elements + min_max_elements + quartile_elements + mean_elements,
                   title="Legend", loc="best")
@@ -422,7 +425,8 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     if len(sentiment_converted_list) == 0 or len(review_length_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:
-        ax = sns.pointplot(x=sentiment_converted_list, y=review_length_list, hue=sentiment_converted_list, dodge=False,)
+        ax = sns.pointplot(x=sentiment_converted_list, y=review_length_list,
+                           hue=sentiment_converted_list, dodge=False,)
 
         xticks = [0, 1]
         ax.set_xticks(xticks)
@@ -431,11 +435,14 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
         ax.xaxis.set_major_formatter(FixedFormatter(["Negative", "Positive"]))
 
         elements = [
-            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#ef4444', label='Negative'),
-            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#22c55e', label='Positive'),
-            ]
+            Line2D([0, 0], [0, 1], marker='o', color='w',
+                   markerfacecolor='#ef4444', label='Negative'),
+            Line2D([0, 0], [0, 1], marker='o', color='w',
+                   markerfacecolor='#22c55e', label='Positive'),
+        ]
 
-        ax.legend(handles=elements, title="Legend", loc="best", bbox_to_anchor=(1, 1))
+        ax.legend(handles=elements, title="Legend",
+                  loc="best", bbox_to_anchor=(1, 1))
 
     # Save the figure to a BytesIO object
     buf_sentiment_review_length = BytesIO()
@@ -790,7 +797,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title="Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -830,7 +838,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall " + csv_questionn)
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title="Overall " + csv_questionn)
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -868,7 +877,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_semesterr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -908,7 +918,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_yearr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -949,7 +960,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for {csv_questionn}")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_semesterr} for {csv_questionn}")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -991,7 +1003,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for {csv_questionn} ")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_yearr} for {csv_questionn} ")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -1034,7 +1047,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, None, title=f"{school_year} - {school_semesterr} for Overall Topics")
+                analysis, None, title=f"{school_year} - {school_semesterr} for Overall Topics")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -1075,7 +1088,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
+        wordcloud_list_with_sentiment = core_analysis(
+            analysis, None, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "overall_departments": department_details,
