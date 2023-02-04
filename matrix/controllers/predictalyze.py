@@ -1313,12 +1313,13 @@ def to_delete_selected_csv_file_flagged(csv_id: int):
             return jsonify({"status": "error", "message": "No csv file found."}), 400
 
         if csv_file.flag_deleted == 1:
-            return jsonify({"status": "error", "message": "File already Deleted."}), 400
+            return jsonify({"status": "error", "message": "File already Archived."}), 400
 
         csv_file.flag_deleted = True
+        csv_file.flag_release = False
 
         db.session.commit()
-        return jsonify({"status": "success", "message": "Successfully deleted the selected csv file with id: "
+        return jsonify({"status": "success", "message": "Successfully archived the selected csv file with id: "
                                                         + str(csv_id) + ". and its related files."}), 200
     except Exception as e:
         error_handler(
@@ -1379,7 +1380,7 @@ def to_delete_all_csv_files_flag():
             csv_file = csv_file[0]
             to_delete_selected_csv_file_flagged(csv_file)
 
-        return jsonify({"status": "success", "message": "Successfully flagged all csv files."}), 200
+        return jsonify({"status": "success", "message": "Successfully Archived all csv files."}), 200
     except Exception as e:
         error_handler(
             category_error="PUT",
@@ -1407,7 +1408,7 @@ def to_delete_all_csv_files_unflag():
             csv_file = csv_file[0]
             to_delete_selected_csv_file_unflagged(csv_file)
 
-        return jsonify({"status": "success", "message": "Successfully unflagged all csv files."}), 200
+        return jsonify({"status": "success", "message": "Successfully restored all csv files."}), 200
     except Exception as e:
         error_handler(
             category_error="PUT",
@@ -1552,7 +1553,7 @@ def download_analysis(professors=None, departments=None, courses=None, sentiment
     courses = sorted(courses, key=lambda x: x[5], reverse=True)
 
     # Append the two tables into a pandas dataframe and convert it to a list of dictionaries
-    sentiments = [dict(row) for row in sentiments]
+    sentiments = [tuple(row) for row in sentiments]
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
         wordcloud_list_with_sentiment = core_analysis(
@@ -1811,6 +1812,7 @@ def to_download_selected_csv_file(csv_id: int, type_of_download: str | None):
         if sentiments is None and professors is None and departments is None and courses is None and analysis is None:
             return jsonify({"status": "error", "message": "No Evaluated file found."}), 400
 
+        print("sentiments", sentiments)
         return download_analysis(
             professors=professors, departments=departments, courses=courses, sentiments=sentiments, analysis=analysis,
             type_of_download=type_of_download, csv_id=csv_id, file_name=file_name, bulk_download=False,
