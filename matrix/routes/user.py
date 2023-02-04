@@ -1,6 +1,5 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify
 
-from extensions import db
 from matrix.controllers.user import authenticate_user, send_tfa, check_email_exists, send_email_verification, \
     password_reset_link, check_username_exists, remove_email, password_reset, \
     remove_session, create_user, create_user_auto_generated_password, create_all_users_auto_generated_password, \
