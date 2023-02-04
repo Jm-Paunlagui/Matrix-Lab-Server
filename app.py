@@ -3,7 +3,7 @@ from flask_cors import CORS
 from sqlalchemy_utils import database_exists, create_database
 
 from config import Config, SQLDatabase, Directories
-from extensions import db, bcrypt, mail, session
+from extensions import db, bcrypt, mail
 from matrix.routes.user import user
 from matrix.routes.predictalyze import predictalyze
 from matrix.routes.dashboard import dashboard
@@ -23,7 +23,6 @@ CORS(app, supports_credentials=True,
 db.init_app(app=app)
 bcrypt.init_app(app=app)
 mail.init_app(app=app)
-session.init_app(app=app)
 
 Directories.create_csv_directories()
 

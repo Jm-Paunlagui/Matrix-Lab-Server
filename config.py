@@ -1,7 +1,5 @@
 import os
 
-import redis
-
 
 class Directories:
     # @desc: The root path of the application
@@ -60,13 +58,6 @@ class FlaskEmail:
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
 
 
-class FlaskRedis:
-    SESSION_TYPE = 'redis'
-    SESSION_PERMANENT = False
-    SESSION_USE_SIGNER = True
-    SESSION_REDIS = redis.from_url("redis://127.0.0.1:6379")
-
-
 class SQLDatabase:
     SQLALCHEMY_DATABASE_URI = os.environ.get("SQLALCHEMY_DATABASE_URI")
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -93,11 +84,6 @@ class Config:
     MAIL_USE_SSL = FlaskEmail.MAIL_USE_SSL
     MAIL_USERNAME = FlaskEmail.MAIL_USERNAME
     MAIL_PASSWORD = FlaskEmail.MAIL_PASSWORD
-
-    SESSION_TYPE = FlaskRedis.SESSION_TYPE
-    SESSION_PERMANENT = FlaskRedis.SESSION_PERMANENT
-    SESSION_USE_SIGNER = FlaskRedis.SESSION_USE_SIGNER
-    SESSION_REDIS = FlaskRedis.SESSION_REDIS
 
     SQLALCHEMY_DATABASE_URI = SQLDatabase.SQLALCHEMY_DATABASE_URI
     SQLALCHEMY_TRACK_MODIFICATIONS = SQLDatabase.SQLALCHEMY_TRACK_MODIFICATIONS
