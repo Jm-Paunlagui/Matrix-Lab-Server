@@ -1409,8 +1409,9 @@ def redirect_to(user_id: int):
 
 def remove_session():
     """Removes the user's session if the user logs out."""
-    user_id: int = session.get('user_id')
-    if user_id is not None:
+    token: str = request.cookies.get('token')
+    if token is not None:
+        session.pop('token', None)
         session.pop('user_id', None)
         session.clear()
         return True
