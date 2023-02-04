@@ -288,6 +288,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
                   for index, row in csv_file.iterrows()})
 
         # @desc: Iterate through the list of the professors and check if they exist in the user table of the database
+        objects_to_insert = []
         for index, evaluatee in enumerate(evaluatee_list):
             if not User.query.filter_by(full_name=evaluatee[0]).first():
                 email = evaluatee[2].lower()
@@ -298,10 +299,10 @@ def professor_analysis(csv_file_path: str, csv_id: int):
                 # @desc: Create the user account
                 user = User(username=username, email=email,
                             full_name=full_name, department=department, role="user", verified_email="Verified")
-                db.session.add(user)
-                db.session.commit()
+                objects_to_insert.append(user)
 
-            continue
+        db.session.bulk_save_objects(objects_to_insert)
+        db.session.commit()
 
         # @desc: For each Professor computing code
         sentiment_list = db.session.query(
@@ -385,20 +386,20 @@ def course_provider(csv_id: int, csv_file_path: str):
         course_code_sentence_per_professor = csv_file.groupby(["course_code", "evaluatee", "department"]).\
             size().reset_index(name="count")
 
+        courses = []
         for index, row in course_code_sentence_per_professor.iterrows():
             if not CsvCourses.query.filter_by(
-                csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
+                    csv_id=csv_id, course_code=row["course_code"], course_for_name=row["evaluatee"],
                     course_for_department=row["department"], number_of_responses=row["count"]).first():
                 # @desc: Removes the , in the evaluatee name
                 course_for_name = row["evaluatee"].replace(",", "")
-                csv_course = CsvCourses(csv_id=csv_id, course_code=row["course_code"],
-                                        course_for_name=course_for_name,
-                                        course_for_department=row["department"],
-                                        number_of_responses=row["count"])
-                db.session.add(csv_course)
-                db.session.commit()
+                courses.append(CsvCourses(csv_id=csv_id, course_code=row["course_code"],
+                                          course_for_name=course_for_name,
+                                          course_for_department=row["department"],
+                                          number_of_responses=row["count"]))
 
-            continue
+        db.session.bulk_save_objects(courses)
+        db.session.commit()
     except Exception as e:
         error_handler(
             category_error="CREATE",
@@ -544,8 +545,9 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
 
         # Add to the database
         start_time_adding_to_db = time.time()
+        objects_to_insert = []
         for index, row in csv_to_pred.iterrows():
-            result = CsvAnalyzedSentiment(
+            objects_to_insert.append(CsvAnalyzedSentiment(
                 csv_id=csv_file.csv_id,
                 evaluatee=row["evaluatee"],
                 department=row["department"],
@@ -557,8 +559,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                 review_len=row["review_len"],
                 word_count=row["word_count"],
                 polarity=row["polarity"],
-            )
-            db.session.add(result)
+            ))
+        db.session.bulk_save_objects(objects_to_insert)
         db.session.commit()
         end_time_adding_to_db = time.time()
 
@@ -693,39 +695,35 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
         # Top department with the highest number of positive sentiments percentage
         if type_comp == "professor_computing":
             # Insert the professor's name and the number of sentiments to the database CsvProfessorSentiment
+            objects_to_insert = []
             for index, professor in enumerate(
                     sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
-                db.session.add(CsvProfessorSentiment(
+                objects_to_insert.append(CsvProfessorSentiment(
                     csv_id=csv_id,
                     professor=professor,
-                    evaluatee_department=department_evaluatee[names.index(
-                        professor)],
-                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(
-                        professor)],
-                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
-                        professor)],
-                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
-                        professor)],
+                    evaluatee_department=department_evaluatee[names.index(professor)],
+                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(professor)],
+                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(professor)],
+                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(professor)],
                     evaluatee_share=share[names.index(professor)],
                 ))
+            db.session.bulk_save_objects(objects_to_insert)
             db.session.commit()
         if type_comp == "department_computing":
             # Insert the department's name and the number of sentiments to the database CsvDepartmentSentiment
+            objects_to_insert = []
             for index, department in enumerate(
                     sorted(names, key=lambda x: positive_sentiments_percentage[names.index(x)], reverse=True), start=0):
-                db.session.add(CsvDepartmentSentiment(
+                objects_to_insert.append(CsvDepartmentSentiment(
                     csv_id=csv_id,
                     department=department,
-                    department_evaluatee=department_evaluatee[names.index(
-                        department)],
-                    department_number_of_sentiments=number_of_sentiments[names.index(
-                        department)],
-                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
-                        department)],
-                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
-                        department)],
+                    department_evaluatee=department_evaluatee[names.index(department)],
+                    department_number_of_sentiments=number_of_sentiments[names.index(department)],
+                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(department)],
+                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(department)],
                     department_share=share[names.index(department)],
                 ))
+            db.session.bulk_save_objects(objects_to_insert)
             db.session.commit()
         return None
     except Exception as e:
