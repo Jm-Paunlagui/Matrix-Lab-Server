@@ -636,6 +636,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
                         "prediction_time": prediction_time,
                         "sentiment_time": sentiment_time,
                         "adding_predictions_time": adding_predictions_time,
+                        "adding_to_db_time": adding_to_db_time,
                         "analysis_user_time": analysis_user_time,
                         "analysis_department_time": analysis_department_time,
                         "analysis_collection_time": analysis_collection_time
