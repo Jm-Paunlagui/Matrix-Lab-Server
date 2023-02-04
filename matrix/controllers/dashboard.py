@@ -3,7 +3,7 @@ from io import BytesIO
 
 import numpy as np
 import seaborn as sns
-from flask import Response, jsonify, session
+from flask import Response, jsonify, session, request
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, FixedFormatter
@@ -15,7 +15,7 @@ from matrix.models.csv_file import (CsvAnalyzedSentiment,
                                     CsvDepartmentSentiment, CsvModelDetail,
                                     CsvProfessorSentiment)
 from matrix.models.user import User
-from matrix.module import InputTextValidation
+from matrix.module import InputTextValidation, verify_authenticated_token
 
 
 def options_read_single_data_dashboard():
@@ -79,16 +79,22 @@ def options_read_single_data_dashboard():
 def dashboard_data_csv():
     """@desc: Get the data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
-    user_id: int = session.get('user_id')
-
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 440
-
-    user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
-
-    if user_data.role != "admin":
-        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+    # token: str = request.cookies.get('token')
+    # print(token)
+    #
+    # if token is None:
+    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
+    #
+    # verified_token: dict = verify_authenticated_token(token)
+    #
+    # if not verified_token:
+    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
+    #
+    # user_data: User = User.query.with_entities(
+    #     User.role).filter_by(user_id=verified_token["id"]).first()
+    #
+    # if user_data.role != "admin":
+    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     # @desc: Get the total number of csv files in the database
     csv_files = CsvModelDetail.query.filter(
@@ -125,16 +131,21 @@ def dashboard_data_csv():
 
 def dashboard_data_professor():
     """@desc: Get the data of the professors in the database."""
-    user_id: int = session.get('user_id')
-
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 440
-
-    user_data: User = User.query.with_entities(
-        User.role).filter_by(user_id=user_id).first()
-
-    if user_data.role != "admin":
-        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+    # token: str = request.cookies.get('token')
+    #
+    # if token is None:
+    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
+    #
+    # verified_token: dict = verify_authenticated_token(token)
+    #
+    # if not verified_token:
+    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
+    #
+    # user_data: User = User.query.with_entities(
+    #     User.role).filter_by(user_id=verified_token["id"]).first()
+    #
+    # if user_data.role != "admin":
+    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     # @desc: Read all the csv file in the database for professor
 
@@ -355,9 +366,11 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
             x=sentiment_converted_list,
             y=polarity_list,
             showfliers=True, showmeans=True,
-            flierprops=dict(marker='d', markerfacecolor='black', markersize=5, linestyle='none'),
+            flierprops=dict(marker='d', markerfacecolor='black',
+                            markersize=5, linestyle='none'),
             medianprops=dict(color='yellow'),
-            meanprops=dict(marker='o', markerfacecolor='#06b6d4', markersize=5),
+            meanprops=dict(
+                marker='o', markerfacecolor='#06b6d4', markersize=5),
             capprops=dict(color='black'),
             notch=True,
         )
@@ -371,19 +384,20 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
 
         # Add the legend for the boxplot components
         flier_elements = [
-            Line2D([0], [0], marker='d', color='w', markerfacecolor='black', markersize=5, label='Outliers'),
+            Line2D([0], [0], marker='d', color='w',
+                   markerfacecolor='black', markersize=5, label='Outliers'),
         ]
         median_elements = [
             Line2D([0], [0], color='yellow', label='Median')]
         min_max_elements = [
             Line2D([0], [0], color='black', label='Min/Max')]
         quartile_elements = [
-            Line2D([0], [0], marker='o', color='w', markerfacecolor='#ef4444', label='25%-75% Negative'),
+            Line2D([0], [0], marker='o', color='w',
+                   markerfacecolor='#ef4444', label='25%-75% Negative'),
             Line2D([0], [0], marker='o', color='w', markerfacecolor='#22c55e', label='25%-75% Positive')]
 
         mean_elements = [
             Line2D([0], [0], marker='o', color='w', markerfacecolor='#06b6d4', label='Mean')]
-
 
         ax.legend(handles=flier_elements + median_elements + min_max_elements + quartile_elements + mean_elements,
                   title="Legend", loc="best")
@@ -411,7 +425,8 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
     if len(sentiment_converted_list) == 0 or len(review_length_list) == 0:
         sns.boxplot(x=[0], y=[0])
     else:
-        ax = sns.pointplot(x=sentiment_converted_list, y=review_length_list, hue=sentiment_converted_list, dodge=False,)
+        ax = sns.pointplot(x=sentiment_converted_list, y=review_length_list,
+                           hue=sentiment_converted_list, dodge=False,)
 
         xticks = [0, 1]
         ax.set_xticks(xticks)
@@ -420,11 +435,14 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
         ax.xaxis.set_major_formatter(FixedFormatter(["Negative", "Positive"]))
 
         elements = [
-            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#ef4444', label='Negative'),
-            Line2D([0,0], [0,1], marker='o', color='w', markerfacecolor='#22c55e', label='Positive'),
-            ]
+            Line2D([0, 0], [0, 1], marker='o', color='w',
+                   markerfacecolor='#ef4444', label='Negative'),
+            Line2D([0, 0], [0, 1], marker='o', color='w',
+                   markerfacecolor='#22c55e', label='Positive'),
+        ]
 
-        ax.legend(handles=elements, title="Legend", loc="best", bbox_to_anchor=(1, 1))
+        ax.legend(handles=elements, title="Legend",
+                  loc="best", bbox_to_anchor=(1, 1))
 
     # Save the figure to a BytesIO object
     buf_sentiment_review_length = BytesIO()
@@ -730,19 +748,31 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    user_id: int = session.get('user_id')
+    # Get data from the localstorage of the browser
+    token = request.headers
+    print(token)
+    cookie = request.cookies
+    print(cookie)
 
-    if user_id is None:
-        return jsonify({"status": "error", "message": "You are not logged in."}), 440
-
-    user_data: User = User.query.with_entities(
-        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
-
-    if user_data.role != "admin":
-        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
-
-    if user_data.verified_email != "Verified":
-        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
+    # token: str = request.cookies.get('token')
+    # print(token)
+    #
+    # if token is None:
+    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
+    #
+    # verified_token: dict = verify_authenticated_token(token)
+    #
+    # if not verified_token:
+    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
+    #
+    # user_data: User = User.query.with_entities(
+    #     User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
+    #
+    # if user_data.role != "admin":
+    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+    #
+    # if user_data.verified_email != "Verified":
+    #     return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(
@@ -773,7 +803,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title="Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -813,7 +844,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title="Overall " + csv_questionn)
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title="Overall " + csv_questionn)
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
                         "image_path_polarity_v_sentiment": sentiment_polarity_encoded,
@@ -851,7 +883,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_semesterr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -891,7 +924,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for Overall")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_yearr} for Overall")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -932,7 +966,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_semesterr} for {csv_questionn}")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_semesterr} for {csv_questionn}")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -974,7 +1009,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         ).all()
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-            wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} for {csv_questionn} ")
+            wordcloud_list_with_sentiment = core_analysis(
+                analysis, None, title=f"{school_yearr} for {csv_questionn} ")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -1017,7 +1053,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
 
         sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
             wordcloud_list_with_sentiment = core_analysis(
-            analysis, None, title=f"{school_year} - {school_semesterr} for Overall Topics")
+                analysis, None, title=f"{school_year} - {school_semesterr} for Overall Topics")
 
         return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                         "overall_departments": department_details,
@@ -1058,7 +1094,8 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     ).all()
 
     sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, \
-        wordcloud_list_with_sentiment = core_analysis(analysis, None, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
+        wordcloud_list_with_sentiment = core_analysis(
+            analysis, None, title=f"{school_yearr} - {school_semesterr} for {csv_questionn}")
 
     return jsonify({"status": "success", "overall_sentiments": sentiment_details,
                     "overall_departments": department_details,
@@ -1091,13 +1128,18 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    user_id: int = session.get('user_id')
+    token: str = request.cookies.get('token')
 
-    if user_id is None:
+    if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
 
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
     user_data: User = User.query.with_entities(
-        User.role, User.full_name, User.verified_email).filter_by(user_id=user_id).first()
+        User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
 
     if user_data.role != "user":
         return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
