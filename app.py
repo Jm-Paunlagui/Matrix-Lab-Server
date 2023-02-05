@@ -32,24 +32,26 @@ Directories.create_csv_directories()
 #     create_database(SQLDatabase.SQLALCHEMY_DATABASE_URI)
 #     print(f"Database created: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
-# with app.app_context():
-#     db.create_all()
-#
-#     hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
-#
-#     default_user = User(
-#         email="paunlagui.jm.cs@gmail.com",
-#         full_name="John Moises E. Paunlagui",
-#         username="admin-jm",
-#         password=hashed_password,
-#         role="admin",
-#         verified_email="Verified"
-#     )
-#
-#     db.session.add(default_user)
-#     db.session.commit()
+with app.app_context():
+    db.create_all()
 
-print("Default user created")
+    user_default = User.query.filter_by(email="paunlagui.jm.cs@gmail.com").first()
+    if not user_default:
+        hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
+
+        default_user = User(
+            email="paunlagui.jm.cs@gmail.com",
+            full_name="John Moises E. Paunlagui",
+            username="admin-jm",
+            password=hashed_password,
+            role="admin",
+            verified_email="Verified"
+        )
+
+        db.session.add(default_user)
+        db.session.commit()
+        print("Default user created")
+
 
 app.register_blueprint(user)
 app.register_blueprint(predictalyze)
