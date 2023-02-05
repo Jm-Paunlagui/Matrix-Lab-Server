@@ -737,10 +737,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 objects_to_insert.append(CsvProfessorSentiment(
                     csv_id=csv_id,
                     professor=professor,
-                    evaluatee_department=department_evaluatee[names.index(professor)],
-                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(professor)],
-                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(professor)],
-                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(professor)],
+                    evaluatee_department=department_evaluatee[names.index(
+                        professor)],
+                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(
+                        professor)],
+                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        professor)],
+                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        professor)],
                     evaluatee_share=share[names.index(professor)],
                 ))
             db.session.bulk_save_objects(objects_to_insert)
@@ -753,10 +757,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 objects_to_insert.append(CsvDepartmentSentiment(
                     csv_id=csv_id,
                     department=department,
-                    department_evaluatee=department_evaluatee[names.index(department)],
-                    department_number_of_sentiments=number_of_sentiments[names.index(department)],
-                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(department)],
-                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(department)],
+                    department_evaluatee=department_evaluatee[names.index(
+                        department)],
+                    department_number_of_sentiments=number_of_sentiments[names.index(
+                        department)],
+                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        department)],
+                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        department)],
                     department_share=share[names.index(department)],
                 ))
             db.session.bulk_save_objects(objects_to_insert)
@@ -877,7 +885,8 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
             User.role == "user", User.flag_deleted == False).distinct().all()
         departments = [department[0] for department in department_list]
         if school_year is None and school_semester is None and csv_question is None:
-            no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
+            no_of_evaluated = db.session.query(CsvModelDetail).filter(
+                CsvModelDetail.flag_deleted == False).count()
 
             sentiment = db.session.query(
                 CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -950,7 +959,8 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
             User.role == "user", User.flag_deleted == False).all()
         users = [user[0].upper() for user in user_list]
         if school_year is None and school_semester is None and csv_question is None:
-            no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
+            no_of_evaluated = db.session.query(CsvModelDetail).filter(
+                CsvModelDetail.flag_deleted == False).count()
 
             sentiment = db.session.query(
                 CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
