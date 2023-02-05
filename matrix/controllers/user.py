@@ -479,7 +479,7 @@ def delete_user_account(user_id: int):
             email = user.email
             user.flag_deleted = True
             # Send the Delete Account Email
-            msg = Message('Matrix Lab Account Deleted',
+            msg = Message('Matrix Lab Account Archived',
                           sender="service.matrix.ai@gmail.com", recipients=[email])
 
             msg.html = f""" <!DOCTYPE html><html lang="en-US"><head><meta content="text/html; charset=utf-8" 
@@ -498,7 +498,7 @@ def delete_user_account(user_id: int):
             rgba(0,0,0,.06);-moz-box-shadow:0 6px 18px 0 rgba(0,0,0,.06);box-shadow:0 6px 18px 0 rgba(0,0,0,.06)"><tr><td 
             style="padding:35px"><h1 style="color:#5d6068;font-weight:700;text-align:left">Hi {name},
             </h1><p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Your 
-            Matrix account has been deleted. You can no longer login and view your sentiment analysis results. If you 
+            Matrix account has been archived. You can no longer login and view your sentiment analysis results. If you 
             wish to continue using Matrix, please contact your administrator to restore your account.</p><p 
             style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:justify">This is an 
             auto-generated email. Please do not reply to this email.</p><p style="color:#878a92;margin:.4em 0 
@@ -523,7 +523,7 @@ def delete_user_account(user_id: int):
                                      function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
-                        "message": "An error occurred while deleting the user account.",
+                        "message": "An error occurred while archiving the user account.",
                         "error": f"{e}"}), 500
     return False
 
@@ -537,13 +537,13 @@ def delete_all_user_accounts():
 
         if bool(all(user[1] == 1 for user in users)):
             return jsonify({"status": "success",
-                            "message": "All user accounts have already been deleted."}), 400
+                            "message": "All user accounts have already been archived."}), 400
 
         for user in users:
             user_id = user[0]
             delete_user_account(user_id)
         return jsonify({"status": "success",
-                        "message": "All user accounts have been deleted."}), 200
+                        "message": "All user accounts have been archived."}), 200
     except Exception as e:
         error_handler(
             category_error="PUT",
@@ -552,7 +552,7 @@ def delete_all_user_accounts():
                                      function_name=inspect.stack()[0][3], file_name=__name__)
         )
         return jsonify({"status": "error",
-                        "message": "An error occurred while deleting all user accounts.",
+                        "message": "An error occurred while archiving all user accounts.",
                         "error": f"{e}"}), 500
 
 

@@ -312,7 +312,7 @@ def professor_analysis(csv_file_path: str, csv_id: int):
             CsvAnalyzedSentiment.csv_id == csv_id).all()
 
         user_list = db.session.query(User.full_name, User.department).filter(
-            User.role == "user").all()
+            User.role == "user", User.flag_deleted == False).all()
 
         users = [user[0].upper() for user in user_list]
 
@@ -340,7 +340,7 @@ def department_analysis(csv_id: int):
     try:
         # @desc: For each Department computing code
         department_list = db.session.query(User.department).filter(
-            User.role == "user").distinct().all()
+            User.role == "user", User.flag_deleted == False).distinct().all()
         departments = [department[0] for department in department_list]
 
         sentiment_list = db.session.query(
@@ -723,7 +723,7 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
             if type_comp == "department_computing":
                 department_evaluatee.append(
                     db.session.query(User.department).filter(
-                        User.department == name, User.role == "user").count()
+                        User.department == name, User.role == "user", User.flag_deleted == False).count()
                 )
             if type_comp == "professor_computing":
                 department_evaluatee.append(duo_raw[names.index(name)][1])
@@ -826,7 +826,7 @@ def computed(sentiment_list=None, many=False, type_comp=None, names=None, no_of_
             if type_comp == "top_dept":
                 department_evaluatee.append(
                     db.session.query(User.department).filter(
-                        User.department == name, User.role == "user").count()
+                        User.department == name, User.role == "user", User.flag_deleted == False).count()
                 ) if type_comp == "top_dept" else 0
             if type_comp == "top_prof":
                 department_evaluatee.append(
@@ -874,7 +874,7 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
     """Count the overall data of the department analysis csv files. This is for the analysis purposes."""
     try:
         department_list = db.session.query(User.department).filter(
-            User.role == "user").distinct().all()
+            User.role == "user", User.flag_deleted == False).distinct().all()
         departments = [department[0] for department in department_list]
         if school_year is None and school_semester is None and csv_question is None:
             no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
@@ -947,7 +947,7 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
     """Count the overall data of the professor analysis csv files. This is for the analysis purposes."""
     try:
         user_list = db.session.query(User.full_name, User.department).filter(
-            User.role == "user").all()
+            User.role == "user", User.flag_deleted == False).all()
         users = [user[0].upper() for user in user_list]
         if school_year is None and school_semester is None and csv_question is None:
             no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
@@ -1887,7 +1887,7 @@ def to_download_all_csv_files(type_of_download: str | None):
 
         # Overall Professor Sentiment
         user_list = db.session.query(User.full_name, User.department).filter(
-            User.role == "user").all()
+            User.role == "user", User.flag_deleted == False).all()
         users = [user[0].upper() for user in user_list]
         no_of_evaluated = db.session.query(CsvModelDetail).filter(
             CsvModelDetail.flag_deleted == False
@@ -1909,7 +1909,7 @@ def to_download_all_csv_files(type_of_download: str | None):
 
         # Overall Department Sentiment
         department_list = db.session.query(User.department).filter(
-            User.role == "user").distinct().all()
+            User.role == "user", User.flag_deleted == False).distinct().all()
         departments = [department[0] for department in department_list]
 
         sentiment_department = db.session.query(
