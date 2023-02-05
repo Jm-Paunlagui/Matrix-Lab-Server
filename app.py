@@ -35,9 +35,11 @@ Directories.create_csv_directories()
 with app.app_context():
     db.create_all()
 
-    user_default = User.query.filter_by(email="paunlagui.jm.cs@gmail.com").first()
+    user_default = User.query.filter_by(
+        email="paunlagui.jm.cs@gmail.com").first()
     if not user_default:
-        hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
+        hashed_password = bcrypt.generate_password_hash(
+            "123@Qwer").decode("utf-8")
 
         default_user = User(
             email="paunlagui.jm.cs@gmail.com",
