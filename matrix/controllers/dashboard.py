@@ -371,7 +371,6 @@ def computation(sentiment_converted_list=None, polarity_list=None, review_length
             meanprops=dict(
                 marker='o', markerfacecolor='#06b6d4', markersize=5),
             capprops=dict(color='black'),
-            notch=True,
         )
 
         # Legend for the ylabels of the boxplot graph
