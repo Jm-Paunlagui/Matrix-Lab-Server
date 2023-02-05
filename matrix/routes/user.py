@@ -7,7 +7,7 @@ from matrix.controllers.user import authenticate_user, send_tfa, check_email_exi
     unlock_user_account, unlock_all_user_accounts, delete_user_account, delete_all_user_accounts, \
     restore_user_account, restore_all_user_accounts, update_password, update_personal_info, update_security_info, \
     update_username, verify_tfa, redirect_to, authenticated_user, verify_verification_code_to_unlock, \
-    verify_remove_token, verify_token, send_username_to_email, cemail, verify_email_request, verify_email
+    verify_remove_token, verify_token, send_username_to_email, verify_email_request, verify_email
 from matrix.models.user import User
 from matrix.module import InputTextValidation, verify_authenticated_token
 

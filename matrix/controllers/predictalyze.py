@@ -9,11 +9,11 @@ from zipfile import ZipFile
 
 import nltk
 import pandas as pd
-from flask import jsonify, Response, session, send_file, request
-from nltk import word_tokenize
-from sqlalchemy import update, func
+from flask import jsonify, Response, send_file, request
 from keras.models import load_model
 from keras.utils import pad_sequences
+from nltk import word_tokenize
+from sqlalchemy import update, func
 from textblob import TextBlob
 from werkzeug.datastructures import FileStorage
 
@@ -465,7 +465,8 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
         CsvModelDetail.csv_question,
         CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
-        CsvModelDetail.csv_id.desc()).first()
+        CsvModelDetail.csv_id.desc()).filter_by(
+        CsvModelDetail.flag_deleted == False).first()
 
     if previous_evaluated_file:
         # Get the department and professors in the database
