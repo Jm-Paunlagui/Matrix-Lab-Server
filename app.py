@@ -21,38 +21,35 @@ app.config.from_object(Config)
 CORS(app, supports_credentials=True,
      methods="GET,POST,PUT,DELETE,OPTIONS", expose_headers="Content-Disposition")
 
-
 db.init_app(app=app)
 bcrypt.init_app(app=app)
 mail.init_app(app=app)
 
 Directories.create_csv_directories()
 
-if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
-    print(f"Creating database: {app.config['SQLALCHEMY_DATABASE_URI']}")
-    create_database(SQLDatabase.SQLALCHEMY_DATABASE_URI)
-    print(f"Database created: {app.config['SQLALCHEMY_DATABASE_URI']}")
+# if not database_exists(SQLDatabase.SQLALCHEMY_DATABASE_URI):
+#     print(f"Creating database: {app.config['SQLALCHEMY_DATABASE_URI']}")
+#     create_database(SQLDatabase.SQLALCHEMY_DATABASE_URI)
+#     print(f"Database created: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
-    with app.app_context():
-        db.create_all()
+# with app.app_context():
+#     db.create_all()
+#
+#     hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
+#
+#     default_user = User(
+#         email="paunlagui.jm.cs@gmail.com",
+#         full_name="John Moises E. Paunlagui",
+#         username="admin-jm",
+#         password=hashed_password,
+#         role="admin",
+#         verified_email="Verified"
+#     )
+#
+#     db.session.add(default_user)
+#     db.session.commit()
 
-        hashed_password = bcrypt.generate_password_hash("123@Qwer").decode("utf-8")
-
-        default_user = User(
-            email="paunlagui.jm.cs@gmail.com",
-            full_name="John Moises E. Paunlagui",
-            username="admin-jm",
-            password=hashed_password,
-            role="admin",
-            verified_email="Verified"
-        )
-
-        db.session.add(default_user)
-        db.session.commit()
-
-    print("Default user created")
-
-
+print("Default user created")
 
 app.register_blueprint(user)
 app.register_blueprint(predictalyze)

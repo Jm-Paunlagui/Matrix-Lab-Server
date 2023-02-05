@@ -1,9 +1,8 @@
 import base64
 from io import BytesIO
 
-import numpy as np
 import seaborn as sns
-from flask import Response, jsonify, session, request
+from flask import Response, jsonify, request
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, FixedFormatter
@@ -79,22 +78,22 @@ def options_read_single_data_dashboard():
 def dashboard_data_csv():
     """@desc: Get the data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
-    # token: str = request.cookies.get('token')
-    # print(token)
-    #
-    # if token is None:
-    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
-    #
-    # verified_token: dict = verify_authenticated_token(token)
-    #
-    # if not verified_token:
-    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
-    #
-    # user_data: User = User.query.with_entities(
-    #     User.role).filter_by(user_id=verified_token["id"]).first()
-    #
-    # if user_data.role != "admin":
-    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+    token: str = request.cookies.get('token')
+    print(token)
+
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=verified_token["id"]).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     # @desc: Get the total number of csv files in the database
     csv_files = CsvModelDetail.query.filter(
@@ -131,21 +130,21 @@ def dashboard_data_csv():
 
 def dashboard_data_professor():
     """@desc: Get the data of the professors in the database."""
-    # token: str = request.cookies.get('token')
-    #
-    # if token is None:
-    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
-    #
-    # verified_token: dict = verify_authenticated_token(token)
-    #
-    # if not verified_token:
-    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
-    #
-    # user_data: User = User.query.with_entities(
-    #     User.role).filter_by(user_id=verified_token["id"]).first()
-    #
-    # if user_data.role != "admin":
-    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+    token: str = request.cookies.get('token')
+
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role).filter_by(user_id=verified_token["id"]).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
 
     # @desc: Read all the csv file in the database for professor
 
@@ -600,7 +599,7 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
 
     # Top departments
     number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage = [], [], []
-    no_of_evaluated = db.session.query(CsvModelDetail).count()
+    no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
     # Distinct departments
     names = list({sentiment[2] for sentiment in sentiments})
 
@@ -748,31 +747,25 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    # Get data from the localstorage of the browser
-    token = request.headers
+    token: str = request.cookies.get('token')
     print(token)
-    cookie = request.cookies
-    print(cookie)
 
-    # token: str = request.cookies.get('token')
-    # print(token)
-    #
-    # if token is None:
-    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
-    #
-    # verified_token: dict = verify_authenticated_token(token)
-    #
-    # if not verified_token:
-    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
-    #
-    # user_data: User = User.query.with_entities(
-    #     User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
-    #
-    # if user_data.role != "admin":
-    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
-    #
-    # if user_data.verified_email != "Verified":
-    #     return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role, User.full_name, User.verified_email).filter_by(user_id=verified_token["id"]).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    if user_data.verified_email != "Verified":
+        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
 
     if school_year == "All" and school_semester == "All" and csv_question == "All":
         starting_year, ending_year = get_starting_ending_year(

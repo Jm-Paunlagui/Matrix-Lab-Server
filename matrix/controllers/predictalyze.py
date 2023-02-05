@@ -437,30 +437,64 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
 
-    # token: str = request.cookies.get('token')
-    #
-    # if token is None:
-    #     return jsonify({"status": "error", "message": "You are not logged in."}), 440
-    #
-    # verified_token: dict = verify_authenticated_token(token)
-    #
-    # if not verified_token:
-    #     return jsonify({"status": "error", "message": "Invalid token!"}), 401
-    #
-    # user_data: User = User.query.with_entities(
-    #     User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
-    #
-    # if user_data.role != "admin":
-    #     return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
-    #
-    # if user_data.verified_email != "Verified":
-    #     return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
+    token: str = request.cookies.get('token')
+
+    if token is None:
+        return jsonify({"status": "error", "message": "You are not logged in."}), 440
+
+    verified_token: dict = verify_authenticated_token(token)
+
+    if not verified_token:
+        return jsonify({"status": "error", "message": "Invalid token!"}), 401
+
+    user_data: User = User.query.with_entities(
+        User.role, User.verified_email).filter_by(user_id=verified_token["id"]).first()
+
+    if user_data.role != "admin":
+        return jsonify({"status": "error", "message": "You are not authorized to access this page."}), 401
+
+    if user_data.verified_email != "Verified":
+        return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
 
     # @desc: Check if the csv file has already been evaluated by csv_question and school_year
     if check_csv_name_exists(csv_question, school_year, school_semester):
         return jsonify({"status": "error", "message": "File already evaluated"}), 409
 
-    # If any error occurs, delete the file
+    previous_evaluated_file = db.session.query(
+        CsvModelDetail).with_entities(
+        CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,
+        CsvModelDetail.csv_question,
+        CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
+        CsvModelDetail.csv_id.desc()).first()
+
+    if previous_evaluated_file:
+        # Get the department and professors in the database
+        departments_in_db = db.session.query(CsvDepartmentSentiment).with_entities(
+            CsvDepartmentSentiment.department).filter_by(
+            csv_id=previous_evaluated_file.csv_id).all()
+        professors_in_db = db.session.query(CsvProfessorSentiment).with_entities(
+            CsvProfessorSentiment.professor).filter_by(
+            csv_id=previous_evaluated_file.csv_id).all()
+
+        # Get the department and professors in the csv file
+        # @desc: Read the csv file and return a pandas dataframe object
+        csv_file = pd.read_csv(
+            Directories.CSV_UPLOADED_FOLDER + "/" + file_name)
+
+        # @desc: Get the department and professors in the csv file
+        departments_in_csv = csv_file["department"].unique()
+        professors_in_csv = csv_file["evaluatee"].unique()
+
+        # Convert the data fetch in the database from [('DAS',), ('DBA',), ('DTE',), ('DCI',)] to
+        # ['DAS', 'DBA', 'DTE', 'DCI']
+        departments_in_db = [department[0] for department in departments_in_db]
+        professors_in_db = [professor[0] for professor in professors_in_db]
+
+        # Check if the departments and professors are the same
+        if bool(set(departments_in_db) != set(departments_in_csv) and set(professors_in_db) != set(professors_in_csv)):
+            return jsonify({"status": "error",
+                            "message": "The csv file does not match the previous evaluated file"}), 400
+
     try:
         # @desc: Format the csv file to the required format: sentence, evaluatee, department and course code.
         # @desc: Get the time of the formatting of the csv file to the required format in seconds and milliseconds
@@ -842,7 +876,7 @@ def read_overall_data_department_analysis_csv_files(school_year: str | None, sch
             User.role == "user").distinct().all()
         departments = [department[0] for department in department_list]
         if school_year is None and school_semester is None and csv_question is None:
-            no_of_evaluated = db.session.query(CsvModelDetail).count()
+            no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
 
             sentiment = db.session.query(
                 CsvModelDetail.csv_id, CsvDepartmentSentiment.csv_id, CsvDepartmentSentiment.department,
@@ -915,7 +949,7 @@ def read_overall_data_professor_analysis_csv_files(school_year: str | None, scho
             User.role == "user").all()
         users = [user[0].upper() for user in user_list]
         if school_year is None and school_semester is None and csv_question is None:
-            no_of_evaluated = db.session.query(CsvModelDetail).count()
+            no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
 
             sentiment = db.session.query(
                 CsvModelDetail.csv_id, CsvProfessorSentiment.csv_id, CsvProfessorSentiment.professor,
