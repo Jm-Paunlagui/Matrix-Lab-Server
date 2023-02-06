@@ -1,6 +1,5 @@
 from flask import request, jsonify, Blueprint
 
-from extensions import db
 from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evaluator, done_in_csv_evaluation, \
     options_read_single_data, read_overall_data_department_analysis_csv_files, \
     read_overall_data_professor_analysis_csv_files, \
