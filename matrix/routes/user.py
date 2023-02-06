@@ -129,7 +129,6 @@ def forgot_password():
 
 
 @user.route("/get_user", methods=["GET"])
-@cross_origin()
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
     token: str = request.cookies.get('token')
