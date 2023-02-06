@@ -1,4 +1,5 @@
 import inspect
+import os
 import re
 import sys
 import uuid
@@ -118,7 +119,8 @@ def create_user_auto_generated_password(user_id: int):
             following credentials to login to your account.</p><h2 
             style="color:#5d6068;font-weight:600;text-align:left">Username: <span style="color:#878a92;font-weight:400">
             {user.username}</span></h2><h2 style="color:#5d6068;font-weight:600;text-align:left">Password: <span 
-            style="color:#878a92;font-weight:400">{new_password}</span></h2><a href="http://localhost:3000/auth" 
+            style="color:#878a92;font-weight:400">{new_password}</span></h2><a 
+            href="{os.environ.get("CLIENT_REACT_URL")}/auth" 
             style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform:uppercase
             ;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,
             .16)">Login</a><p style="color:#878a92;margin:2.1875em 0 
@@ -775,7 +777,7 @@ def authenticate_user(username: str, password: str):
                 </h1><p style="color:#878a92;margin:.4em 0 
                 2.1875em;font-size:16px;line-height:1.625;text-align:justify">Due to multiple failed attempts to login to 
                 your account, we decided to lock your account for security reasons. Please click on the button below to 
-                unlock your account.</p><a href="{"http://localhost:3000/admin-unlock/" + unlock_token}" 
+                unlock your account.</p><a href="{os.environ.get("CLIENT_REACT_URL") + "/admin-unlock/" + unlock_token}" 
                 style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform
                 :uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,
                 0,0,.16)">Unlock Account</a><p style="color:#878a92;margin:2.1875em 0 
@@ -918,7 +920,7 @@ def send_tfa(email: str, type_of_tfa: str):
                 </b> on  <b>{source[4]}</b>.</p><p style="color:#878a92;margin: .4em 0 
                 2.1875em;font-size:16px;line-height:1.625; text-align: justify;">If you did not recognize this email to 
                 your {username}'s email address, you can 
-                <a href="{"http://localhost:3000/remove-email-from-account/" + link}" style="color:#44578b;text
+                <a href="{os.environ.get("CLIENT_REACT_URL") + "/remove-email-from-account/" + link}" style="color:#44578b;text
                 -decoration:none;font-weight:bold;">click here</a> to remove the email address from that account.</p><p 
                 style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align: left;">Thanks, 
                 <br>The Matrix Lab team. </p></td></tr></table> </td><tr> <td style="height:20px;">&nbsp;</td></tr><tr> 
@@ -1000,7 +1002,7 @@ def send_email_verification(email: str):
             </b> on <b> {source[4]} </b>.</p><p 
             style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">If you did 
             not recognize this email to your {username}'s email address, you can <a href="{
-            "http://localhost:3000/remove-email-from-account/" + link}" 
+            os.environ.get("CLIENT_REACT_URL") + "/remove-email-from-account/" + link}" 
             style="color:#44578b;text-decoration:none;font-weight:700">click here</a> to remove the email address from 
             that account.</p><p style="color:#878a92;margin:1.1875em 0 
             .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,<br>The Matrix Lab 
@@ -1072,7 +1074,8 @@ def verify_verification_code_to_unlock(code: str, email: str):
                 {email}.</p><h2 style="color:#5d6068;font-weight:600;text-align:left">Username: <span 
                 style="color:#878a92;font-weight:400">{username}</span></h2><h2 
                 style="color:#5d6068;font-weight:600;text-align:left">Password: <span 
-                style="color:#878a92;font-weight:400">{new_password}</span></h2><a href="http://localhost:3000/auth" 
+                style="color:#878a92;font-weight:400">{new_password}</span></h2><a 
+                href={os.environ.get("CLIENT_REACT_URL") + "/auth"} 
                 style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;text-transform
                 :uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,
                 0,0,.16)">Login</a><p style="color:#878a92;margin:2.1875em 0 
@@ -1181,8 +1184,9 @@ def send_username_to_email(code: str, email: str):
                  justify">For security, this request was received from a<b> {source[0]} {source[1]} </b>device using<b> 
                  {source[2]} {source[3]} </b>on<b> {source[4]}</b>.</p><p style="color:#878a92;margin:.4em 0 2.1875em;
                  font-size:16px;line-height:1.625;text-align:justify">If you did not recognize this email to your 
-                 {username}'s email address, you can<a href="{"http://localhost:3000/remove-email-from-account/" + 
-                                                              link}" style="color:#44578b;text-decoration:none;
+                 {username}'s email address, you can<a 
+                 href="{os.environ.get("CLIENT_REACT_URL") +"/remove-email-from-account/" + link}" 
+                 style="color:#44578b;text-decoration:none;
                  font-weight:700"> click here </a>to remove the email address from that account.</p><p 
                  style="color:#878a92;margin:1.1875em 0 .4em;font-size:16px;line-height:1.625;text-align:left">Thanks,
                  <br>The Matrix Lab team.</p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr>
@@ -1269,7 +1273,7 @@ def password_reset_link(email: str):
         style="color:#5d6068;font-weight:700;text-align:left">Hi {name},</h1> <p style="color:#878a92;margin:.4em 0
         2.1875em;font-size:16px;line-height:1.625; text-align: justify;">You recently requested to reset your password
         for your Matrix account. Use the button below to reset it. <strong>This password reset link is only valid for only 5
-         minutes.</strong></p><a href="{"http://localhost:3000/reset-password/" + password_reset_token}"
+         minutes.</strong></p><a href="{os.environ.get("CLIENT_REACT_URL") +"/reset-password/" + password_reset_token}"
         style="background:#22bc66;text-decoration:none !important; font-weight:500; color:#fff;text-transform:uppercase;
         font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 3px rgba(0,0,0,.16);">Reset
         Password</a> <p style="color:#878a92;margin: 2.1875em 0 .4em;font-size:16px;line-height:1.625; text-align:
@@ -1285,7 +1289,7 @@ def password_reset_link(email: str):
         1.1875em;font-size:13px;line-height:1.625; text-align: left;">If you&#39;re having trouble with the button above,
         copy and paste the URL below into your web browser.</p><p style="color:#878a92;margin:.4em 0
         1.1875em;font-size:13px;line-height:1.625; text-align: left;">
-        {"http://localhost:3000/reset-password/" + password_reset_token}</p></td></tr></table> </td><tr> <td
+        {os.environ.get("CLIENT_REACT_URL") + "/reset-password/" + password_reset_token}</p></td></tr></table> </td><tr> <td
         style="height:20px;">&nbsp;</td></tr><tr> <td style="text-align:center;"> <p style="font-size:14px; color:rgba(
         124, 144, 163, 0.741); line-height:18px; margin:0 0 0;">Group 14 - Matrix Lab <br>Blk 01 Lot 18 Lazaro 3 Brgy. 3
         Calamba City, Laguna <br>4027 Philippines</p></td></tr><tr> <td style="height:20px;">&nbsp;</td></tr></table>
@@ -1682,7 +1686,7 @@ def verify_email_request(email: str):
             <p style="color:#878a92;margin:.4em 0 2.1875em;font-size:16px;line-height:1.625;text-align:justify">
             You recently requested to verify for your Matrix account email<strong> {email} </strong>. 
             Use the button below to reset it.<strong>This verification is only valid for only 5 minutes.</strong></p>
-            <a href="{"http://localhost:3000/verify-email/" + link}" 
+            <a href="{os.environ.get("CLIENT_REACT_URL") + "/verify-email/" + link}" 
             style="background:#22bc66;text-decoration:none!important;font-weight:500;color:#fff;
             text-transform:uppercase;font-size:14px;padding:12px 24px;display:block;border-radius:5px;box-shadow:0 2px 
             3px rgba(0,0,0,.16)">Verify Email</a><p style="color:#878a92;margin:2.1875em 0 .4em;font-size:16px;
@@ -1696,7 +1700,8 @@ def verify_email_request(email: str):
             The Matrix Lab team</p><hr style="margin-top:12px;margin-bottom:12px"><p style="color:#878a92;
             margin:.4em 0 1.1875em;font-size:13px;line-height:1.625;text-align:left">If you&#39;re having trouble with 
             the button above, copy and paste the URL below into your web browser.</p><p style="color:#878a92;margin:.4em
-             0 1.1875em;font-size:13px;line-height:1.625;text-align:left">{"http://localhost:3000/verify-email/" + link}
+             0 1.1875em;font-size:13px;line-height:1.625;text-align:left">
+             {os.environ.get("CLIENT_REACT_URL") + "/verify-email/" + link}
              </p></td></tr></table></td></tr><tr><td style="height:20px">&nbsp;</td></tr><tr><td 
              style="text-align:center"><p style="font-size:14px;color:rgba(124,144,163,.741);line-height:18px;
              margin:0 0 0">Group 14 - Matrix Lab<br>Blk 01 Lot 18 Lazaro 3 Brgy. 3 Calamba City, Laguna<br>4027 
