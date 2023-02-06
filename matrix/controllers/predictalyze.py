@@ -466,7 +466,7 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
         CsvModelDetail.csv_question,
         CsvModelDetail.flag_deleted, CsvModelDetail.flag_release).order_by(
         CsvModelDetail.csv_id.desc()).filter_by(
-        CsvModelDetail.flag_deleted == False).first()
+        flag_deleted=False).first()
 
     if previous_evaluated_file:
         # Get the department and professors in the database
