@@ -72,8 +72,8 @@ def analyze_save_csv():
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
     if check_csv_name_exists(csv_question, school_year, school_semester):
         return jsonify({"status": "error", "message": "File already evaluated!"}), 409
-    previous_semester = CsvModelDetail.query.filter_by \
-        (csv_question=csv_question, school_year=school_year).order_by(CsvModelDetail.school_semester.desc()).first()
+    previous_semester = CsvModelDetail.query.filter_by(
+        csv_question=csv_question, school_year=school_year).order_by(CsvModelDetail.school_semester.desc()).first()
     if previous_semester:
         previous_semester = previous_semester.school_semester
         if previous_semester == "1st_Semester" and school_semester != "2nd_Semester":
