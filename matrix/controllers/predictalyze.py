@@ -456,10 +456,6 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     if user_data.verified_email != "Verified":
         return jsonify({"status": "error", "message": "You are not verified to access this page."}), 401
 
-    # @desc: Check if the csv file has already been evaluated by csv_question and school_year
-    if check_csv_name_exists(csv_question, school_year, school_semester):
-        return jsonify({"status": "error", "message": "File already evaluated"}), 409
-
     previous_evaluated_file = db.session.query(
         CsvModelDetail).with_entities(
         CsvModelDetail.csv_id, CsvModelDetail.school_year, CsvModelDetail.school_semester,

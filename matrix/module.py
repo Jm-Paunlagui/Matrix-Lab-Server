@@ -554,3 +554,24 @@ def verify_authenticated_token(token: str):
         return user_info
     except jwt.exceptions.InvalidTokenError:
         return False
+
+
+def is_school_year_valid(school_year):
+    sy_string = school_year.strip()
+    parts = sy_string.split(" ")
+    if len(parts) != 2:
+        return False
+    year_range = parts[1]
+    years = year_range.split("-")
+    if len(years) != 2:
+        return False
+    current_year = int(years[0])
+    current_year_2 = int(years[1])
+    current_time = datetime.now().year
+    prev_year = current_year - 1
+    if current_year < 1000 or current_year > 9999 or prev_year < 1000 or prev_year > 9999 or \
+            current_year > current_time or current_year_2 < current_year or current_year_2 - current_year > 1 or \
+            current_year == current_year_2:
+        return False
+    return True
+    

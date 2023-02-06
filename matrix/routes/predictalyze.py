@@ -1,5 +1,6 @@
 from flask import request, jsonify, Blueprint
 
+from extensions import db
 from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evaluator, done_in_csv_evaluation, \
     options_read_single_data, read_overall_data_department_analysis_csv_files, \
     read_overall_data_professor_analysis_csv_files, \
@@ -9,8 +10,10 @@ from matrix.controllers.predictalyze import view_columns_with_pandas, csv_evalua
     to_delete_selected_csv_file_flagged, to_delete_selected_csv_file_unflagged, to_delete_all_csv_files_flag, \
     to_delete_all_csv_files_unflag, to_publish_selected_csv_file, to_unpublished_selected_csv_file, \
     to_publish_all_csv_files, to_unpublished_all_csv_files, to_download_selected_csv_file, list_csv_file_to_read, \
-    to_read_csv_file, list_evaluatees_to_create, format_names, get_previous_evaluated_file, to_download_all_csv_files
-from matrix.module import AllowedFile, InputTextValidation
+    to_read_csv_file, list_evaluatees_to_create, format_names, get_previous_evaluated_file, to_download_all_csv_files, \
+    check_csv_name_exists
+from matrix.models.csv_file import CsvModelDetail
+from matrix.module import AllowedFile, InputTextValidation, is_school_year_valid
 
 predictalyze = Blueprint("predictalyze", __name__, url_prefix="/data")
 
@@ -54,14 +57,37 @@ def analyze_save_csv():
                                                        csv_question):
         return jsonify({"status": "error", "message": "Some of the inputs are unsuccessfully retrieved"}), 400
     if not InputTextValidation(sentence_column).validate_number():
-        return jsonify({"status": "error", "message": "Invalid column number"}), 400
+        return jsonify({"status": "error", "message": "Invalid column number!"}), 400
     if not InputTextValidation(csv_question).validate_empty_fields():
-        return jsonify({"status": "error", "message": "Invalid question"}), 400
+        return jsonify({"status": "error", "message": "Invalid question!"}), 400
     if not InputTextValidation(school_year).validate_school_year():
-        return jsonify({"status": "error", "message": "Invalid school year"}), 400
+        return jsonify({"status": "error", "message": "Invalid school year!"}), 400
     if not InputTextValidation(school_semester).validate_school_semester():
-        return jsonify({"status": "error", "message": "Invalid school semester"}), 400
-    return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
+        return jsonify({"status": "error", "message": "Invalid school semester!"}), 400
+    if not is_school_year_valid(school_year):
+        return jsonify({"status": "error", "message": "Invalid school year!"}), 400
+    school_year = InputTextValidation(school_year).to_query_school_year()
+    school_semester = InputTextValidation(
+        school_semester).to_query_space_under()
+    csv_question = InputTextValidation(csv_question).to_query_csv_question()
+    if check_csv_name_exists(csv_question, school_year, school_semester):
+        return jsonify({"status": "error", "message": "File already evaluated!"}), 409
+    previous_semester = CsvModelDetail.query.filter_by \
+        (csv_question=csv_question, school_year=school_year).order_by(CsvModelDetail.school_semester.desc()).first()
+    if previous_semester:
+        previous_semester = previous_semester.school_semester
+        if previous_semester == "1st_Semester" and school_semester != "2nd_Semester":
+            return jsonify({"status": "error", "message": "Expected 2nd Semester!"}), 409
+        elif previous_semester == "2nd_Semester" and school_semester != "3rd_Semester":
+            return jsonify({"status": "error", "message": "Expected 3rd Semester!"}), 409
+        elif previous_semester == "3rd_Semester" and school_semester != "Summer":
+            return jsonify({"status": "error", "message": "Expected Summer!"}), 409
+        elif previous_semester == "Summer" and school_semester != "1st_Semester":
+            return jsonify({"status": "error", "message": "Expected 1st Semester!"}), 409
+    else:
+        if school_semester != "1st_Semester":
+            return jsonify({"status": "error", "message": "Expected 1st Semester!"}), 409
+        return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
 
 
 @predictalyze.route("/delete-uploaded-csv-file", methods=["POST"])
