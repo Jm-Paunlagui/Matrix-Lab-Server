@@ -595,7 +595,8 @@ def pancore_compute(sentiments: list[tuple[int, int, str, int, float, float]],
 
     # Top departments
     number_of_sentiments, positive_sentiments_percentage, negative_sentiments_percentage = [], [], []
-    no_of_evaluated = db.session.query(CsvModelDetail).filter(CsvModelDetail.flag_deleted == False).count()
+    no_of_evaluated = db.session.query(CsvModelDetail).filter(
+        CsvModelDetail.flag_deleted == False).count()
     # Distinct departments
     names = list({sentiment[2] for sentiment in sentiments})
 
@@ -722,7 +723,7 @@ def core_analysis(
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
-def analysis_options_admin(school_year: str, school_semester: str, csv_question: str, token:str) \
+def analysis_options_admin(school_year: str, school_semester: str, csv_question: str, token: str) \
         -> tuple[Response, int]:
     """
     Get the analysis of the admin using matplotlib and seaborn library.
@@ -1095,7 +1096,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                     }), 200
 
 
-def analysis_options_user(school_year: str, school_semester: str, csv_question: str, token:str) -> tuple[Response, int]:
+def analysis_options_user(school_year: str, school_semester: str, csv_question: str, token: str) -> tuple[Response, int]:
     """
     @desc: This function is used to get the analysis of the csv files for the user
 
