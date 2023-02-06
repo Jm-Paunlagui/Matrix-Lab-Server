@@ -2,7 +2,7 @@ import base64
 from io import BytesIO
 
 import seaborn as sns
-from flask import Response, jsonify, request
+from flask import Response, jsonify
 from matplotlib import pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.ticker import FixedLocator, FixedFormatter
@@ -75,11 +75,9 @@ def options_read_single_data_dashboard():
     }), 200
 
 
-def dashboard_data_csv():
+def dashboard_data_csv(token: str):
     """@desc: Get the data of the csv files in the database."""
     # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
-    print(token)
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -128,9 +126,8 @@ def dashboard_data_csv():
     }), 200
 
 
-def dashboard_data_professor():
+def dashboard_data_professor(token: str):
     """@desc: Get the data of the professors in the database."""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -725,7 +722,7 @@ def core_analysis(
     return sentiment_polarity_encoded, sentiment_review_length_encoded, wordcloud_encoded, wordcloud_list_with_sentiment
 
 
-def analysis_options_admin(school_year: str, school_semester: str, csv_question: str) \
+def analysis_options_admin(school_year: str, school_semester: str, csv_question: str, token:str) \
         -> tuple[Response, int]:
     """
     Get the analysis of the admin using matplotlib and seaborn library.
@@ -734,6 +731,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
         school_year (str): The school year.
         school_semester (str): The school semester.
         csv_question (str): The csv question.
+        token (str): The token of the user.
 
     Returns:
         tuple[Response, int]: The response and the status code and the analysis of the csv files
@@ -745,9 +743,6 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
-
-    token: str = request.cookies.get('token')
-    print(token)
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1100,7 +1095,7 @@ def analysis_options_admin(school_year: str, school_semester: str, csv_question:
                     }), 200
 
 
-def analysis_options_user(school_year: str, school_semester: str, csv_question: str) -> tuple[Response, int]:
+def analysis_options_user(school_year: str, school_semester: str, csv_question: str, token:str) -> tuple[Response, int]:
     """
     @desc: This function is used to get the analysis of the csv files for the user
 
@@ -1108,6 +1103,7 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
         school_year (str): The school year of the csv files
         school_semester (str): The school semester of the csv files
         csv_question (str): The csv question of the csv files
+        token (str): The token of the user
 
     Returns:
         tuple[Response, int]: The response and the status code and the analysis of the csv files
@@ -1119,8 +1115,6 @@ def analysis_options_user(school_year: str, school_semester: str, csv_question: 
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
-
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440

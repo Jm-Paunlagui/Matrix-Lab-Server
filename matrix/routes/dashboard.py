@@ -12,27 +12,27 @@ def options_for_file_data_dashboard():
     return options_read_single_data_dashboard()
 
 
-@dashboard.route("/dashboard-data-csv", methods=["GET"])
-def getting_all_data_from_csv():
+@dashboard.route("/dashboard-data-csv/<string:token>", methods=["GET"])
+def getting_all_data_from_csv(token):
     """Get all the data from the csv file."""
-    return dashboard_data_csv()
+    return dashboard_data_csv(token)
 
 
-@dashboard.route("/dashboard-data-user", methods=["GET"])
-def getting_all_user():
+@dashboard.route("/dashboard-data-user/<string:token>", methods=["GET"])
+def getting_all_user(token):
     """Get all the data from the csv file."""
-    return dashboard_data_professor()
+    return dashboard_data_professor(token)
 
 
-@dashboard.route("/sentiment_vs_polarity/<string:school_year>/<string:school_semester>/<string:csv_question>",
+@dashboard.route("/sentiment_vs_polarity/<string:school_year>/<string:school_semester>/<string:csv_question>/<string:token>",
                  methods=["GET"])
-def for_analysis_options_admin(school_year, school_semester, csv_question):
+def for_analysis_options_admin(school_year, school_semester, csv_question, token):
     """Get the data for sentiment vs polarity."""
-    return analysis_options_admin(school_year, school_semester, csv_question)
+    return analysis_options_admin(school_year, school_semester, csv_question, token)
 
 
-@dashboard.route("/for_analysis_options_user/<string:school_year>/<string:school_semester>/<string:csv_question>",
+@dashboard.route("/for_analysis_options_user/<string:school_year>/<string:school_semester>/<string:csv_question>/<string:token>",
                  methods=["GET"])
-def for_analysis_options_user(school_year, school_semester, csv_question):
+def for_analysis_options_user(school_year, school_semester, csv_question, token):
     """Get the data for sentiment vs polarity."""
-    return analysis_options_user(school_year, school_semester, csv_question)
+    return analysis_options_user(school_year, school_semester, csv_question, token)
