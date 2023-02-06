@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask_cors import cross_origin
 
 from matrix.controllers.user import authenticate_user, send_tfa, check_email_exists, send_email_verification, \
     password_reset_link, check_username_exists, remove_email, password_reset, \
@@ -128,6 +129,7 @@ def forgot_password():
 
 
 @user.route("/get_user", methods=["GET"])
+@cross_origin()
 def get_authenticated_user():
     """Gets the authenticated user by id and returns the user object."""
     token: str = request.cookies.get('token')

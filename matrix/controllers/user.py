@@ -58,7 +58,7 @@ def check_email_exists_by_username(username: str):
         return False
     if is_email is not None and username == is_email.username:
         payload = {
-            "iss": "http://127.0.0.1:5000",
+            "iss": "https://matrix-client.herokuapp.com",
             "sub": is_email.email,
             "recovery_email": is_email.recovery_email,
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
@@ -746,7 +746,7 @@ def authenticate_user(username: str, password: str):
                 source = get_os_browser_versions()
                 ip_address = get_ip_address()
                 payload = {
-                    "iss": "http://127.0.0.1:5000",
+                    "iss": "https://matrix-client.herokuapp.com",
                     "sub": name,
                     "iat": Timezone("Asia/Manila").get_timezone_current_time(),
                     "exp": datetime.timestamp(
@@ -842,7 +842,7 @@ def send_tfa(email: str, type_of_tfa: str):
 
             # Generate a link for removing the user's email if not recognized by the user using jwt
             payload = {
-                "iss": "http://127.0.0.1:5000",
+                "iss": "https://matrix-client.herokuapp.com",
                 "sub": email,
                 "username": is_email[2],
                 "iat": Timezone("Asia/Manila").get_timezone_current_time(),
@@ -960,7 +960,7 @@ def send_email_verification(email: str):
                 extra_message = " to a unverified recovery email address."
             # Generate a link for removing the user's email if not recognized by the user using jwt
             payload = {
-                "iss": "http://127.0.0.1:5000",
+                "iss": "https://matrix-client.herokuapp.com",
                 "sub": email,
                 "username": is_email[2],
                 "iat": Timezone("Asia/Manila").get_timezone_current_time(),
@@ -1122,7 +1122,7 @@ def send_username_to_email(code: str, email: str):
             ip_address = get_ip_address()
 
             payload = {
-                "iss": "http://127.0.0.1:5000",
+                "iss": "https://matrix-client.herokuapp.com",
                 "sub": email,
                 "username": username,
                 "iat": Timezone("Asia/Manila").get_timezone_current_time(),
@@ -1245,7 +1245,7 @@ def password_reset_link(email: str):
         name = is_user.full_name.split(
         )[0] + " " + is_user.full_name.split()[1]
         payload = {
-            "iss": "http://127.0.0.1:5000",
+            "iss": "https://matrix-client.herokuapp.com",
             "sub": email,
             "iat": Timezone("Asia/Manila").get_timezone_current_time(),
             "exp": datetime.timestamp(Timezone("Asia/Manila").get_timezone_current_time() + timedelta(minutes=5)),
@@ -1388,7 +1388,7 @@ def has_emails(username: str):
         .filter_by(username=username).first()
 
     user_emails = {
-        "iss": "http://127.0.0.1:5000",
+        "iss": "https://matrix-client.herokuapp.com",
         "sub": "has_emails",
         "id1": user_email.email,
         "id3": user_email.recovery_email,
@@ -1652,7 +1652,7 @@ def verify_email_request(email: str):
         if email in (is_email.email, is_email.recovery_email):
             # Generate a link for removing the user's email if not recognized by the user using jwt
             payload = {
-                "iss": "http://127.0.0.1:5000",
+                "iss": "https://matrix-client.herokuapp.com",
                 "sub": email,
                 "username": is_email[2],
                 "iat": Timezone("Asia/Manila").get_timezone_current_time(),
