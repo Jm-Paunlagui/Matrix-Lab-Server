@@ -1411,9 +1411,8 @@ def redirect_to(user_id: int):
     return "/"
 
 
-def remove_session():
+def remove_session(token: str):
     """Removes the user's session if the user logs out."""
-    token: str = request.cookies.get('token')
     if token is not None:
         session.pop('token', None)
         session.pop('user_id', None)
@@ -1505,9 +1504,8 @@ def remove_email(option: str, email: str, username: str):
                         "error": f"{e}"}), 500
 
 
-def update_password(old_password: str, new_password: str):
+def update_password(old_password: str, new_password: str, token: str):
     """Updates the password of the user"""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1530,9 +1528,8 @@ def update_password(old_password: str, new_password: str):
     return False
 
 
-def update_personal_info(email: str, full_name: str):
+def update_personal_info(email: str, full_name: str, token: str):
     """Updates the personal information of the user"""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1560,9 +1557,8 @@ def update_personal_info(email: str, full_name: str):
                     "token": authenticated_user(user_id=verified_token["id"])}), 200
 
 
-def update_security_info(recovery_email: str):
+def update_security_info(recovery_email: str, token: str):
     """Updates the security information of the user"""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1589,9 +1585,8 @@ def update_security_info(recovery_email: str):
                     "token": authenticated_user(user_id=verified_token["id"])}), 200
 
 
-def update_username(username: str):
+def update_username(username: str, token: str):
     """Updates the username of the user"""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440

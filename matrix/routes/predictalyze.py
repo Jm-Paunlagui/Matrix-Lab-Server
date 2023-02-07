@@ -51,6 +51,7 @@ def analyze_save_csv():
     school_semester: str = request.json["selected_semester"]
     school_year: str = request.json["school_year"]
     csv_question: str = request.json["csv_question"]
+    token: str = request.json["token"]
 
     if not InputTextValidation().validate_empty_fields(csv_file, sentence_column, school_semester, school_year,
                                                        csv_question):
@@ -86,7 +87,7 @@ def analyze_save_csv():
     else:
         if school_semester != "1st_Semester":
             return jsonify({"status": "error", "message": "Expected 1st Semester!"}), 409
-        return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question)
+        return csv_evaluator(csv_file, int(sentence_column), school_semester, school_year, csv_question, token)
 
 
 @predictalyze.route("/delete-uploaded-csv-file", methods=["POST"])
@@ -162,16 +163,16 @@ def getting_top_professor_by_file():
     return read_overall_data_professor_analysis_csv_files(school_year, school_semester, csv_question)
 
 
-@predictalyze.route("/list-of-csv-files-to-view/<int:page>/<int:per_page>", methods=["GET"])
-def getting_list_of_csv_files(page: int, per_page: int):
+@predictalyze.route("/list-of-csv-files-to-view/<int:page>/<int:per_page>/<string:token>", methods=["GET"])
+def getting_list_of_csv_files(page: int, per_page: int, token: str):
     """Get the list of csv files."""
-    return list_csv_files_to_view_and_delete_pagination(page, per_page)
+    return list_csv_files_to_view_and_delete_pagination(page, per_page, token)
 
 
-@predictalyze.route("/getting-list-of-temporarily-deleted-csv-files/<int:page>/<int:per_page>", methods=["GET"])
-def getting_list_of_temporarily_deleted_csv_files(page: int, per_page: int):
+@predictalyze.route("/getting-list-of-temporarily-deleted-csv-files/<int:page>/<int:per_page>/<string:token>", methods=["GET"])
+def getting_list_of_temporarily_deleted_csv_files(page: int, per_page: int, token: str):
     """Get the list of temporarily deleted csv files."""
-    return list_csv_files_to_permanently_delete_pagination(page, per_page)
+    return list_csv_files_to_permanently_delete_pagination(page, per_page, token)
 
 
 @predictalyze.route("/list-of-csv-files-to-view-collections/<int:page>/<int:per_page>", methods=["GET"])
@@ -180,10 +181,10 @@ def getting_collection_of_csv_files(page: int, per_page: int):
     return list_user_collection_of_sentiment_per_evaluatee_csv_files(page, per_page)
 
 
-@predictalyze.route("/view-csv-file/<int:csv_id>/<int:page>/<int:per_page>", methods=["GET"])
-def viewing_csv_file(csv_id: int, page: int, per_page: int):
+@predictalyze.route("/view-csv-file/<int:csv_id>/<int:page>/<int:per_page>/<string:token>", methods=["GET"])
+def viewing_csv_file(csv_id: int, page: int, per_page: int, token: str):
     """View the csv file."""
-    return to_view_selected_csv_file(csv_id=csv_id, page=page, per_page=per_page)
+    return to_view_selected_csv_file(csv_id=csv_id, page=page, per_page=per_page, token=token)
 
 
 @predictalyze.route("/delete-csv-file-permanent/<int:csv_id>", methods=["DELETE"])
@@ -258,23 +259,23 @@ def downloading_all_csv_file(type_of_download: str):
     return to_download_all_csv_files(type_of_download)
 
 
-@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>/<int:page>/<int:per_page>",
+@predictalyze.route("/get-list-of-taught-courses/<int:csv_id>/<string:folder_name>/<int:page>/<int:per_page>/<string:token>",
                     methods=["GET"])
-def list_of_csv_files_to_view(csv_id: int, folder_name: str, page: int, per_page: int):
+def list_of_csv_files_to_view(csv_id: int, folder_name: str, page: int, per_page: int, token: str):
     """Get the list of csv files to view."""
-    return list_csv_file_to_read(csv_id, folder_name, page, per_page)
+    return list_csv_file_to_read(csv_id, folder_name, page, per_page, token)
 
 
-@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>", methods=["GET"])
-def reading_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
+@predictalyze.route("/read-data-response/<int:csv_id>/<string:folder_name>/<string:file_name>/<int:page>/<int:per_page>/<string:token>", methods=["GET"])
+def reading_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int, token: str):
     """Read the csv file."""
-    return to_read_csv_file(csv_id, folder_name, file_name, page, per_page)
+    return to_read_csv_file(csv_id, folder_name, file_name, page, per_page, token)
 
 
-@predictalyze.route("/list-of-users-to-view/<int:page>/<int:per_page>", methods=["GET"])
-def getting_list_of_evaluatees(page: int, per_page: int):
+@predictalyze.route("/list-of-users-to-view/<int:page>/<int:per_page>/<string:token>", methods=["GET"])
+def getting_list_of_evaluatees(page: int, per_page: int, token: str):
     """Get the list of evaluatees."""
-    return list_evaluatees_to_create(page, per_page)
+    return list_evaluatees_to_create(page, per_page, token)
 
 
 @predictalyze.route("/format-names", methods=["GET"])

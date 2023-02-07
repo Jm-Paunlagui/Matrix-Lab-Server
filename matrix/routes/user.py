@@ -128,10 +128,9 @@ def forgot_password():
     return jsonify({"status": "success", "message": "Password reset link sent successfully."}), 200
 
 
-@user.route("/get_user", methods=["GET"])
-def get_authenticated_user():
+@user.route("/get_user/<string:token>", methods=["GET"])
+def get_authenticated_user(token: str):
     """Gets the authenticated user by id and returns the user object."""
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -144,7 +143,7 @@ def get_authenticated_user():
     if bool(verified_token["id"]):
         return jsonify({"status": "success", "message": "User retrieved successfully.",
                         "user": verified_token}), 200
-    remove_session()
+    remove_session(token)
     return jsonify({
         "status": "error",
         "message": "Token and User ID did not match"
@@ -196,10 +195,10 @@ def reset_password(token: str):
     return jsonify({"status": "success", "message": "Your password has been reset successfully."}), 200
 
 
-@user.route("/sign-out", methods=["POST"])
-def signout():
+@user.route("/sign-out/<string:token>", methods=["POST"])
+def signout(token: str):
     """Signs out the authenticated user by id and deletes the session."""
-    if not remove_session():
+    if not remove_session(token):
         return jsonify({"status": "error", "message": "Session not found"}), 404
     return jsonify({"status": "success", "message": "User signed out successfully"}), 200
 
@@ -325,12 +324,13 @@ def update_user_password():
 
     current_password = request.json["old_password"]
     new_password = request.json["new_password"]
+    token = request.json["token"]
 
     if not InputTextValidation().validate_empty_fields(current_password, new_password):
         return jsonify({"status": "error", "message": "Field required!"}), 400
     if not InputTextValidation(new_password).validate_password():
         return jsonify({"status": "error", "message": "Follow the password rules below!"}), 400
-    if not update_password(current_password, new_password):
+    if not update_password(current_password, new_password, token):
         return jsonify({"status": "error", "message": "Current password is incorrect!"}), 401
     return jsonify({"status": "success",
                     "message": "Your password has been updated successfully."}), 200
@@ -344,12 +344,13 @@ def update_user_personal_info():
 
     email = request.json["email"]
     full_name = request.json["full_name"]
+    token = request.json["token"]
 
     if not InputTextValidation(email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
     if not InputTextValidation(full_name).validate_text():
         return jsonify({"status": "error", "message": "Invalid first name!"}), 400
-    return update_personal_info(email, full_name, )
+    return update_personal_info(email, full_name, token)
 
 
 @user.route("/update-security-info", methods=["PUT"])
@@ -359,10 +360,11 @@ def update_user_security_info():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     recovery_email = request.json["recovery_email"]
+    token = request.json["token"]
 
     if not InputTextValidation(recovery_email).validate_email():
         return jsonify({"status": "error", "message": "Invalid email address!"}), 400
-    return update_security_info(recovery_email)
+    return update_security_info(recovery_email, token)
 
 
 @user.route("/update-username", methods=["PUT"])
@@ -372,12 +374,13 @@ def update_user_username():
         return jsonify({"status": "error", "message": "Invalid request!"})
 
     username = request.json["username"]
+    token = request.json["token"]
 
     if not InputTextValidation().validate_empty_fields(username):
         return jsonify({"status": "error", "message": "Field required!"}), 400
     if not InputTextValidation(username).validate_username():
         return jsonify({"status": "error", "message": "Invalid username!"}), 400
-    return update_username(username)
+    return update_username(username, token)
 
 
 @user.route("/verify-2fa", methods=["POST"])

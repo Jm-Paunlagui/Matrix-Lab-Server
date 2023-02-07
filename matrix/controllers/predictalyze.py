@@ -421,7 +421,8 @@ def remove_stopwords(response):
     return response
 
 
-def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str):
+def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, school_year: str, csv_question: str,
+                  token: str):
     """
     Evaluate the csv file.
 
@@ -430,14 +431,13 @@ def csv_evaluator(file_name: str, sentence_index: int, school_semester: str, sch
     :param school_semester: The school semester
     :param school_year: The school year
     :param csv_question: The csv question
+    :param token: The user token
     :return: The evaluated csv file
     """
     school_year = InputTextValidation(school_year).to_query_school_year()
     school_semester = InputTextValidation(
         school_semester).to_query_space_under()
     csv_question = InputTextValidation(csv_question).to_query_csv_question()
-
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1061,15 +1061,14 @@ def options_read_single_data():
     }), 200
 
 
-def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
+def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int, token: str):
     """
     @desc: List all csv files to view, download, and delete in pagination.
     :param page: The page number.
     :param per_page: The number of items per page.
+    :param token: The token of the user.
     :return: A list of csv files.
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1121,15 +1120,14 @@ def list_csv_files_to_view_and_delete_pagination(page: int, per_page: int):
                         "message": "An error occurred while trying to list the csv files."}), 500
 
 
-def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
+def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int, token: str):
     """
     @desc: List all csv files to permanently delete in pagination.
     :param page: The page number.
     :param per_page: The number of items per page.
+    :param token: The token of the user.
     :return: A list of csv files.
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1179,16 +1177,15 @@ def list_csv_files_to_permanently_delete_pagination(page: int, per_page: int):
         )
 
 
-def to_view_selected_csv_file(csv_id: int, page: int, per_page: int):
+def to_view_selected_csv_file(csv_id: int, page: int, per_page: int, token: str):
     """
     @desc: To view the selected csv file
     :param csv_id: The id of the csv file
     :param page: The page number.
     :param per_page: The number of items per page.
+    :param token: Token of the user
     :return: The csv file
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -1964,17 +1961,16 @@ def to_download_all_csv_files(type_of_download: str | None):
                         "message": "An error occurred while trying to download all csv files."}), 500
 
 
-def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: int):
+def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: int, token: str):
     """
     This function is used to list the csv file to read.
     :param csv_id: The id of the csv file.
     :param folder_name: The name of the folder.
     :param page: The current page
     :param per_page: The number of files to show
+    :param token: The token of the user.
     :return: The list of the csv file.
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -2078,7 +2074,7 @@ def list_csv_file_to_read(csv_id: int, folder_name: str, page: int, per_page: in
                         "message": "An error occurred while trying to view the directory."}), 500
 
 
-def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int):
+def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, per_page: int, token: str):
     """
     This function is used to read the csv file using pandas.
     :param csv_id: The id of the csv file.
@@ -2086,10 +2082,9 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
     :param file_name: The name of the file.
     :param page: The page number.
     :param per_page: The number of items per page.
+    :param token: The token of the user.
     :return: The csv file.
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
@@ -2181,13 +2176,11 @@ def to_read_csv_file(csv_id: int, folder_name: str, file_name: str, page: int, p
                         "message": "An error occurred while trying to read the csv file."}), 500
 
 
-def list_evaluatees_to_create(page: int, per_page: int):
+def list_evaluatees_to_create(page: int, per_page: int, token: str):
     """
     This function is used to list the evaluatees to create.
     :return: The list of the evaluatees to create.
     """
-    # @desc: Get the Session to verify if the user is logged in.
-    token: str = request.cookies.get('token')
 
     if token is None:
         return jsonify({"status": "error", "message": "You are not logged in."}), 440
