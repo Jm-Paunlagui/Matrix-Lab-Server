@@ -1,1 +1,1 @@
-web: gunicorn app:app
+web: gunicorn app:app --graceful-timeout 780 --keep-alive 780
