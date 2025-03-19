@@ -733,10 +733,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 objects_to_insert.append(CsvProfessorSentiment(
                     csv_id=csv_id,
                     professor=professor,
-                    evaluatee_department=department_evaluatee[names.index(professor)],
-                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(professor)],
-                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(professor)],
-                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(professor)],
+                    evaluatee_department=department_evaluatee[names.index(
+                        professor)],
+                    evaluatee_number_of_sentiments=number_of_sentiments[names.index(
+                        professor)],
+                    evaluatee_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        professor)],
+                    evaluatee_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        professor)],
                     evaluatee_share=share[names.index(professor)],
                 ))
             db.session.bulk_save_objects(objects_to_insert)
@@ -749,10 +753,14 @@ def quad(names=None, sentiment_list=None, type_comp=None, duo_raw=None, csv_id=N
                 objects_to_insert.append(CsvDepartmentSentiment(
                     csv_id=csv_id,
                     department=department,
-                    department_evaluatee=department_evaluatee[names.index(department)],
-                    department_number_of_sentiments=number_of_sentiments[names.index(department)],
-                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(department)],
-                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(department)],
+                    department_evaluatee=department_evaluatee[names.index(
+                        department)],
+                    department_number_of_sentiments=number_of_sentiments[names.index(
+                        department)],
+                    department_positive_sentiments_percentage=positive_sentiments_percentage[names.index(
+                        department)],
+                    department_negative_sentiments_percentage=negative_sentiments_percentage[names.index(
+                        department)],
                     department_share=share[names.index(department)],
                 ))
             db.session.bulk_save_objects(objects_to_insert)
