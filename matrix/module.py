@@ -574,4 +574,3 @@ def is_school_year_valid(school_year):
             current_year == current_year_2:
         return False
     return True
-    
